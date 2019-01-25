@@ -1,0 +1,11 @@
+<resources>
+    <string name="app_name">ChatApp</string>
+
+    <string name="email_default_text">Email</string>
+    <string name="password_default_text">Password</string>
+    <string name="signin_button_text">SIGN IN</string>
+    <string name="register_button_text">REGISTER</string>
+    <string name="text_chat_app">Chat App</string>
+    <string name="text_password_confirm">Retype Password</string>
+    <string name="credentials_key">osbornem_credentials_information</string>
+</resources>
