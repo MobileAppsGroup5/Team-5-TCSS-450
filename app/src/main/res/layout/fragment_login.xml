@@ -7,8 +7,6 @@
     android:layout_height="match_parent"
     tools:context=".LoginFragment">
 
-    <!-- TODO: Update blank fragment layout -->
-
     <EditText
         android:id="@+id/field_email_login"
         android:layout_width="352dp"
@@ -17,9 +15,11 @@
         android:ems="10"
         android:hint="@string/email_default_text"
         android:inputType="textPersonName"
+        android:text="test@test"
         app:layout_constraintBottom_toTopOf="@+id/field_password"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent" />
+        <!--TODO: REMOVE ABOVE BEFORE DEPLOYING-->
 
     <EditText
         android:id="@+id/field_password"
@@ -29,9 +29,11 @@
         android:ems="10"
         android:hint="@string/password_default_text"
         android:inputType="textPassword"
+        android:text="test123"
         app:layout_constraintBottom_toTopOf="@+id/button_signin"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent" />
+        <!--TODO: REMOVE ABOVE BEFORE DEPLOYING-->
 
     <Button
         android:id="@+id/button_signin"
@@ -39,7 +41,9 @@
         android:layout_height="wrap_content"
         android:layout_marginEnd="16dp"
         android:layout_marginBottom="16dp"
+        android:background="@color/colorPrimaryDark"
         android:text="@string/signin_button_text"
+        android:textColor="@android:color/background_light"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
 
@@ -60,7 +64,7 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="16dp"
         android:layout_marginBottom="16dp"
-        android:text="@string/text_chat_app"
+        android:text="@string/text_phish_app"
         android:textSize="24sp"
         app:layout_constraintBottom_toTopOf="@+id/field_email_login"
         app:layout_constraintEnd_toEndOf="parent"

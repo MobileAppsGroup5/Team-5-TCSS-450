@@ -1,4 +1,4 @@
-package tcss450.uw.edu.chatapp;
+package tcss450.uw.edu.phishapp;
 
 import android.content.Context;
 import android.support.test.InstrumentationRegistry;

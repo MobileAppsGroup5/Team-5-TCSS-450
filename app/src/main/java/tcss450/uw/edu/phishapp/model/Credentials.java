@@ -1,4 +1,4 @@
-package tcss450.uw.edu.chatapp.model;
+package tcss450.uw.edu.phishapp.model;
 
 import android.util.Log;
 import org.json.JSONException;

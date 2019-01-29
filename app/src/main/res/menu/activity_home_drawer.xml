@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:showIn="navigation_view">
+    <item
+        android:id="@+id/nav_home"
+        android:icon="@drawable/ic_menu_home"
+        android:title="@string/nav_home_text" />
+    <item
+        android:id="@+id/nav_blog_posts"
+        android:icon="@drawable/ic_menu_blog_posts"
+        android:title="@string/nav_blog_posts_text" />
+    <item
+        android:id="@+id/nav_set_lists"
+        android:icon="@drawable/nav_set_lists_icon"
+        android:title="@string/nav_set_lists_text" />
+</menu>

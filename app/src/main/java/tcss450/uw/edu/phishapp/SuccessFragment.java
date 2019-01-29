@@ -1,4 +1,4 @@
-package tcss450.uw.edu.chatapp;
+package tcss450.uw.edu.phishapp;
 
 import android.net.Uri;
 import android.os.Bundle;
@@ -8,7 +8,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
-import tcss450.uw.edu.chatapp.model.Credentials;
+import tcss450.uw.edu.phishapp.model.Credentials;
 
 
 /**
@@ -20,7 +20,6 @@ import tcss450.uw.edu.chatapp.model.Credentials;
 public class SuccessFragment extends Fragment {
 
     private OnFragmentInteractionListener mListener;
-    private View rootView;
 
     public SuccessFragment() {
         // Required empty public constructor
@@ -32,7 +31,6 @@ public class SuccessFragment extends Fragment {
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         View v = inflater.inflate(R.layout.fragment_success, container, false);
-        rootView = v;
 
         return v;
     }
@@ -41,14 +39,14 @@ public class SuccessFragment extends Fragment {
     public void onStart() {
         super.onStart();
         if (getArguments() != null) {
-            Credentials creds = (Credentials) getArguments().get(getString(R.string.credentials_key));
+            Credentials creds = (Credentials) getArguments().getSerializable(getString(R.string.key_credentials));
 
             updateUserInfo(creds);
         }
     }
 
     private void updateUserInfo(Credentials creds) {
-        TextView centerText = rootView.findViewById(R.id.text_success_email);
+        TextView centerText = getActivity().findViewById(R.id.text_success_email);
         centerText.setText(creds.getEmail());
     }
 

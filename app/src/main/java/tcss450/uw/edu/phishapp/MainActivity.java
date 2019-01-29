@@ -1,11 +1,13 @@
-package tcss450.uw.edu.chatapp;
+package tcss450.uw.edu.phishapp;
 
+import android.content.Intent;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 
-import tcss450.uw.edu.chatapp.model.Credentials;
+import tcss450.uw.edu.phishapp.model.Credentials;
 
 public class MainActivity extends AppCompatActivity implements LoginFragment.OnLoginFragmentInteractionListener, RegisterFragment.OnRegisterFragmentInteractionListener {
 
@@ -25,17 +27,11 @@ public class MainActivity extends AppCompatActivity implements LoginFragment.OnL
 
     @Override
     public void onLoginSuccess(Credentials theCredentials, String jwt) {
-        SuccessFragment successFragment = new SuccessFragment();
-        Bundle args = new Bundle();
-        args.putSerializable(getString(R.string.credentials_key), theCredentials);
-        successFragment.setArguments(args);
-        FragmentTransaction transaction = getSupportFragmentManager()
-                .beginTransaction()
-                .replace(R.id.frame_main_container, successFragment);
-
-        // Clear back stack so back press exits app
-        getSupportFragmentManager().popBackStack(null, FragmentManager.POP_BACK_STACK_INCLUSIVE);
-        transaction.commit();
+        Intent intent = new Intent(this, HomeActivity.class);
+        intent.putExtra(getString(R.string.key_credentials), theCredentials);
+        intent.putExtra(getString(R.string.keys_intent_jwt), jwt);
+        startActivity(intent);
+        finish();
     }
 
     @Override
@@ -58,7 +54,7 @@ public class MainActivity extends AppCompatActivity implements LoginFragment.OnL
         } else {
             loginFragment = new LoginFragment();
             Bundle args = new Bundle();
-            args.putSerializable(getString(R.string.credentials_key), theCredentials);
+            args.putSerializable(getString(R.string.key_credentials), theCredentials);
             loginFragment.setArguments(args);
             FragmentTransaction transaction = getSupportFragmentManager()
                     .beginTransaction()
@@ -68,5 +64,22 @@ public class MainActivity extends AppCompatActivity implements LoginFragment.OnL
             getSupportFragmentManager().popBackStack(null, FragmentManager.POP_BACK_STACK_INCLUSIVE);
             transaction.commit();
         }
+    }
+
+    @Override
+    public void onWaitFragmentInteractionShow() {
+        getSupportFragmentManager()
+                .beginTransaction()
+                .add(R.id.frame_main_container, new WaitFragment(), "WAIT")
+                .addToBackStack(null)
+                .commit();
+    }
+
+    @Override
+    public void onWaitFragmentInteractionHide() {
+        getSupportFragmentManager()
+                .beginTransaction()
+                .remove(getSupportFragmentManager().findFragmentByTag("WAIT"))
+                .commit();
     }
 }

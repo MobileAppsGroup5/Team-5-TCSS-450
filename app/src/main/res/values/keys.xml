@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources tools:ignore="ExtraTranslation" xmlns:tools="http://schemas.android.com/tools">
+    <string name="keys_shared_prefs">edu.uw.tcss450.challengeapp.PREFS</string>
+    <string name="keys_prefs_username">username</string>
+    <string name="keys_prefs_stay_logged_in">loggedIn</string>
+    <string name="keys_fragment_login">loginFragmentTag</string>
+    <string name="keys_fragment_register">registerFragmentTag</string>
+    <string name="keys_intent_credentials">intent key for creds</string>
+    <string name="keys_intent_jwt">intent key for jwt</string>
+    <string name="keys_json_login_success">success</string>
+    <string name="keys_json_login_jwt">token</string>
+    <string name="keys_json_response">response</string>
+    <string name="keys_json_data">data</string>
+    <string name="keys_json_blogs_pubdate">pubdate</string>
+    <string name="keys_json_blogs_title">title</string>
+    <string name="keys_json_blogs_teaser">teaser</string>
+    <string name="keys_json_blogs_url">url</string>
+    <string name="keys_json_setlists_long_date">long_date</string>
+    <string name="keys_json_setlists_location">location</string>
+    <string name="keys_json_setlists_venue">venue</string>
+    <string name="keys_json_setlists_set_list_data">setlistdata</string>
+    <string name="keys_json_setlists_set_list_notes">setlistnotes</string>
+    <string name="keys_json_setlists_url">url</string>
+    <string name="key_credentials">osbornem_credentials_information</string>
+    <string name="key_blog_post">osbornem_blog_post_information</string>
+    <string name="key_set_list">osbornem_set_list_information</string>
+
+
+</resources>
