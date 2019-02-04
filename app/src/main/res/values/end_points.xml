@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources tools:ignore="ExtraTranslation" xmlns:tools="http://schemas.android.com/tools">
-    <string name="ep_base_url">cfb3-lab4-backend.herokuapp.com</string>
+    <string name="ep_base_url">chapp-server-5.herokuapp.com</string>
     <string name="ep_login">login</string>
     <string name="ep_register">register</string>
     <string name="ep_setlists">setlists</string>

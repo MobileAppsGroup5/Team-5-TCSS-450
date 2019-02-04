@@ -1,17 +1,17 @@
 <resources>
-    <string name="app_name">PhishApp</string>
+    <string name="app_name">Chapp</string>
 
     <string name="email_default_text">Email</string>
     <string name="password_default_text">Password</string>
     <string name="signin_button_text">SIGN IN</string>
     <string name="register_button_text">REGISTER</string>
-    <string name="text_phish_app">Phish App</string>
+    <string name="text_phish_app">Chapp</string>
     <string name="text_password_confirm">Retype Password</string>
     <string name="title_activity_home">HomeActivity</string>
     <string name="navigation_drawer_open">Open navigation drawer</string>
     <string name="navigation_drawer_close">Close navigation drawer</string>
-    <string name="nav_header_title">Phish App</string>
-    <string name="nav_header_subtitle">TCSS 450 Labs</string>
+    <string name="nav_header_title">Chapp</string>
+    <string name="nav_header_subtitle">The Best Chat App!</string>
     <string name="nav_header_desc">Navigation header</string>
     <string name="action_settings">Settings</string>
     <string name="nav_home_text">Home</string>
@@ -19,8 +19,5 @@
     <string name="text_full_post">Full Post</string>
     <string name="sample_text">sample</string>
     <string name="nav_set_lists_text">Set Lists</string>
-
-    <!-- TODO: Remove or change this placeholder text -->
-    <string name="hello_blank_fragment">Hello blank fragment</string>
 
 </resources>
