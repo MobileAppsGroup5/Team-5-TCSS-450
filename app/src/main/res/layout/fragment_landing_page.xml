@@ -23,7 +23,7 @@
 
                 <fragment
                     android:id="@+id/fragment_success"
-                    android:name="tcss450.uw.edu.phishapp.SuccessFragment"
+                    android:name="tcss450.uw.edu.chapp.SuccessFragment"
                     android:layout_width="match_parent"
                     android:layout_height="150dp"
                     tools:layout="@layout/fragment_success" />
@@ -42,7 +42,7 @@
 
                     <fragment
                         android:id="@+id/fragment_set_list"
-                        android:name="tcss450.uw.edu.phishapp.SetListFragment"
+                        android:name="tcss450.uw.edu.chapp.SetListFragment"
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
                         tools:layout="@layout/fragment_setlist_list" />
@@ -55,7 +55,7 @@
 
                     <fragment
                         android:id="@+id/fragment_blog"
-                        android:name="tcss450.uw.edu.phishapp.BlogFragment"
+                        android:name="tcss450.uw.edu.chapp.BlogFragment"
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
                         tools:layout="@layout/fragment_blog_post" />

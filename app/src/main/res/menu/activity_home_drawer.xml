@@ -1,18 +1,87 @@
 <?xml version="1.0" encoding="utf-8"?>
+
+<!-- In right side navigation drawer -->
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     tools:showIn="navigation_view">
-    <item
-        android:id="@+id/nav_home"
-        android:icon="@drawable/ic_menu_home"
-        android:title="@string/nav_home_text" />
-    <item
-        android:id="@+id/nav_blog_posts"
-        android:icon="@drawable/ic_menu_blog_posts"
-        android:title="@string/nav_blog_posts_text" />
-    <item
-        android:id="@+id/nav_set_lists"
-        android:icon="@drawable/nav_set_lists_icon"
-        android:title="@string/nav_set_lists_text" />
+    <group android:id="@+id/nav_home_group">
+        <item
+            android:id="@+id/nav_home"
+            android:icon="@drawable/ic_menu_home"
+            android:title="@string/nav_home_text" />
+    </group>
+    <group
+        android:id="@+id/nav_communication_group"
+        android:checkableBehavior="none">
+        <item
+            android:id="@+id/nav_connections"
+            android:icon="@drawable/ic_menu_connections"
+            android:title="@string/nav_connections" />
+        <item
+            android:id="@+id/nav_chat"
+            android:icon="@drawable/ic_menu_chat"
+            android:title="@string/nav_chat" />
+    </group>
+
+    <group
+        android:id="@+id/nav_weather_group"
+        android:checkableBehavior="none">
+        <item
+            android:id="@+id/nav_weather"
+            android:icon="@drawable/ic_menu_weather"
+            android:title="@string/nav_weather" />
+    </group>
 </menu>
+
+
+
+<!-- Right side navigation drawer, Maybe can use this like a settings menu
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+xmlns:app="http://schemas.android.com/apk/res-auto"
+xmlns:tools="http://schemas.android.com/tools"
+tools:context=".MainActivity">
+    <group android:id="@+id/CommunicationGroup" android:checkableBehavior="none" >
+        <item
+            android:id="@+id/Connections"
+            android:icon="@drawable/ic_menu_home"
+            android:enabled="false"
+            android:title="@string/nav_connections" />
+        <item
+            android:id="@+id/Chat"
+            android:icon="@drawable/ic_menu_chat"
+            android:enabled="false"
+            android:title="@string/nav_chat" />
+    </group>
+
+    <group android:id="@+id/WeatherGroup" android:checkableBehavior="none" >
+        <item
+            android:id="@+id/Weather"
+            android:icon="@drawable/ic_menu_weather"
+            android:enabled="false"
+            android:title="@string/nav_weather" />
+    </group>
+</menu>
+-->
+
+
+<!-- Old Navigation bar for phish app
+    <?xml version="1.0" encoding="utf-8"?>
+    <menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:showIn="navigation_view">
+        <item
+            android:id="@+id/nav_home"
+            android:icon="@drawable/ic_menu_home"
+            android:title="@string/nav_home_text" />
+        <item
+            android:id="@+id/nav_blog_posts"
+            android:icon="@drawable/ic_menu_blog_posts"
+            android:title="@string/nav_blog_posts_text" />
+        <item
+            android:id="@+id/nav_set_lists"
+            android:icon="@drawable/nav_set_lists_icon"
+            android:title="@string/nav_set_lists_text" />
+    </menu>
+ -->
