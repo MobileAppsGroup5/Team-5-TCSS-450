@@ -25,5 +25,11 @@
     <string name="key_blog_post">osbornem_blog_post_information</string>
     <string name="key_set_list">osbornem_set_list_information</string>
 
+    <!-- register keys -->
+    <string name="keys_json_register_error">error</string>
+    <string name="keys_json_register_error_message">detail</string>
+    <string name="keys_json_register_success">success</string>
+    <string name="keys_json_register_code">code</string>
+
 
 </resources>
