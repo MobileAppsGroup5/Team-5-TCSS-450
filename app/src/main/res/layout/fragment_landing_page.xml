@@ -4,7 +4,8 @@
     android:id="@+id/fragment_homelanding"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".LandingPage">
+    tools:context=".LandingPage"
+    android:background="@color/divider">
 
     <!-- TODO: Update blank fragment layout -->
 
@@ -19,7 +20,8 @@
 
             <FrameLayout
                 android:layout_width="match_parent"
-                android:layout_height="match_parent">
+                android:layout_height="match_parent"
+                android:id="@+id/framelayout_homelanding_success">
 
                 <fragment
                     android:id="@+id/fragment_success"
@@ -38,7 +40,8 @@
                 <FrameLayout
                     android:layout_width="0dp"
                     android:layout_height="match_parent"
-                    android:layout_weight="1">
+                    android:layout_weight="1"
+                    android:id="@+id/framelayout_homelanding_setlist">
 
                     <fragment
                         android:id="@+id/fragment_set_list"
@@ -51,7 +54,8 @@
                 <FrameLayout
                     android:layout_width="0dp"
                     android:layout_height="match_parent"
-                    android:layout_weight="1">
+                    android:layout_weight="1"
+                    android:id="@+id/framelayout_homelanding_blog">
 
                     <fragment
                         android:id="@+id/fragment_blog"

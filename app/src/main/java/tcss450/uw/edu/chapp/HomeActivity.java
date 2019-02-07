@@ -77,7 +77,6 @@ public class HomeActivity extends AppCompatActivity
                 args.putSerializable(getString(R.string.key_credentials)
                         , mCreds);
                 successFrag.setArguments(args);
-
                 //this is the only line changed to add landing page instead of just
                 //the home fragment. -jess
                 trans.add(R.id.fragment_container, landingPage);
