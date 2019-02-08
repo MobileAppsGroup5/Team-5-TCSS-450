@@ -2,6 +2,7 @@ package tcss450.uw.edu.chapp;
 
 
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -30,6 +31,7 @@ public class LoginFragment extends Fragment {
 
     private OnLoginFragmentInteractionListener mListener;
     private Credentials mCredentials;
+    private String mJwt;
 
     public LoginFragment() {
         // Required empty public constructor
@@ -37,8 +39,8 @@ public class LoginFragment extends Fragment {
 
     public void validateCredentials(View v) {
         // Fetch Values
-        EditText emailEditText = getActivity().findViewById(R.id.field_email_login);
-        EditText passwordEditText = getActivity().findViewById(R.id.field_password);
+        EditText emailEditText = getActivity().findViewById(R.id.edit_login_email);
+        EditText passwordEditText = getActivity().findViewById(R.id.edit_login_password);
 
         String email = emailEditText.getText().toString();
         String password = passwordEditText.getText().toString();
@@ -60,10 +62,15 @@ public class LoginFragment extends Fragment {
 
         if (!emailEmpty && !passwordEmpty && atInEmail && !moreThanOneAtInEmail) {
             // Successfully verified (on the client side)!
-            Credentials credentials = new Credentials.Builder(email, password).build();
+      //      Credentials credentials = new Credentials.Builder(email, password).build();
+
+            doLogin(new Credentials.Builder(
+                    emailEditText.getText().toString(),
+                    passwordEditText.getText().toString())
+                    .build());
 
             //build the web service URL
-            Uri uri = new Uri.Builder()
+      /*     Uri uri = new Uri.Builder()
                     .scheme("https")
                     .appendPath(getString(R.string.ep_base_url))
                     .appendPath(getString(R.string.ep_login))
@@ -76,7 +83,7 @@ public class LoginFragment extends Fragment {
                     .onPreExecute(this::handleLoginOnPre)
                     .onPostExecute(this::handleLoginOnPost)
                     .onCancelled(this::handleErrorsInTask)
-                    .build().execute();
+                    .build().execute();     */
 
         } else {
             // Notify of problems
@@ -99,8 +106,8 @@ public class LoginFragment extends Fragment {
     }
 
     public void fillFields(Credentials theCredentials) {
-        EditText emailEditText = getActivity().findViewById(R.id.field_email_login);
-        EditText passwordEditText = getActivity().findViewById(R.id.field_password);
+        EditText emailEditText = getActivity().findViewById(R.id.edit_login_email);
+        EditText passwordEditText = getActivity().findViewById(R.id.edit_login_password);
 
         emailEditText.setText(theCredentials.getEmail());
         passwordEditText.setText(theCredentials.getPassword());
@@ -109,9 +116,34 @@ public class LoginFragment extends Fragment {
     @Override
     public void onStart() {
         super.onStart();
-        if (getArguments() != null) {
+     /*   if (getArguments() != null) {
             Credentials creds = (Credentials) getArguments().get(getString(R.string.key_credentials));
             fillFields(creds);
+        }   */
+
+        SharedPreferences prefs =
+                getActivity().getSharedPreferences(
+                        getString(R.string.keys_shared_prefs),
+                        Context.MODE_PRIVATE);
+
+        // Retrieve the stored credentials from SharedPrefs
+        if (prefs.contains(getString(R.string.keys_prefs_email)) &&
+                prefs.contains(getString(R.string.keys_prefs_password))) {
+
+            final String email = prefs.getString(getString(R.string.keys_prefs_email), "");
+            final String password = prefs.getString(getString(R.string.keys_prefs_password), "");
+
+            // Load the two login EditTexts with the credentials found in SharedPrefs
+            EditText emailEdit = getActivity().findViewById(R.id.edit_login_email);
+            emailEdit.setText(email);
+
+            EditText passwordEdit = getActivity().findViewById(R.id.edit_login_password);
+            passwordEdit.setText(password);
+
+            doLogin(new Credentials.Builder(
+                    emailEdit.getText().toString(),
+                    passwordEdit.getText().toString())
+                    .build());
         }
     }
 
@@ -176,14 +208,21 @@ public class LoginFragment extends Fragment {
                             getString(R.string.keys_json_login_success));
             if (success) {
                 //Login was successful. Switch to the loadSuccessFragment.
-                mListener.onLoginSuccess(mCredentials,
+       /*         mListener.onLoginSuccess(mCredentials,
                         resultsJSON.getString(
-                                getString(R.string.keys_json_login_jwt)));
+                                getString(R.string.keys_json_login_jwt)));  */
+
+                mJwt = resultsJSON.getString(
+                        getString(R.string.keys_json_login_jwt));
+
+                saveCredentials(mCredentials);
+                mListener.onLoginSuccess(mCredentials, mJwt);
+
                 return;
             } else {
                 //Login was unsuccessful. Don’t switch fragments and
                 // inform the user
-                ((TextView) getView().findViewById(R.id.field_email_login))
+                ((TextView) getView().findViewById(R.id.edit_login_email))
                         .setError("Login Unsuccessful");
             }
             mListener.onWaitFragmentInteractionHide();
@@ -194,7 +233,7 @@ public class LoginFragment extends Fragment {
                     + System.lineSeparator()
                     + e.getMessage());
             mListener.onWaitFragmentInteractionHide();
-            ((TextView) getView().findViewById(R.id.field_email_login))
+            ((TextView) getView().findViewById(R.id.edit_login_email))
                     .setError("Login Unsuccessful");
         }
     }
@@ -213,6 +252,51 @@ public class LoginFragment extends Fragment {
     public interface OnLoginFragmentInteractionListener extends WaitFragment.OnFragmentInteractionListener {
         void onLoginSuccess(Credentials theCredentials, String jwt);
         void onRegisterClicked();
+    }
+    /**
+     * Added this functionality in Lab 5
+     * saveCredentials method is aimed to store the credentials in the SharedPrefs.
+     */
+    private void saveCredentials(final Credentials credentials) {
+        SharedPreferences prefs =
+                getActivity().getSharedPreferences(
+                        getString(R.string.keys_shared_prefs),
+                        Context.MODE_PRIVATE);
+        // Store the credentials in SharedPrefs
+        prefs.edit().putString(getString(R.string.keys_prefs_email), credentials.getEmail()).apply();
+        prefs.edit().putString(getString(R.string.keys_prefs_password), credentials.getPassword()).apply();
+    }
+
+    /**
+     * Helper method from lab5 that does the login process automatically.
+     * @author Trung Thai
+     */
+    private void doLogin(Credentials credentials) {
+        // build the web service URL
+        Uri uri = new Uri.Builder()
+                .scheme("https")
+                .appendPath(getString(R.string.ep_base_url))
+                .appendPath(getString(R.string.ep_login))
+                .build();
+
+        // build the JSONObject
+        JSONObject msg = credentials.asJSONObject();
+
+        mCredentials = credentials;
+
+        Log.d("JSON Credentials", msg.toString());
+
+        // instantiate and execute the AsyncTask.
+        // Feel free to add a handler for onPreExecution so that a progress bar
+        // is displayed or maybe disable buttons.
+
+        new SendPostAsyncTask.Builder(uri.toString(), msg)
+                .onPreExecute(this::handleLoginOnPre)
+                .onPostExecute(this::handleLoginOnPost)
+                .onCancelled(this::handleErrorsInTask)
+                .build().execute();
+
+
     }
 
 

@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources tools:ignore="ExtraTranslation" xmlns:tools="http://schemas.android.com/tools">
-    <string name="keys_shared_prefs">edu.uw.tcss450.challengeapp.PREFS</string>
     <string name="keys_prefs_username">username</string>
     <string name="keys_prefs_stay_logged_in">loggedIn</string>
     <string name="keys_fragment_login">loginFragmentTag</string>
@@ -24,6 +23,12 @@
     <string name="key_credentials">osbornem_credentials_information</string>
     <string name="key_blog_post">osbornem_blog_post_information</string>
     <string name="key_set_list">osbornem_set_list_information</string>
+
+    <!-- Added this in Lab 5 -->
+    <string name="key_email">email_key</string>
+    <string name="keys_shared_prefs">edu.uw.tcss450.phishapp.PREFS</string>
+    <string name="keys_prefs_email">traffic_light_wont_let_me_through</string>
+    <string name="keys_prefs_password">see_the_city_see_the_zoo</string>
 
 
 </resources>

@@ -13,7 +13,7 @@
     <string name="sample_text">sample</string>
     <string name="nav_set_lists_text">Set Lists</string>
 
-    <!-- Naviation Drawer Strings -->
+    <!-- Navigation Drawer Strings -->
     <string name="navigation_drawer_open">Open navigation drawer</string>
     <string name="navigation_drawer_close">Close navigation drawer</string>
     <string name="nav_header_title">Chapp</string>
@@ -26,5 +26,8 @@
     <string name="nav_chat">Chat</string>
     <string name="nav_weather">Weather</string>
     <string name="nav_logout">Logout</string>
+
+    <!--Store Credentials -->
+    <string name ="action_logout">Logout</string>"
 
 </resources>

@@ -6,6 +6,8 @@ import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 
+import java.io.Serializable;
+
 import tcss450.uw.edu.chapp.model.Credentials;
 
 public class MainActivity extends AppCompatActivity implements LoginFragment.OnLoginFragmentInteractionListener, RegisterFragment.OnRegisterFragmentInteractionListener {
@@ -23,6 +25,7 @@ public class MainActivity extends AppCompatActivity implements LoginFragment.OnL
             }
         }
     }
+
 
     @Override
     public void onLoginSuccess(Credentials theCredentials, String jwt) {
@@ -80,5 +83,18 @@ public class MainActivity extends AppCompatActivity implements LoginFragment.OnL
                 .beginTransaction()
                 .remove(getSupportFragmentManager().findFragmentByTag("WAIT"))
                 .commit();
+    }
+
+    /**
+     *
+     */
+    private void login(final Credentials credentials, String jwt) {
+        Intent i = new Intent(this, HomeActivity.class);
+        i.putExtra(getString(R.string.key_email), (Serializable) credentials);
+
+        i.putExtra(getString(R.string.keys_intent_jwt), jwt);
+        startActivity(i);
+        // End this Activity and remove it from the Activity back stack.
+        finish();
     }
 }

@@ -1,5 +1,7 @@
 package tcss450.uw.edu.chapp;
 
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -117,7 +119,8 @@ public class HomeActivity extends AppCompatActivity
         int id = item.getItemId();
 
         //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
+        if (id == R.id.action_logout) {
+            logout();
             return true;
         }
 
@@ -362,6 +365,31 @@ public class HomeActivity extends AppCompatActivity
                 .remove(getSupportFragmentManager().findFragmentByTag("WAIT"))
                 .commit();
         getSupportFragmentManager().popBackStack();
+    }
+
+    /**
+     * This is the logout method
+     * @author Trung Thai
+     */
+    private void logout() {
+        SharedPreferences prefs =
+                getSharedPreferences(
+                        getString(R.string.keys_shared_prefs),
+                        Context.MODE_PRIVATE);
+         // remove the saved credentials from StoredPrefs
+        prefs.edit().remove(getString(R.string.keys_prefs_password)).apply();
+        prefs.edit().remove(getString(R.string.keys_prefs_email)).apply();
+
+
+
+        //Close the app
+        finishAndRemoveTask();
+
+        //or close this activity and bring back the login
+        // Intent i = new Intent(this, MainActivity.class);
+        // startActivity(i);
+        // End this Activity and remove it form the Activity back stack.
+        // finish();
     }
 
 

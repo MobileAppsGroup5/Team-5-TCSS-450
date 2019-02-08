@@ -8,28 +8,26 @@
     tools:context=".LoginFragment">
 
     <EditText
-        android:id="@+id/field_email_login"
+        android:id="@+id/edit_login_email"
         android:layout_width="352dp"
         android:layout_height="wrap_content"
         android:layout_marginBottom="16dp"
         android:ems="10"
         android:hint="@string/email_default_text"
         android:inputType="textPersonName"
-        android:text="test@test"
-        app:layout_constraintBottom_toTopOf="@+id/field_password"
+        app:layout_constraintBottom_toTopOf="@+id/edit_login_password"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent" />
         <!--TODO: REMOVE ABOVE BEFORE DEPLOYING-->
 
     <EditText
-        android:id="@+id/field_password"
+        android:id="@+id/edit_login_password"
         android:layout_width="352dp"
         android:layout_height="wrap_content"
         android:layout_marginBottom="16dp"
         android:ems="10"
         android:hint="@string/password_default_text"
         android:inputType="textPassword"
-        android:text="test123"
         app:layout_constraintBottom_toTopOf="@+id/button_signin"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent" />
@@ -67,7 +65,7 @@
         android:layout_marginEnd="8dp"
         android:layout_marginBottom="8dp"
         android:src="@mipmap/chapp_logo_trans_foreground"
-        app:layout_constraintBottom_toTopOf="@+id/field_email_login"
+        app:layout_constraintBottom_toTopOf="@+id/edit_login_email"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
