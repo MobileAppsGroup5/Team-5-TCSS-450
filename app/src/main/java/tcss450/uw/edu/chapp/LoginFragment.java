@@ -12,6 +12,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.Switch;
 import android.widget.TextView;
 
 import org.json.JSONException;
@@ -68,22 +69,6 @@ public class LoginFragment extends Fragment {
                     emailEditText.getText().toString(),
                     passwordEditText.getText().toString())
                     .build());
-
-            //build the web service URL
-      /*     Uri uri = new Uri.Builder()
-                    .scheme("https")
-                    .appendPath(getString(R.string.ep_base_url))
-                    .appendPath(getString(R.string.ep_login))
-                    .build();
-            //build the JSONObject
-            JSONObject msg = credentials.asJSONObject();
-            mCredentials = credentials;
-            //instantiate and execute the AsyncTask.
-            new SendPostAsyncTask.Builder(uri.toString(), msg)
-                    .onPreExecute(this::handleLoginOnPre)
-                    .onPostExecute(this::handleLoginOnPost)
-                    .onCancelled(this::handleErrorsInTask)
-                    .build().execute();     */
 
         } else {
             // Notify of problems
@@ -214,8 +199,10 @@ public class LoginFragment extends Fragment {
 
                 mJwt = resultsJSON.getString(
                         getString(R.string.keys_json_login_jwt));
-
-                saveCredentials(mCredentials);
+                
+                if (((Switch)getActivity().findViewById(R.id.switch_stay_logged_in)).isChecked()) {
+                    saveCredentials(mCredentials);
+                }
                 mListener.onLoginSuccess(mCredentials, mJwt);
 
                 return;

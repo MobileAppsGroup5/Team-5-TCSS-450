@@ -17,8 +17,9 @@
         android:inputType="textPersonName"
         app:layout_constraintBottom_toTopOf="@+id/edit_login_password"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.491"
         app:layout_constraintStart_toStartOf="parent" />
-        <!--TODO: REMOVE ABOVE BEFORE DEPLOYING-->
+    <!--TODO: REMOVE ABOVE BEFORE DEPLOYING-->
 
     <EditText
         android:id="@+id/edit_login_password"
@@ -28,10 +29,11 @@
         android:ems="10"
         android:hint="@string/password_default_text"
         android:inputType="textPassword"
-        app:layout_constraintBottom_toTopOf="@+id/button_signin"
+        app:layout_constraintBottom_toTopOf="@+id/switch_stay_logged_in"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.491"
         app:layout_constraintStart_toStartOf="parent" />
-        <!--TODO: REMOVE ABOVE BEFORE DEPLOYING-->
+    <!--TODO: REMOVE ABOVE BEFORE DEPLOYING-->
 
     <Button
         android:id="@+id/button_signin"
@@ -69,5 +71,15 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
+
+    <Switch
+        android:id="@+id/switch_stay_logged_in"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="16dp"
+        android:layout_marginBottom="32dp"
+        android:text="@string/stay_logged_in"
+        app:layout_constraintBottom_toTopOf="@+id/button_signin"
+        app:layout_constraintEnd_toEndOf="parent" />
 
 </android.support.constraint.ConstraintLayout>
