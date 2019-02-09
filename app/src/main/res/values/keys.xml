@@ -30,5 +30,9 @@
     <string name="keys_prefs_email">traffic_light_wont_let_me_through</string>
     <string name="keys_prefs_password">see_the_city_see_the_zoo</string>
 
-
+    <!-- register keys -->
+    <string name="keys_json_register_error">error</string>
+    <string name="keys_json_register_error_message">detail</string>
+    <string name="keys_json_register_success">success</string>
+    <string name="keys_json_register_code">code</string>
 </resources>

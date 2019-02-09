@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <integer name="reg_password_max_chars">12</integer>
+    <integer name="reg_password_min_chars">6</integer>
+
+    <integer name="reg_username_max_chars">12</integer>
+    <integer name="reg_username_min_chars">6</integer>
+
+    <string name="reg_password_special_chars">~!@#$%^*()_+{}[]/\-+="',`</string>
+
+    <!-- Register Error Messages -->
+    <string name="reg_error_email_empty">Email can\'t be empty</string>
+    <string name="reg_error_email_too_many_at">Too many @ symbols in Email</string>
+    <string name="reg_error_email_no_at">\@ symbol must be in Email</string>
+
+    <string name="reg_error_firstname_empty">First Name can\'t be empty</string>
+    <string name="reg_error_lastname_empty">Last Name can\'t be empty</string>
+
+    <string name="reg_error_username_empty">Username can\'t be empty</string>
+    <string name="reg_error_username_outofbounds">Username must have 6 – 12 characters</string>
+
+    <string name="reg_error_password_empty">Password can\'t be empty</string>
+    <string name="reg_error_password_outofbounds">Password must have 6 – 12 characters</string>
+    <string name="reg_error_password_nospecialchar">Password must have a special character [~!@#$%^*()_+{}[]/\-+="']</string>
+    <string name="reg_error_password_no_number">Password must have a number 0 – 9</string>
+    <string name="reg_error_password_no_upper_case">Password must have an upper case letter</string>
+    <string name="reg_error_password_no_lower_case">Password must have a lower case letter</string>
+    <string name="reg_error_password_doesnotmatch">Passwords must match</string>
+
+    <string name="reg_error_password_confirm_empty">Password can\'t be empty</string>
+
+    <!-- regex which is designed to get a key error from the error message returned from the
+    end point. This regex returns 2 groups,
+     group 1 is the key
+     group 2 is the value -->
+    <string name="reg_error_regex_detail">\\((.*?)\\)=\\((.*?)\\)</string>
+    <string name="reg_error_code_key_already_exists">23505</string>
+
+</resources>
