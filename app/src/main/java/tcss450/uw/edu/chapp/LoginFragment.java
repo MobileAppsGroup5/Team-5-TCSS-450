@@ -210,7 +210,7 @@ public class LoginFragment extends Fragment {
                 //Login was unsuccessful. Don’t switch fragments and
                 // inform the user
                 ((TextView) getView().findViewById(R.id.edit_login_email))
-                        .setError("Login Unsuccessful");
+                        .setError(resultsJSON.getString("message"));
             }
             mListener.onWaitFragmentInteractionHide();
         } catch (JSONException e) {

@@ -3,6 +3,7 @@ package tcss450.uw.edu.chapp;
 import android.content.Intent;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 
@@ -50,6 +51,14 @@ public class MainActivity extends AppCompatActivity implements LoginFragment.OnL
         LoginFragment loginFragment;
 
         loginFragment = (LoginFragment) getSupportFragmentManager().findFragmentById(R.id.fragment_login);
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setMessage("A verification email has been sent, click on the link in that email to" +
+                " verify your account")
+                .setTitle("Verification")
+                .setPositiveButton("OK", (i, d) -> {});
+        AlertDialog dialog = builder.create();
+        dialog.show();
 
         if (loginFragment != null) {
             loginFragment.fillFields(theCredentials);
