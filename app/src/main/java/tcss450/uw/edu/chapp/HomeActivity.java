@@ -126,10 +126,10 @@ public class HomeActivity extends AppCompatActivity
         int id = item.getItemId();
 
         //noinspection SimplifiableIfStatement
-        if (id == R.id.action_logout) {
-            logout();
-            return true;
-        }
+//        if (id == R.id.action_logout) {
+//            logout();
+//            return true;
+//        }
 
         return super.onOptionsItemSelected(item);
     }
@@ -383,13 +383,13 @@ public class HomeActivity extends AppCompatActivity
 
 
         //Close the app
-        finishAndRemoveTask();
+        //finishAndRemoveTask();
 
         //or close this activity and bring back the login
-         //Intent i = new Intent(this, MainActivity.class);
-         //startActivity(i);
+         Intent i = new Intent(this, MainActivity.class);
+         startActivity(i);
         // End this Activity and remove it form the Activity back stack.
-         //finish();
+         finish();
     }
 
 
