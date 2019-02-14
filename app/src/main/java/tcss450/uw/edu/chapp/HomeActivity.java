@@ -1,6 +1,7 @@
 package tcss450.uw.edu.chapp;
 
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Bundle;
@@ -91,7 +92,13 @@ public class HomeActivity extends AppCompatActivity
 
         // Set the logout listener for the navigation drawer
         TextView logoutText = (TextView) findViewById(R.id.nav_logout);
-        logoutText.setOnClickListener(this::onLogoutClick);
+        logoutText.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Log.d("CHAPP_LOGOUT", "Logout clicked in navigation bar");
+                logout();
+            }
+        });
     }
 
     @Override
@@ -192,14 +199,7 @@ public class HomeActivity extends AppCompatActivity
         drawer.closeDrawer(GravityCompat.START);
         return true;
     }
-    /**
-     * Logout click listener for the logout button in the navigation drawer
-     * TODO: logout the user
-     * @param theText the TextView that was pressed
-     */
-    public void onLogoutClick(View theText) {
-        Log.i("NAVIGATION_INFORMATION", "Pressed: " + ((TextView)theText).getText().toString());
-    }
+
 
     private void loadFragment(Fragment frag) {
         FragmentTransaction transaction = getSupportFragmentManager()
@@ -386,10 +386,10 @@ public class HomeActivity extends AppCompatActivity
         finishAndRemoveTask();
 
         //or close this activity and bring back the login
-        // Intent i = new Intent(this, MainActivity.class);
-        // startActivity(i);
+         //Intent i = new Intent(this, MainActivity.class);
+         //startActivity(i);
         // End this Activity and remove it form the Activity back stack.
-        // finish();
+         //finish();
     }
 
 
