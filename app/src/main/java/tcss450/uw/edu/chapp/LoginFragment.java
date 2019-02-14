@@ -4,6 +4,7 @@ package tcss450.uw.edu.chapp;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.util.Log;
@@ -18,6 +19,7 @@ import android.widget.TextView;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import me.pushy.sdk.Pushy;
 import tcss450.uw.edu.chapp.model.Credentials;
 import tcss450.uw.edu.chapp.utils.SendPostAsyncTask;
 
@@ -199,11 +201,8 @@ public class LoginFragment extends Fragment {
 
                 mJwt = resultsJSON.getString(
                         getString(R.string.keys_json_login_jwt));
-                
-                if (((Switch)getActivity().findViewById(R.id.switch_stay_logged_in)).isChecked()) {
-                    saveCredentials(mCredentials);
-                }
-                mListener.onLoginSuccess(mCredentials, mJwt);
+
+                new RegisterForPushNotificationsAsync().execute();
 
                 return;
             } else {
@@ -285,6 +284,43 @@ public class LoginFragment extends Fragment {
 
 
     }
+
+    private class RegisterForPushNotificationsAsync extends AsyncTask<Void, String, String>
+    {
+        protected String doInBackground(Void... params) {
+            String deviceToken = "";
+            try {
+                // Assign a unique token to this device
+                deviceToken = Pushy.register(getActivity().getApplicationContext());
+                //subscribe to a topic (this is a Blocking call)
+                Pushy.subscribe("all", getActivity().getApplicationContext());
+            }
+            catch (Exception exc) {
+                cancel(true);
+                // Return exc to onCancelled
+                return exc.getMessage();
+            }
+            // Success
+            return deviceToken;
+        }
+        @Override
+        protected void onCancelled(String errorMsg) {
+            super.onCancelled(errorMsg);
+            Log.d("CHAPP", "Error getting Pushy Token: " + errorMsg);
+        }
+        @Override
+        protected void onPostExecute(String deviceToken) {
+            // Log it for debugging purposes
+            Log.d("CHAPP", "Pushy device token: " + deviceToken);
+
+            // Does the user want us to save credentials?
+            if (((Switch)getActivity().findViewById(R.id.switch_stay_logged_in)).isChecked()) {
+                saveCredentials(mCredentials);
+            }
+            mListener.onLoginSuccess(mCredentials, mJwt);
+        }
+    }
+
 
 
 }

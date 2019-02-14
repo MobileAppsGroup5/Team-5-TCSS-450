@@ -9,6 +9,7 @@ import android.os.Bundle;
 
 import java.io.Serializable;
 
+import me.pushy.sdk.Pushy;
 import tcss450.uw.edu.chapp.model.Credentials;
 
 public class MainActivity extends AppCompatActivity implements LoginFragment.OnLoginFragmentInteractionListener, RegisterFragment.OnRegisterFragmentInteractionListener {
@@ -17,6 +18,7 @@ public class MainActivity extends AppCompatActivity implements LoginFragment.OnL
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        Pushy.listen(this);
 
         if (savedInstanceState == null) {
             if (findViewById(R.id.frame_main_container) != null) {
