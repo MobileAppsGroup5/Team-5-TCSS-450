@@ -10,6 +10,8 @@ import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.function.Consumer;
 
 /**
@@ -29,7 +31,6 @@ import java.util.function.Consumer;
  * Created by Charles Bryan on 3/22/2018.
  *
  * @author Charles Bryan
- * @author Michael Osborne
  * @version 4/15/2018
  */
 public class SendPostAsyncTask extends AsyncTask<Void, String, String> {
@@ -41,6 +42,7 @@ public class SendPostAsyncTask extends AsyncTask<Void, String, String> {
     private Consumer<String[]> mOnProgress;
     private Consumer<String> mOnPost;
     private Consumer<String> mOnCancel;
+    private final Map<String, String> mHeaders;
 
     /**
      * Helper class for building PostAsyncTasks.
@@ -58,6 +60,7 @@ public class SendPostAsyncTask extends AsyncTask<Void, String, String> {
         private Consumer<String[]> onProg = X -> {};
         private Consumer<String> onPost = x -> {};
         private Consumer<String> onCancel = x -> {};
+        private Map<String, String> headers;
 
         /**
          * Constructs a new Builder.
@@ -68,6 +71,7 @@ public class SendPostAsyncTask extends AsyncTask<Void, String, String> {
         public Builder(final String url, final JSONObject json) {
             mUrl = url;
             mJsonMsg = json;
+            headers = new HashMap<>();
         }
 
         /**
@@ -120,6 +124,17 @@ public class SendPostAsyncTask extends AsyncTask<Void, String, String> {
         }
 
         /**
+         * Add a Key/Value pair to be set in the Header of the HTTP request.
+         * @param key the key of the pair
+         * @param value the vaue of the pair
+         * @return
+         */
+        public Builder addHeaderField(final String key, final String value) {
+            headers.put(key, value);
+            return this;
+        }
+
+        /**
          * Constructs a SendPostAsyncTask with the current attributes.
          *
          * @return a SendPostAsyncTask with the current attributes
@@ -143,6 +158,7 @@ public class SendPostAsyncTask extends AsyncTask<Void, String, String> {
         mOnProgress = builder.onProg;
         mOnPost = builder.onPost;
         mOnCancel = builder.onCancel;
+        mHeaders = builder.headers;
     }
 
     @Override
@@ -162,6 +178,11 @@ public class SendPostAsyncTask extends AsyncTask<Void, String, String> {
             urlConnection = (HttpURLConnection) urlObject.openConnection();
             urlConnection.setRequestMethod("POST");
             urlConnection.setRequestProperty("Content-Type", "application/json");
+
+            for (final String key: mHeaders.keySet()) {
+                urlConnection.setRequestProperty(key, mHeaders.get(key));
+            }
+
             urlConnection.setDoOutput(true);
             OutputStreamWriter wr = new OutputStreamWriter(urlConnection.getOutputStream());
 

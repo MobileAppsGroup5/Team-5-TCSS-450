@@ -61,6 +61,13 @@ public class HomeActivity extends AppCompatActivity
         drawer.addDrawerListener(toggle);
         toggle.syncState();
 
+        NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
+        navigationView.setNavigationItemSelectedListener(this);
+
+        // Set the logout listener for the navigation drawer
+        TextView logoutText = (TextView) findViewById(R.id.nav_logout);
+        logoutText.setOnClickListener(this::onLogoutClick);
+
         // Get values from the intent
         mCreds = (Credentials) getIntent().getSerializableExtra(getString(R.string.key_credentials));
         mJwToken = getIntent().getStringExtra(getString(R.string.keys_intent_jwt));
@@ -68,32 +75,21 @@ public class HomeActivity extends AppCompatActivity
         // Load SuccessFragment into content_home (aka fragment_container)
         if (savedInstanceState == null) {
             if (findViewById(R.id.fragment_container) != null) {
-                //created objects so adding multiple fragments can be done
-                FragmentManager manager = getSupportFragmentManager();
-                FragmentTransaction trans = manager.beginTransaction();
-
-                // Pass along the credentials from the intent to the SuccessFragment
-                SuccessFragment successFrag = new SuccessFragment();
-
-                LandingPage landingPage = new LandingPage();
+                Fragment fragment;
                 Bundle args = new Bundle();
                 // Get value from intent and put it in fragment args
                 args.putSerializable(getString(R.string.key_credentials)
                         , mCreds);
-                successFrag.setArguments(args);
-                //this is the only line changed to add landing page instead of just
-                //the home fragment. -jess
-                trans.add(R.id.fragment_container, landingPage);
-                trans.commit();
+                if (getIntent().getBooleanExtra(getString(R.string.keys_intent_notification_msg), false)) {
+                    fragment = new ChatFragment();
+                } else {
+                    fragment = new LandingPage();
+                    fragment.setArguments(args);
+                }
+
+                loadFragment(fragment);
             }
         }
-
-        NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
-        navigationView.setNavigationItemSelectedListener(this);
-
-        // Set the logout listener for the navigation drawer
-        TextView logoutText = (TextView) findViewById(R.id.nav_logout);
-        logoutText.setOnClickListener(this::onLogoutClick);
     }
 
     @Override

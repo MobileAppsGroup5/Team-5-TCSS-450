@@ -11,6 +11,7 @@ import android.util.Log;
 
 import me.pushy.sdk.Pushy;
 import tcss450.uw.edu.chapp.MainActivity;
+import tcss450.uw.edu.chapp.R;
 
 import static android.app.ActivityManager.RunningAppProcessInfo.IMPORTANCE_FOREGROUND;
 import static android.app.ActivityManager.RunningAppProcessInfo.IMPORTANCE_VISIBLE;
@@ -72,6 +73,7 @@ public class PushReceiver extends BroadcastReceiver {
                     .setContentTitle("Message from: " + sender)
                     .setContentText(messageText)
                     .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+                    .setSmallIcon(R.drawable.ic_menu_chat)
                     .setContentIntent(pendingIntent);
 
             // Automatically configure a Notification Channel for devices running Android O+
