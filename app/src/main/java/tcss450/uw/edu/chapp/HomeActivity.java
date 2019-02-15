@@ -80,12 +80,14 @@ public class HomeActivity extends AppCompatActivity
                 // Get value from intent and put it in fragment args
                 args.putSerializable(getString(R.string.key_credentials)
                         , mCreds);
+                args.putSerializable(getString(R.string.keys_intent_jwt)
+                        , mJwToken);
                 if (getIntent().getBooleanExtra(getString(R.string.keys_intent_notification_msg), false)) {
                     fragment = new ChatFragment();
                 } else {
                     fragment = new LandingPage();
-                    fragment.setArguments(args);
                 }
+                fragment.setArguments(args);
 
                 loadFragment(fragment);
             }
@@ -176,6 +178,12 @@ public class HomeActivity extends AppCompatActivity
                 break;
 
             case R.id.nav_chat:
+                ChatFragment chatFrag = new ChatFragment();
+                Bundle args = new Bundle();
+                args.putSerializable(getString(R.string.key_credentials), mCreds);
+                args.putSerializable(getString(R.string.keys_intent_jwt), mJwToken);
+                chatFrag.setArguments(args);
+                loadFragment(chatFrag);
                 break;
 
             case R.id.nav_weather:
