@@ -6,17 +6,30 @@ import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 
 import java.io.Serializable;
 
+import me.pushy.sdk.Pushy;
 import tcss450.uw.edu.chapp.model.Credentials;
 
 public class MainActivity extends AppCompatActivity implements LoginFragment.OnLoginFragmentInteractionListener, RegisterFragment.OnRegisterFragmentInteractionListener {
 
+    private boolean mLoadFromChatNotification = false;
+    private static final String TAG = MainActivity.class.getSimpleName();
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        Pushy.listen(this);
         setContentView(R.layout.activity_main);
+
+        if (getIntent().getExtras() != null) {
+            if (getIntent().getExtras().containsKey("type")) {
+                mLoadFromChatNotification = getIntent().getExtras().getString("type").equals("msg");
+            }
+        }
 
         if (savedInstanceState == null) {
             if (findViewById(R.id.frame_main_container) != null) {
@@ -30,6 +43,9 @@ public class MainActivity extends AppCompatActivity implements LoginFragment.OnL
 
     @Override
     public void onLoginSuccess(Credentials theCredentials, String jwt) {
+        // FOR DEBUG PURPOSES, REMOVE BEFORE PRODUCTION
+        Log.d("JSON_WEB_TOKEN", jwt);
+
         Intent intent = new Intent(this, HomeActivity.class);
         intent.putExtra(getString(R.string.key_credentials), theCredentials);
         intent.putExtra(getString(R.string.keys_intent_jwt), jwt);
@@ -100,7 +116,7 @@ public class MainActivity extends AppCompatActivity implements LoginFragment.OnL
     private void login(final Credentials credentials, String jwt) {
         Intent i = new Intent(this, HomeActivity.class);
         i.putExtra(getString(R.string.key_email), (Serializable) credentials);
-
+        i.putExtra(getString(R.string.keys_intent_notification_msg), mLoadFromChatNotification);
         i.putExtra(getString(R.string.keys_intent_jwt), jwt);
         startActivity(i);
         // End this Activity and remove it from the Activity back stack.

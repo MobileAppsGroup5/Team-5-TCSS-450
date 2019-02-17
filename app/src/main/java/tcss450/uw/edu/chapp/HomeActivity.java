@@ -3,6 +3,7 @@ package tcss450.uw.edu.chapp;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
@@ -26,6 +27,7 @@ import org.json.JSONObject;
 import java.util.ArrayList;
 import java.util.List;
 
+import me.pushy.sdk.Pushy;
 import tcss450.uw.edu.chapp.blog.BlogPost;
 import tcss450.uw.edu.chapp.model.Credentials;
 import tcss450.uw.edu.chapp.setlist.SetList;
@@ -59,6 +61,13 @@ public class HomeActivity extends AppCompatActivity
         drawer.addDrawerListener(toggle);
         toggle.syncState();
 
+        NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
+        navigationView.setNavigationItemSelectedListener(this);
+
+        // Set the logout listener for the navigation drawer
+        TextView logoutText = (TextView) findViewById(R.id.nav_logout);
+        logoutText.setOnClickListener(this::onLogoutClick);
+
         // Get values from the intent
         mCreds = (Credentials) getIntent().getSerializableExtra(getString(R.string.key_credentials));
         mJwToken = getIntent().getStringExtra(getString(R.string.keys_intent_jwt));
@@ -66,32 +75,23 @@ public class HomeActivity extends AppCompatActivity
         // Load SuccessFragment into content_home (aka fragment_container)
         if (savedInstanceState == null) {
             if (findViewById(R.id.fragment_container) != null) {
-                //created objects so adding multiple fragments can be done
-                FragmentManager manager = getSupportFragmentManager();
-                FragmentTransaction trans = manager.beginTransaction();
-
-                // Pass along the credentials from the intent to the SuccessFragment
-                SuccessFragment successFrag = new SuccessFragment();
-
-                LandingPage landingPage = new LandingPage();
+                Fragment fragment;
                 Bundle args = new Bundle();
                 // Get value from intent and put it in fragment args
                 args.putSerializable(getString(R.string.key_credentials)
                         , mCreds);
-                successFrag.setArguments(args);
-                //this is the only line changed to add landing page instead of just
-                //the home fragment. -jess
-                trans.add(R.id.fragment_container, landingPage);
-                trans.commit();
+                args.putSerializable(getString(R.string.keys_intent_jwt)
+                        , mJwToken);
+                if (getIntent().getBooleanExtra(getString(R.string.keys_intent_notification_msg), false)) {
+                    fragment = new ChatFragment();
+                } else {
+                    fragment = new LandingPage();
+                }
+                fragment.setArguments(args);
+
+                loadFragment(fragment);
             }
         }
-
-        NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
-        navigationView.setNavigationItemSelectedListener(this);
-
-        // Set the logout listener for the navigation drawer
-        TextView logoutText = (TextView) findViewById(R.id.nav_logout);
-        logoutText.setOnClickListener(this::onLogoutClick);
     }
 
     @Override
@@ -178,6 +178,12 @@ public class HomeActivity extends AppCompatActivity
                 break;
 
             case R.id.nav_chat:
+                ChatFragment chatFrag = new ChatFragment();
+                Bundle args = new Bundle();
+                args.putSerializable(getString(R.string.key_credentials), mCreds);
+                args.putSerializable(getString(R.string.keys_intent_jwt), mJwToken);
+                chatFrag.setArguments(args);
+                loadFragment(chatFrag);
                 break;
 
             case R.id.nav_weather:
@@ -372,25 +378,44 @@ public class HomeActivity extends AppCompatActivity
      * @author Trung Thai
      */
     private void logout() {
-        SharedPreferences prefs =
-                getSharedPreferences(
-                        getString(R.string.keys_shared_prefs),
-                        Context.MODE_PRIVATE);
-         // remove the saved credentials from StoredPrefs
-        prefs.edit().remove(getString(R.string.keys_prefs_password)).apply();
-        prefs.edit().remove(getString(R.string.keys_prefs_email)).apply();
-
-
-
-        //Close the app
-        finishAndRemoveTask();
-
-        //or close this activity and bring back the login
-        // Intent i = new Intent(this, MainActivity.class);
-        // startActivity(i);
-        // End this Activity and remove it form the Activity back stack.
-        // finish();
+        new DeleteTokenAsyncTask().execute();
     }
+
+    // Deleting the Pushy device token must be done asynchronously. Good thing
+    // we have something that allows us to do that.
+    class DeleteTokenAsyncTask extends AsyncTask<Void, Void, Void> {
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+            onWaitFragmentInteractionShow();
+        }
+        @Override
+        protected Void doInBackground(Void... voids) {
+            //since we are already doing stuff in the background, go ahead
+            //and remove the credentials from shared prefs here.
+            SharedPreferences prefs =
+                    getSharedPreferences(
+                            getString(R.string.keys_shared_prefs),
+                            Context.MODE_PRIVATE);
+            prefs.edit().remove(getString(R.string.keys_prefs_password)).apply();
+            prefs.edit().remove(getString(R.string.keys_prefs_email)).apply();
+            //unregister the device from the Pushy servers
+            Pushy.unregister(HomeActivity.this);
+            return null;
+        }
+        @Override
+        protected void onPostExecute(Void aVoid) {
+            super.onPostExecute(aVoid);
+            //close the app
+            finishAndRemoveTask();
+            //or close this activity and bring back the Login
+            // Intent i = new Intent(this, MainActivity.class);
+            // startActivity(i);
+            // //Ends this Activity and removes it from the Activity back stack.
+            // finish();
+        }
+    }
+
 
 
 }
