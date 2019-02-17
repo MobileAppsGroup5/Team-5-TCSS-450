@@ -194,13 +194,16 @@ public class LoginFragment extends Fragment {
                     resultsJSON.getBoolean(
                             getString(R.string.keys_json_login_success));
             if (success) {
-                //Login was successful. Switch to the loadSuccessFragment.
-       /*         mListener.onLoginSuccess(mCredentials,
-                        resultsJSON.getString(
-                                getString(R.string.keys_json_login_jwt)));  */
 
+                // Store our token, also augment our credentials with information from the server.
                 mJwt = resultsJSON.getString(
                         getString(R.string.keys_json_login_jwt));
+                mCredentials = new Credentials.Builder(mCredentials.getEmail(), mCredentials.getPassword())
+                        .addFirstName(resultsJSON.getString("firstname"))
+                        .addLastName(resultsJSON.getString("lastname"))
+                        .addUsername(resultsJSON.getString("username"))
+                        .build();
+                System.out.println(mCredentials);
 
                 new RegisterForPushNotificationsAsync().execute();
 
@@ -322,6 +325,7 @@ public class LoginFragment extends Fragment {
                     .build();
             //build the JSONObject
             JSONObject msg = mCredentials.asJSONObject();
+
             try {
                 msg.put("token", deviceToken);
             } catch (JSONException e) {

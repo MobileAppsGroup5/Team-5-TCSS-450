@@ -32,14 +32,13 @@ public class ChatFragment extends Fragment {
 
     private static final String TAG = "CHAT_FRAG";
 
-    private static final String CHAT_ID = "1";
-
     private TextView mMessageOutputTextView;
     private EditText mMessageInputEditText;
 
-    private String mEmail;
+    private String mUsername;
     private String mJwToken;
     private String mSendUrl;
+    private String mChatId;
 
     private PushMessageReceiver mPushMessageReciever;
 
@@ -53,8 +52,9 @@ public class ChatFragment extends Fragment {
         super.onStart();
         if (getArguments() != null) {
             //get the email and JWT from the Activity. Make sure the Keys match what you used
-            mEmail = ((Credentials)getArguments().get(getString(R.string.key_credentials))).getEmail();
+            mUsername = ((Credentials)getArguments().get(getString(R.string.key_credentials))).getUsername();
             mJwToken = getArguments().getString(getString(R.string.keys_intent_jwt));
+            mChatId = getArguments().getString(getString(R.string.key_chatid));
         }
         //We will use this url every time the user hits send. Let's only build it once, ya?
         mSendUrl = new Uri.Builder()
@@ -84,8 +84,8 @@ public class ChatFragment extends Fragment {
         String msg = mMessageInputEditText.getText().toString();
         JSONObject messageJson = new JSONObject();
         try {
-            messageJson.put("chatId", CHAT_ID);
-            messageJson.put("email", mEmail);
+            messageJson.put("chatId", mChatId);
+            messageJson.put("username", mUsername);
             messageJson.put("message", msg);
         } catch (JSONException e) {
             e.printStackTrace();
@@ -136,12 +136,16 @@ public class ChatFragment extends Fragment {
         @Override
         public void onReceive(Context context, Intent intent) {
             Log.e("WORLD", intent.getStringExtra("MESSAGE"));
-            if(intent.hasExtra("SENDER") && intent.hasExtra("MESSAGE")) {
+            if(intent.hasExtra("SENDER")
+                    && intent.hasExtra("MESSAGE")
+                    && intent.hasExtra("CHATID")) {
                 String sender = intent.getStringExtra("SENDER");
                 String messageText = intent.getStringExtra("MESSAGE");
-                mMessageOutputTextView.append(sender + ":" + messageText);
-                mMessageOutputTextView.append(System.lineSeparator());
-                mMessageOutputTextView.append(System.lineSeparator());
+                if (intent.getStringExtra("CHATID").equals(mChatId)) {
+                    mMessageOutputTextView.append(sender + ":" + messageText);
+                    mMessageOutputTextView.append(System.lineSeparator());
+                    mMessageOutputTextView.append(System.lineSeparator());
+                }
             }
         }
     }

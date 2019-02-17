@@ -6,7 +6,6 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
@@ -29,8 +28,10 @@ import java.util.List;
 
 import me.pushy.sdk.Pushy;
 import tcss450.uw.edu.chapp.blog.BlogPost;
+import tcss450.uw.edu.chapp.chat.Chat;
 import tcss450.uw.edu.chapp.model.Credentials;
 import tcss450.uw.edu.chapp.setlist.SetList;
+import tcss450.uw.edu.chapp.utils.SendPostAsyncTask;
 
 /**
  *
@@ -42,7 +43,8 @@ public class HomeActivity extends AppCompatActivity
         BlogFragment.OnBlogListFragmentInteractionListener,
         BlogPostFragment.OnFragmentInteractionListener,
         WaitFragment.OnFragmentInteractionListener,
-        SetListFragment.OnListFragmentInteractionListener {
+        SetListFragment.OnListFragmentInteractionListener,
+        AllChatsFragment.OnListFragmentInteractionListener {
 
     private Credentials mCreds;
 
@@ -178,12 +180,33 @@ public class HomeActivity extends AppCompatActivity
                 break;
 
             case R.id.nav_chat:
-                ChatFragment chatFrag = new ChatFragment();
-                Bundle args = new Bundle();
-                args.putSerializable(getString(R.string.key_credentials), mCreds);
-                args.putSerializable(getString(R.string.keys_intent_jwt), mJwToken);
-                chatFrag.setArguments(args);
-                loadFragment(chatFrag);
+                Uri uri = new Uri.Builder()
+                    .scheme("https")
+                    .appendPath(getString(R.string.ep_base_url))
+                    .appendPath(getString(R.string.ep_chats_base))
+                    .appendPath(getString(R.string.ep_chats_get_chats))
+                    .build();
+                // Create the JSON object with our username
+                JSONObject msg = mCreds.asJSONObject();
+                msg = new JSONObject();
+                try {
+                    msg.put("username", mCreds.getUsername());
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+                System.out.println(msg);
+                new SendPostAsyncTask.Builder(uri.toString(), msg)
+                    .onPreExecute(this::onWaitFragmentInteractionShow)
+                    .onPostExecute(this::handleChatsPostOnPostExecute)
+                    .onCancelled(this::handleErrorsInTask)
+                    .addHeaderField("authorization", mJwToken) //add the JWT as a header
+                    .build().execute();
+//                ChatFragment chatFrag = new ChatFragment();
+//                Bundle args = new Bundle();
+//                args.putSerializable(getString(R.string.key_credentials), mCreds);
+//                args.putSerializable(getString(R.string.keys_intent_jwt), mJwToken);
+//                chatFrag.setArguments(args);
+//                loadFragment(chatFrag);
                 break;
 
             case R.id.nav_weather:
@@ -198,6 +221,7 @@ public class HomeActivity extends AppCompatActivity
         drawer.closeDrawer(GravityCompat.START);
         return true;
     }
+
     /**
      * Logout click listener for the logout button in the navigation drawer
      * TODO: logout the user
@@ -314,6 +338,51 @@ public class HomeActivity extends AppCompatActivity
         }
     }
 
+    private void handleChatsPostOnPostExecute(final String result) {
+        // parse JSON
+        try {
+            JSONObject root = new JSONObject(result);
+            if (root.has(getString(R.string.keys_json_chats_chatlist))) {
+
+                    JSONArray data = root.getJSONArray(
+                            getString(R.string.keys_json_chats_chatlist));
+                    List<Chat> chats = new ArrayList<>();
+                    for(int i = 0; i < data.length(); i++) {
+                        JSONObject jsonChat = data.getJSONObject(i);
+                        chats.add(new Chat.Builder(
+                                jsonChat.getString(getString(R.string.keys_json_chats_chatid)),
+                                jsonChat.getString(getString(R.string.keys_json_chats_name)))
+                                .build());
+                    }
+                    Chat[] chatsAsArray = new Chat[chats.size()];
+                    chatsAsArray = chats.toArray(chatsAsArray);
+                    Bundle args = new Bundle();
+                    args.putSerializable(AllChatsFragment.ARG_CHAT_LIST, chatsAsArray);
+                    Fragment frag = new AllChatsFragment();
+                    frag.setArguments(args);
+                    onWaitFragmentInteractionHide();
+                    loadFragment(frag);
+                } else {
+                    Log.e("ERROR!", "No data array");
+                    //notify user
+                    onWaitFragmentInteractionHide();
+                }
+        } catch (JSONException e) {
+            e.printStackTrace();
+            Log.e("ERROR!", e.getMessage());
+            //notify user
+            onWaitFragmentInteractionHide();
+        }
+    }
+
+    /**
+     * Handle errors that may occur during the AsyncTask.
+     * @param result the error message provide from the AsyncTask
+     */
+    private void handleErrorsInTask(String result) {
+        Log.e("ASYNC_TASK_ERROR", result);
+    }
+
     @Override
     public void onListFragmentInteraction(BlogPost blogPost) {
         BlogPostFragment blogPostFrag;
@@ -379,6 +448,40 @@ public class HomeActivity extends AppCompatActivity
      */
     private void logout() {
         new DeleteTokenAsyncTask().execute();
+    }
+
+    @Override
+    public void onListFragmentInteraction(Chat item) {
+        ChatFragment chatFrag = new ChatFragment();
+        Bundle args = new Bundle();
+        args.putSerializable(getString(R.string.keys_intent_jwt), mJwToken);
+        args.putSerializable(getString(R.string.key_credentials), mCreds);
+        args.putSerializable(getString(R.string.key_chatid), item.getId());
+        chatFrag.setArguments(args);
+        FragmentTransaction transaction = getSupportFragmentManager()
+                .beginTransaction()
+                .replace(R.id.fragment_container, chatFrag)
+                .addToBackStack(null);
+        transaction.commit();
+
+        // do this stuff in the future, for now just hard replace it every time
+//        ChatFragment chatFrag;
+//
+//        chatFrag = (ChatFragment) getSupportFragmentManager().findFragmentById(R.id.fragment_chat);
+//
+//        if (chatFrag != null) {
+////            chatFrag.updateContent(item);
+//        } else {
+//            setListFrag = new SetListViewFragment();
+//            Bundle args = new Bundle();
+//            args.putSerializable(getString(R.string.key_set_list), setList);
+//            setListFrag.setArguments(args);
+//            FragmentTransaction transaction = getSupportFragmentManager()
+//                    .beginTransaction()
+//                    .replace(R.id.fragment_container, setListFrag)
+//                    .addToBackStack(null);
+//            transaction.commit();
+//        }
     }
 
     // Deleting the Pushy device token must be done asynchronously. Good thing
