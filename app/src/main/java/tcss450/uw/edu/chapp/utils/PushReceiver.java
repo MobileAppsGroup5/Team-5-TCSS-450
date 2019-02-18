@@ -40,6 +40,10 @@ public class PushReceiver extends BroadcastReceiver {
 
         String messageText = intent.getStringExtra("message");
 
+        String chatid = intent.getStringExtra("chatid");
+
+        Log.e("INTENTS", intent.getExtras().toString());
+
         ActivityManager.RunningAppProcessInfo appProcessInfo = new ActivityManager.RunningAppProcessInfo();
         ActivityManager.getMyMemoryState(appProcessInfo);
 
@@ -51,6 +55,7 @@ public class PushReceiver extends BroadcastReceiver {
             Intent i = new Intent(RECEIVED_NEW_MESSAGE);
             i.putExtra("SENDER", sender);
             i.putExtra("MESSAGE", messageText);
+            i.putExtra("CHATID", chatid);
             i.putExtras(intent.getExtras());
 
             context.sendBroadcast(i);
