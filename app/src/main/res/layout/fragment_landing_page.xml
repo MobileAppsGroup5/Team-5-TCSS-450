@@ -21,14 +21,8 @@
             <FrameLayout
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:id="@+id/framelayout_homelanding_success">
+                android:id="@+id/framelayout_homelanding_email">
 
-                <fragment
-                    android:id="@+id/fragment_success"
-                    android:name="tcss450.uw.edu.chapp.SuccessFragment"
-                    android:layout_width="match_parent"
-                    android:layout_height="150dp"
-                    tools:layout="@layout/fragment_success" />
 
             </FrameLayout>
 
@@ -41,14 +35,14 @@
                     android:layout_width="0dp"
                     android:layout_height="match_parent"
                     android:layout_weight="1"
-                    android:id="@+id/framelayout_homelanding_setlist">
+                    android:id="@+id/framelayout_homelanding_chatlist">
 
-                    <fragment
-                        android:id="@+id/fragment_set_list"
-                        android:name="tcss450.uw.edu.chapp.SetListFragment"
-                        android:layout_width="match_parent"
-                        android:layout_height="match_parent"
-                        tools:layout="@layout/fragment_setlist_list" />
+                    <!--<fragment-->
+                        <!--android:id="@+id/fragment_set_list"-->
+                        <!--android:name="tcss450.uw.edu.chapp.SetListFragment"-->
+                        <!--android:layout_width="match_parent"-->
+                        <!--android:layout_height="match_parent"-->
+                        <!--tools:layout="@layout/fragment_setlist_list" />-->
                 </FrameLayout>
 
                 <FrameLayout

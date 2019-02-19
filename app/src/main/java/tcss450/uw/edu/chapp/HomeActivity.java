@@ -66,9 +66,9 @@ public class HomeActivity extends AppCompatActivity
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
 
-        // Set the logout listener for the navigation drawer
-        TextView logoutText = (TextView) findViewById(R.id.nav_logout);
-        logoutText.setOnClickListener(this::onLogoutClick);
+//        // Set the logout listener for the navigation drawer
+//        TextView logoutText = (TextView) findViewById(R.id.nav_logout);
+//        logoutText.setOnClickListener(this::onLogoutClick);
 
         // Get values from the intent
         mCreds = (Credentials) getIntent().getSerializableExtra(getString(R.string.key_credentials));
@@ -86,12 +86,32 @@ public class HomeActivity extends AppCompatActivity
                         , mJwToken);
                 if (getIntent().getBooleanExtra(getString(R.string.keys_intent_notification_msg), false)) {
                     fragment = new ChatFragment();
+                    fragment.setArguments(args);
+
+                    loadFragment(fragment);
+
                 } else {
                     fragment = new LandingPage();
-                }
-                fragment.setArguments(args);
 
-                loadFragment(fragment);
+                    //set the email to show in the top fragment
+                    SuccessFragment successFragment = new SuccessFragment();
+                    successFragment.setArguments(args);
+                    //show the chat list in the bottom left fragment
+//                    AllChatsFragment chats = new AllChatsFragment();
+//                    chats.setArguments(args);
+
+                    fragment.setArguments(args);
+
+                    FragmentTransaction transaction = getSupportFragmentManager()
+                            .beginTransaction()
+                            .replace(R.id.fragment_container, fragment)
+                            .addToBackStack(null);
+                    // Commit the transaction (obviously)
+                    transaction.add(R.id.framelayout_homelanding_email, successFragment);
+                    //transaction.add(R.id.framelayout_homelanding_chatlist, chats);
+
+                    transaction.commit();
+                }
             }
         }
     }
@@ -174,6 +194,14 @@ public class HomeActivity extends AppCompatActivity
         //TODO: AND CREATE HandleOnPostExecute FOR EACH ITEM TO LOAD NEW FRAGMENT.
         switch(id) {
             case R.id.nav_home:
+                Fragment fragment = new LandingPage();
+                Bundle args = new Bundle();
+                // Get value from intent and put it in fragment args
+                args.putSerializable(getString(R.string.key_credentials)
+                        , mCreds);
+                args.putSerializable(getString(R.string.keys_intent_jwt)
+                        , mJwToken);
+                loadFragment(fragment);
                 break;
 
             case R.id.nav_connections:
@@ -212,8 +240,8 @@ public class HomeActivity extends AppCompatActivity
             case R.id.nav_weather:
                 break;
 
-            case R.id.nav_logout:
-                break;
+//            case R.id.nav_logout:
+//                break;
         }
         Log.i("NAVIGATION_INFORMATION", "Pressed: " + item.getTitle().toString());
 
@@ -383,6 +411,10 @@ public class HomeActivity extends AppCompatActivity
         Log.e("ASYNC_TASK_ERROR", result);
     }
 
+    /**
+     * Handles a click on a Blog Post item, and transitions to the blog post fragment
+     * @param blogPost
+     */
     @Override
     public void onListFragmentInteraction(BlogPost blogPost) {
         BlogPostFragment blogPostFrag;
@@ -404,6 +436,10 @@ public class HomeActivity extends AppCompatActivity
         }
     }
 
+    /**
+     * Handles a click on a Set List item, and transitions to the Set List View fragment
+     * @param setList
+     */
     @Override
     public void onListFragmentInteraction(SetList setList) {
         SetListViewFragment setListFrag;
@@ -450,6 +486,11 @@ public class HomeActivity extends AppCompatActivity
         new DeleteTokenAsyncTask().execute();
     }
 
+    /**
+     * Handles a click on a specific chat in the chat list and transitions to the frament
+     * to view/send messages in the chat room.
+     * @param item  the chat room to be opened.
+     */
     @Override
     public void onListFragmentInteraction(Chat item) {
         ChatFragment chatFrag = new ChatFragment();
