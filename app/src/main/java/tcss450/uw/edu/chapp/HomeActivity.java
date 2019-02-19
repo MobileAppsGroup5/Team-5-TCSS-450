@@ -67,7 +67,6 @@ public class HomeActivity extends AppCompatActivity
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
 
-
         // Set the logout listener for the navigation drawer
 //        TextView logoutText = (TextView) findViewById(R.id.nav_logout);
 //        logoutText.setOnClickListener(this::onLogoutClick);
@@ -80,7 +79,6 @@ public class HomeActivity extends AppCompatActivity
                 logout();
             }
         });
-
 
         // Get values from the intent
         mCreds = (Credentials) getIntent().getSerializableExtra(getString(R.string.key_credentials));
@@ -524,8 +522,8 @@ public class HomeActivity extends AppCompatActivity
             //close the app
             //finishAndRemoveTask();
             //or close this activity and bring back the Login
-             Intent i = new Intent(getApplicationContext(), MainActivity.class);
-             startActivity(i);
+            Intent i = new Intent(getApplicationContext(), MainActivity.class);
+            startActivity(i);
             // //Ends this Activity and removes it from the Activity back stack.
             finish();
         }

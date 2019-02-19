@@ -29,22 +29,22 @@
         app:headerLayout="@layout/nav_header_home"
         app:menu="@menu/activity_home_drawer" >
 
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:layout_gravity="bottom"
-            android:padding="16dp">
+        <!--<LinearLayout-->
+            <!--android:layout_width="match_parent"-->
+            <!--android:layout_height="wrap_content"-->
+            <!--android:orientation="vertical"-->
+            <!--android:layout_gravity="bottom"-->
+            <!--android:padding="16dp">-->
 
-            <TextView
-                android:id="@+id/nav_logout"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center"
-                android:text="@string/nav_logout"
-                android:textAlignment="center"
-                android:textSize="18sp" />
-        </LinearLayout>
+            <!--&lt;!&ndash;<TextView&ndash;&gt;-->
+                <!--&lt;!&ndash;android:id="@+id/nav_logout"&ndash;&gt;-->
+                <!--&lt;!&ndash;android:layout_width="match_parent"&ndash;&gt;-->
+                <!--&lt;!&ndash;android:layout_height="wrap_content"&ndash;&gt;-->
+                <!--&lt;!&ndash;android:layout_gravity="center"&ndash;&gt;-->
+                <!--&lt;!&ndash;android:text="@string/nav_logout"&ndash;&gt;-->
+                <!--&lt;!&ndash;android:textAlignment="center"&ndash;&gt;-->
+                <!--&lt;!&ndash;android:textSize="18sp" />&ndash;&gt;-->
+        <!--</LinearLayout>-->
 
     </android.support.design.widget.NavigationView>
 
