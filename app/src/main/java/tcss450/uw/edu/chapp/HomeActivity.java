@@ -1,12 +1,11 @@
 package tcss450.uw.edu.chapp;
 
 import android.content.Context;
-import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
@@ -27,9 +26,12 @@ import org.json.JSONObject;
 import java.util.ArrayList;
 import java.util.List;
 
+import me.pushy.sdk.Pushy;
 import tcss450.uw.edu.chapp.blog.BlogPost;
+import tcss450.uw.edu.chapp.chat.Chat;
 import tcss450.uw.edu.chapp.model.Credentials;
 import tcss450.uw.edu.chapp.setlist.SetList;
+import tcss450.uw.edu.chapp.utils.SendPostAsyncTask;
 
 /**
  *
@@ -41,7 +43,8 @@ public class HomeActivity extends AppCompatActivity
         BlogFragment.OnBlogListFragmentInteractionListener,
         BlogPostFragment.OnFragmentInteractionListener,
         WaitFragment.OnFragmentInteractionListener,
-        SetListFragment.OnListFragmentInteractionListener {
+        SetListFragment.OnListFragmentInteractionListener,
+        AllChatsFragment.OnListFragmentInteractionListener {
 
     private Credentials mCreds;
 
@@ -60,6 +63,13 @@ public class HomeActivity extends AppCompatActivity
         drawer.addDrawerListener(toggle);
         toggle.syncState();
 
+        NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
+        navigationView.setNavigationItemSelectedListener(this);
+
+        // Set the logout listener for the navigation drawer
+        TextView logoutText = (TextView) findViewById(R.id.nav_logout);
+        logoutText.setOnClickListener(this::onLogoutClick);
+
         // Get values from the intent
         mCreds = (Credentials) getIntent().getSerializableExtra(getString(R.string.key_credentials));
         mJwToken = getIntent().getStringExtra(getString(R.string.keys_intent_jwt));
@@ -67,38 +77,23 @@ public class HomeActivity extends AppCompatActivity
         // Load SuccessFragment into content_home (aka fragment_container)
         if (savedInstanceState == null) {
             if (findViewById(R.id.fragment_container) != null) {
-                //created objects so adding multiple fragments can be done
-                FragmentManager manager = getSupportFragmentManager();
-                FragmentTransaction trans = manager.beginTransaction();
-
-                // Pass along the credentials from the intent to the SuccessFragment
-                SuccessFragment successFrag = new SuccessFragment();
-
-                LandingPage landingPage = new LandingPage();
+                Fragment fragment;
                 Bundle args = new Bundle();
                 // Get value from intent and put it in fragment args
                 args.putSerializable(getString(R.string.key_credentials)
                         , mCreds);
-                successFrag.setArguments(args);
-                //this is the only line changed to add landing page instead of just
-                //the home fragment. -jess
-                trans.add(R.id.fragment_container, landingPage);
-                trans.commit();
+                args.putSerializable(getString(R.string.keys_intent_jwt)
+                        , mJwToken);
+                if (getIntent().getBooleanExtra(getString(R.string.keys_intent_notification_msg), false)) {
+                    fragment = new ChatFragment();
+                } else {
+                    fragment = new LandingPage();
+                }
+                fragment.setArguments(args);
+
+                loadFragment(fragment);
             }
         }
-
-        NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
-        navigationView.setNavigationItemSelectedListener(this);
-
-        // Set the logout listener for the navigation drawer
-        TextView logoutText = (TextView) findViewById(R.id.nav_logout);
-        logoutText.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Log.d("CHAPP_LOGOUT", "Logout clicked in navigation bar");
-                logout();
-            }
-        });
     }
 
     @Override
@@ -126,10 +121,10 @@ public class HomeActivity extends AppCompatActivity
         int id = item.getItemId();
 
         //noinspection SimplifiableIfStatement
-//        if (id == R.id.action_logout) {
-//            logout();
-//            return true;
-//        }
+        if (id == R.id.action_logout) {
+            logout();
+            return true;
+        }
 
         return super.onOptionsItemSelected(item);
     }
@@ -185,6 +180,33 @@ public class HomeActivity extends AppCompatActivity
                 break;
 
             case R.id.nav_chat:
+                Uri uri = new Uri.Builder()
+                    .scheme("https")
+                    .appendPath(getString(R.string.ep_base_url))
+                    .appendPath(getString(R.string.ep_chats_base))
+                    .appendPath(getString(R.string.ep_chats_get_chats))
+                    .build();
+                // Create the JSON object with our username
+                JSONObject msg = mCreds.asJSONObject();
+                msg = new JSONObject();
+                try {
+                    msg.put("username", mCreds.getUsername());
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+                System.out.println(msg);
+                new SendPostAsyncTask.Builder(uri.toString(), msg)
+                    .onPreExecute(this::onWaitFragmentInteractionShow)
+                    .onPostExecute(this::handleChatsPostOnPostExecute)
+                    .onCancelled(this::handleErrorsInTask)
+                    .addHeaderField("authorization", mJwToken) //add the JWT as a header
+                    .build().execute();
+//                ChatFragment chatFrag = new ChatFragment();
+//                Bundle args = new Bundle();
+//                args.putSerializable(getString(R.string.key_credentials), mCreds);
+//                args.putSerializable(getString(R.string.keys_intent_jwt), mJwToken);
+//                chatFrag.setArguments(args);
+//                loadFragment(chatFrag);
                 break;
 
             case R.id.nav_weather:
@@ -200,6 +222,14 @@ public class HomeActivity extends AppCompatActivity
         return true;
     }
 
+    /**
+     * Logout click listener for the logout button in the navigation drawer
+     * TODO: logout the user
+     * @param theText the TextView that was pressed
+     */
+    public void onLogoutClick(View theText) {
+        Log.i("NAVIGATION_INFORMATION", "Pressed: " + ((TextView)theText).getText().toString());
+    }
 
     private void loadFragment(Fragment frag) {
         FragmentTransaction transaction = getSupportFragmentManager()
@@ -308,6 +338,51 @@ public class HomeActivity extends AppCompatActivity
         }
     }
 
+    private void handleChatsPostOnPostExecute(final String result) {
+        // parse JSON
+        try {
+            JSONObject root = new JSONObject(result);
+            if (root.has(getString(R.string.keys_json_chats_chatlist))) {
+
+                    JSONArray data = root.getJSONArray(
+                            getString(R.string.keys_json_chats_chatlist));
+                    List<Chat> chats = new ArrayList<>();
+                    for(int i = 0; i < data.length(); i++) {
+                        JSONObject jsonChat = data.getJSONObject(i);
+                        chats.add(new Chat.Builder(
+                                jsonChat.getString(getString(R.string.keys_json_chats_chatid)),
+                                jsonChat.getString(getString(R.string.keys_json_chats_name)))
+                                .build());
+                    }
+                    Chat[] chatsAsArray = new Chat[chats.size()];
+                    chatsAsArray = chats.toArray(chatsAsArray);
+                    Bundle args = new Bundle();
+                    args.putSerializable(AllChatsFragment.ARG_CHAT_LIST, chatsAsArray);
+                    Fragment frag = new AllChatsFragment();
+                    frag.setArguments(args);
+                    onWaitFragmentInteractionHide();
+                    loadFragment(frag);
+                } else {
+                    Log.e("ERROR!", "No data array");
+                    //notify user
+                    onWaitFragmentInteractionHide();
+                }
+        } catch (JSONException e) {
+            e.printStackTrace();
+            Log.e("ERROR!", e.getMessage());
+            //notify user
+            onWaitFragmentInteractionHide();
+        }
+    }
+
+    /**
+     * Handle errors that may occur during the AsyncTask.
+     * @param result the error message provide from the AsyncTask
+     */
+    private void handleErrorsInTask(String result) {
+        Log.e("ASYNC_TASK_ERROR", result);
+    }
+
     @Override
     public void onListFragmentInteraction(BlogPost blogPost) {
         BlogPostFragment blogPostFrag;
@@ -372,25 +447,78 @@ public class HomeActivity extends AppCompatActivity
      * @author Trung Thai
      */
     private void logout() {
-        SharedPreferences prefs =
-                getSharedPreferences(
-                        getString(R.string.keys_shared_prefs),
-                        Context.MODE_PRIVATE);
-         // remove the saved credentials from StoredPrefs
-        prefs.edit().remove(getString(R.string.keys_prefs_password)).apply();
-        prefs.edit().remove(getString(R.string.keys_prefs_email)).apply();
-
-
-
-        //Close the app
-        //finishAndRemoveTask();
-
-        //or close this activity and bring back the login
-         Intent i = new Intent(this, MainActivity.class);
-         startActivity(i);
-        // End this Activity and remove it form the Activity back stack.
-         finish();
+        new DeleteTokenAsyncTask().execute();
     }
+
+    @Override
+    public void onListFragmentInteraction(Chat item) {
+        ChatFragment chatFrag = new ChatFragment();
+        Bundle args = new Bundle();
+        args.putSerializable(getString(R.string.keys_intent_jwt), mJwToken);
+        args.putSerializable(getString(R.string.key_credentials), mCreds);
+        args.putSerializable(getString(R.string.key_chatid), item.getId());
+        chatFrag.setArguments(args);
+        FragmentTransaction transaction = getSupportFragmentManager()
+                .beginTransaction()
+                .replace(R.id.fragment_container, chatFrag)
+                .addToBackStack(null);
+        transaction.commit();
+
+        // do this stuff in the future, for now just hard replace it every time
+//        ChatFragment chatFrag;
+//
+//        chatFrag = (ChatFragment) getSupportFragmentManager().findFragmentById(R.id.fragment_chat);
+//
+//        if (chatFrag != null) {
+////            chatFrag.updateContent(item);
+//        } else {
+//            setListFrag = new SetListViewFragment();
+//            Bundle args = new Bundle();
+//            args.putSerializable(getString(R.string.key_set_list), setList);
+//            setListFrag.setArguments(args);
+//            FragmentTransaction transaction = getSupportFragmentManager()
+//                    .beginTransaction()
+//                    .replace(R.id.fragment_container, setListFrag)
+//                    .addToBackStack(null);
+//            transaction.commit();
+//        }
+    }
+
+    // Deleting the Pushy device token must be done asynchronously. Good thing
+    // we have something that allows us to do that.
+    class DeleteTokenAsyncTask extends AsyncTask<Void, Void, Void> {
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+            onWaitFragmentInteractionShow();
+        }
+        @Override
+        protected Void doInBackground(Void... voids) {
+            //since we are already doing stuff in the background, go ahead
+            //and remove the credentials from shared prefs here.
+            SharedPreferences prefs =
+                    getSharedPreferences(
+                            getString(R.string.keys_shared_prefs),
+                            Context.MODE_PRIVATE);
+            prefs.edit().remove(getString(R.string.keys_prefs_password)).apply();
+            prefs.edit().remove(getString(R.string.keys_prefs_email)).apply();
+            //unregister the device from the Pushy servers
+            Pushy.unregister(HomeActivity.this);
+            return null;
+        }
+        @Override
+        protected void onPostExecute(Void aVoid) {
+            super.onPostExecute(aVoid);
+            //close the app
+            finishAndRemoveTask();
+            //or close this activity and bring back the Login
+            // Intent i = new Intent(this, MainActivity.class);
+            // startActivity(i);
+            // //Ends this Activity and removes it from the Activity back stack.
+            // finish();
+        }
+    }
+
 
 
 }
