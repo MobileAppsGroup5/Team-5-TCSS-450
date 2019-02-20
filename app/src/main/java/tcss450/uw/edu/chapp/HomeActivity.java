@@ -33,6 +33,8 @@ import tcss450.uw.edu.chapp.chat.Chat;
 import tcss450.uw.edu.chapp.model.Credentials;
 import tcss450.uw.edu.chapp.setlist.SetList;
 import tcss450.uw.edu.chapp.utils.SendPostAsyncTask;
+import tcss450.uw.edu.chapp.ConnectionFragment;
+
 
 /**
  *
@@ -185,6 +187,13 @@ public class HomeActivity extends AppCompatActivity
                 break;
 
             case R.id.nav_connections:
+                ConnectionFragment connectionFragment = new ConnectionFragment();
+                Bundle args = new Bundle();
+                args.putSerializable(getString(R.string.key_credentials), mCreds);
+                args.putSerializable(getString(R.string.keys_intent_jwt), mJwToken);
+                connectionFragment.setArguments(args);
+                loadFragment(connectionFragment);
+
                 break;
 
             case R.id.nav_chat:

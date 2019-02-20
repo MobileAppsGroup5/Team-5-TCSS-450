@@ -28,7 +28,18 @@
     <string name="nav_logout">Logout</string>
 
     <!--Store Credentials -->
-    <string name ="action_logout">Logout</string>
-    <string name="stay_logged_in">Remember my credentials</string>"
+    <string name="action_logout">Logout</string>
+    <string name="stay_logged_in">Remember my credentials</string>
+
+
+    <!-- Connection Fragment -->
+    <string name="searchview_connection">Search Connection</string>
+    <string name="image_connection_chapp">Chapp Logo</string>
+    <string name="recyclerview_connection">RecyclerView Connection</string>
+    <string name="pending_connection">Pending Connection</string>
+
+
+
+
 
 </resources>
