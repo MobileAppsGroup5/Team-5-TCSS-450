@@ -18,7 +18,7 @@
         android:layout_marginStart="16dp"
         android:layout_marginTop="4dp"
         android:layout_marginEnd="16dp"
-        android:contentDescription="@string/imageView_chapp"
+        android:contentDescription="@string/image_connection_chapp"
         android:src="@mipmap/chapp_logo_trans_foreground"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
