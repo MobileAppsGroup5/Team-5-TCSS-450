@@ -17,6 +17,7 @@ import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.TextView;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -41,6 +42,7 @@ public class ChatFragment extends Fragment {
     private TextView mMessageOutputTextView;
     private EditText mMessageInputEditText;
     private List<Message> mMessages;
+    private OnChatMessageFragmentInteractionListener mListener;
 
 
     private String mUsername;
@@ -61,13 +63,12 @@ public class ChatFragment extends Fragment {
         super.onStart();
         if (getArguments() != null) {
             //get the email and JWT from the Activity. Make sure the Keys match what you used
-            mUsername = ((Credentials) getArguments().get(getString(R.string.keys_intent_credentials))).getUsername();
+            mUsername = ((Credentials) getArguments().get(getString(R.string.key_credentials))).getUsername();
             mJwToken = getArguments().getString(getString(R.string.keys_intent_jwt));
             mChatId = getArguments().getString(getString(R.string.key_chatid));
 
             //get the messages grabbed from the database
-            mMessages = new ArrayList<Message>(Arrays.asList((Message[]) getArguments().getSerializable(ARG_MESSAGE_LIST)));
-            updateMessages();
+            callWebServiceforMessages();
         } else {
             mMessages = new ArrayList<Message>();
             Log.e("tag", "no messages received");
@@ -81,6 +82,72 @@ public class ChatFragment extends Fragment {
                 .build()
                 .toString();
 
+    }
+
+    private void callWebServiceforMessages(){
+        //Create the url for getting all messages in chat
+        Uri uri = new Uri.Builder()
+                .scheme("https")
+                .appendPath(getString(R.string.ep_base_url))
+                .appendPath(getString(R.string.ep_messaging_base))
+                .appendPath(getString(R.string.ep_chats_get_messages))
+                .build();
+
+        // Create the JSON object with given chatID
+        JSONObject msg = new JSONObject();
+        try {
+            msg.put("chatId", mChatId);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        System.out.println(msg);
+        new SendPostAsyncTask.Builder(uri.toString(), msg)
+                .onPreExecute(this::handleWaitFragmentShow)
+                .onPostExecute(this::handleChatsMessagesOnPostExecute)
+                .onCancelled(this::handleErrorsInTask)
+                .addHeaderField("authorization", mJwToken) //add the JWT as a header
+                .build().execute();
+    }
+
+    private void handleChatsMessagesOnPostExecute(final String result){
+        try {
+            JSONObject root = new JSONObject(result);
+            if (root.has(getString(R.string.keys_json_chats_messages))) {
+
+                JSONArray data = root.getJSONArray(
+                        getString(R.string.keys_json_chats_messages));
+                List<Message> messages = new ArrayList<>();
+                for(int i = 0; i < data.length(); i++) {
+                    JSONObject jsonMessage = data.getJSONObject(i);
+                    messages.add(new Message.Builder(
+                            jsonMessage.getString(getString(R.string.keys_json_chats_username)),
+                            jsonMessage.getString(getString(R.string.keys_json_chats_message)),
+                            jsonMessage.getString(getString(R.string.keys_json_chats_time)))
+                            .build());
+                    Log.e("TAG",jsonMessage.getString(getString(R.string.keys_json_chats_message)));
+
+                }
+                Message[] messagesAsArray = new Message[messages.size()];
+                messagesAsArray = messages.toArray(messagesAsArray);
+                mMessages = new ArrayList<Message>(Arrays.asList(messagesAsArray));
+
+                //now update UI to show messages
+                updateMessages();
+                mListener.onWaitFragmentInteractionHide();
+            } else {
+                Log.e("ERROR!", "No data array");
+                //notify user
+            }
+        } catch (JSONException e) {
+            e.printStackTrace();
+            Log.e("ERROR!", e.getMessage());
+            //notify user
+        }
+
+    }
+
+    private void handleWaitFragmentShow(){
+        mListener.onWaitFragmentInteractionShow();
     }
 
     private void updateMessages(){
@@ -140,6 +207,13 @@ public class ChatFragment extends Fragment {
             e.printStackTrace();
         }
     }
+    /**
+     * Handle errors that may occur during the AsyncTask.
+     * @param result the error message provide from the AsyncTask
+     */
+    private void handleErrorsInTask(String result) {
+        Log.e("ASYNC_TASK_ERROR", result);
+    }
 
     @Override
     public void onResume() {
@@ -159,6 +233,22 @@ public class ChatFragment extends Fragment {
     }
 
 
+
+    @Override
+    public void onAttach(Context context) {
+        super.onAttach(context);
+        if (context instanceof OnChatMessageFragmentInteractionListener) {
+            mListener = (OnChatMessageFragmentInteractionListener) context;
+        } else {
+            throw new RuntimeException(context.toString()
+                    + " must implement OnChatMessageFragmentInteractionListener");
+        }
+    }
+
+    public interface OnChatMessageFragmentInteractionListener extends WaitFragment.OnFragmentInteractionListener {
+        void onRetrieveMessage();
+        void onReceivedMessage();
+    }
     /**
      * A BroadcastReceiver that listens for messages sent from PushReceiver
      */

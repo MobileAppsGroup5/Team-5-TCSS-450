@@ -45,7 +45,8 @@ public class HomeActivity extends AppCompatActivity
         BlogPostFragment.OnFragmentInteractionListener,
         WaitFragment.OnFragmentInteractionListener,
         SetListFragment.OnListFragmentInteractionListener,
-        AllChatsFragment.OnListFragmentInteractionListener {
+        AllChatsFragment.OnListFragmentInteractionListener,
+        ChatFragment.OnChatMessageFragmentInteractionListener{
 
     private Credentials mCreds;
 
@@ -237,104 +238,6 @@ public class HomeActivity extends AppCompatActivity
         transaction.commit();
     }
 
-    private void handleSetListGetOnPostExecute(final String result) {
-        // parse JSON
-        try {
-            JSONObject root = new JSONObject(result);
-            if (root.has(getString(R.string.keys_json_response))) {
-                JSONObject response = root.getJSONObject(
-                        getString(R.string.keys_json_response));
-                if (response.has(getString(R.string.keys_json_data))) {
-                    JSONArray data = response.getJSONArray(
-                            getString(R.string.keys_json_data));
-                    List<SetList> setLists = new ArrayList<>();
-                    for(int i = 0; i < data.length(); i++) {
-                        JSONObject jsonSetList = data.getJSONObject(i);
-                        setLists.add(new SetList.Builder()
-                                .addLongDate(jsonSetList.getString(getString(R.string.keys_json_setlists_long_date)))
-                                .addLocation(jsonSetList.getString(getString(R.string.keys_json_setlists_location)))
-                                .addVenue(jsonSetList.getString(getString(R.string.keys_json_setlists_venue)))
-                                .addSetListData(jsonSetList.getString(getString(R.string.keys_json_setlists_set_list_data)))
-                                .addSetListNotes(jsonSetList.getString(getString(R.string.keys_json_setlists_set_list_notes)))
-                                .addUrl(jsonSetList.getString(getString(R.string.keys_json_setlists_url)))
-                                .build());
-                    }
-                    SetList[] setListsAsArray = new SetList[setLists.size()];
-                    setListsAsArray = setLists.toArray(setListsAsArray);
-                    Bundle args = new Bundle();
-                    args.putSerializable(SetListFragment.ARG_SET_LISTS, setListsAsArray);
-                    Fragment frag = new SetListFragment();
-                    frag.setArguments(args);
-                    onWaitFragmentInteractionHide();
-                    loadFragment(frag);
-                } else {
-                    Log.e("ERROR!", "No data array");
-                    //notify user
-                    onWaitFragmentInteractionHide();
-                }
-            } else {
-                Log.e("ERROR!", "No response");
-                //notify user
-                onWaitFragmentInteractionHide();
-            }
-        } catch (JSONException e) {
-            e.printStackTrace();
-            Log.e("ERROR!", e.getMessage());
-            //notify user
-            onWaitFragmentInteractionHide();
-        }
-    }
-
-    private void handleBlogGetOnPostExecute(final String result) {
-        //parse JSON
-        try {
-            JSONObject root = new JSONObject(result);
-            if (root.has(getString(R.string.keys_json_response))) {
-                JSONObject response = root.getJSONObject(
-                        getString(R.string.keys_json_response));
-                if (response.has(getString(R.string.keys_json_data))) {
-                    JSONArray data = response.getJSONArray(
-                            getString(R.string.keys_json_data));
-                    List<BlogPost> blogs = new ArrayList<>();
-                    for(int i = 0; i < data.length(); i++) {
-                        JSONObject jsonBlog = data.getJSONObject(i);
-                        blogs.add(new BlogPost.Builder(
-                                jsonBlog.getString(
-                                        getString(R.string.keys_json_blogs_pubdate)),
-                                jsonBlog.getString(
-                                        getString(R.string.keys_json_blogs_title)))
-                                .addTeaser(jsonBlog.getString(
-                                        getString(R.string.keys_json_blogs_teaser)))
-                                .addUrl(jsonBlog.getString(
-                                        getString(R.string.keys_json_blogs_url)))
-                                .build());
-                    }
-                    BlogPost[] blogsAsArray = new BlogPost[blogs.size()];
-                    blogsAsArray = blogs.toArray(blogsAsArray);
-                    Bundle args = new Bundle();
-                    args.putSerializable(BlogFragment.ARG_BLOG_LIST, blogsAsArray);
-                    Fragment frag = new BlogFragment();
-                    frag.setArguments(args);
-                    onWaitFragmentInteractionHide();
-                    loadFragment(frag);
-                } else {
-                    Log.e("ERROR!", "No data array");
-                    //notify user
-                    onWaitFragmentInteractionHide();
-                }
-            } else {
-                Log.e("ERROR!", "No response");
-                //notify user
-                onWaitFragmentInteractionHide();
-            }
-        } catch (JSONException e) {
-            e.printStackTrace();
-            Log.e("ERROR!", e.getMessage());
-            //notify user
-            onWaitFragmentInteractionHide();
-        }
-    }
-
     private void handleChatsPostOnPostExecute(final String result) {
         // parse JSON
         try {
@@ -378,46 +281,48 @@ public class HomeActivity extends AppCompatActivity
      * @param result
      */
     private void handleChatsMessagesPostOnPostExecute(final String result) {
-        // parse JSON
-        try {
-            JSONObject root = new JSONObject(result);
-            if (root.has(getString(R.string.keys_json_chats_messages))) {
 
-                JSONArray data = root.getJSONArray(
-                        getString(R.string.keys_json_chats_messages));
-                List<Message> messages = new ArrayList<>();
-                for(int i = 0; i < data.length(); i++) {
-                    JSONObject jsonMessage = data.getJSONObject(i);
-                    messages.add(new Message.Builder(
-                            jsonMessage.getString(getString(R.string.keys_json_chats_username)),
-                            jsonMessage.getString(getString(R.string.keys_json_chats_message)),
-                            jsonMessage.getString(getString(R.string.keys_json_chats_time)))
-                            .build());
-                    Log.e("TAG",jsonMessage.getString(getString(R.string.keys_json_chats_message)));
 
-                }
-                Message[] messagesAsArray = new Message[messages.size()];
-                messagesAsArray = messages.toArray(messagesAsArray);
-                Bundle args = new Bundle();
-                args.putSerializable(ChatFragment.ARG_MESSAGE_LIST, messagesAsArray);
-                args.putSerializable(getString(R.string.keys_intent_credentials), mCreds);
-                args.putSerializable(getString(R.string.keys_intent_jwt), mJwToken);
-                args.putSerializable(getString(R.string.key_chatid), clickedChat);
-                Fragment frag = new ChatFragment();
-                frag.setArguments(args);
-                onWaitFragmentInteractionHide();
-                loadFragment(frag);
-            } else {
-                Log.e("ERROR!", "No data array");
-                //notify user
-                onWaitFragmentInteractionHide();
-            }
-        } catch (JSONException e) {
-            e.printStackTrace();
-            Log.e("ERROR!", e.getMessage());
-            //notify user
-            onWaitFragmentInteractionHide();
-        }
+         //parse JSON
+//        try {
+//            JSONObject root = new JSONObject(result);
+//            if (root.has(getString(R.string.keys_json_chats_messages))) {
+//
+//                JSONArray data = root.getJSONArray(
+//                        getString(R.string.keys_json_chats_messages));
+//                List<Message> messages = new ArrayList<>();
+//                for(int i = 0; i < data.length(); i++) {
+//                    JSONObject jsonMessage = data.getJSONObject(i);
+//                    messages.add(new Message.Builder(
+//                            jsonMessage.getString(getString(R.string.keys_json_chats_username)),
+//                            jsonMessage.getString(getString(R.string.keys_json_chats_message)),
+//                            jsonMessage.getString(getString(R.string.keys_json_chats_time)))
+//                            .build());
+//                    Log.e("TAG",jsonMessage.getString(getString(R.string.keys_json_chats_message)));
+//
+//                }
+//                Message[] messagesAsArray = new Message[messages.size()];
+//                messagesAsArray = messages.toArray(messagesAsArray);
+//                Bundle args = new Bundle();
+//                args.putSerializable(ChatFragment.ARG_MESSAGE_LIST, messagesAsArray);
+//                args.putSerializable(getString(R.string.keys_intent_credentials), mCreds);
+//                args.putSerializable(getString(R.string.keys_intent_jwt), mJwToken);
+//                args.putSerializable(getString(R.string.key_chatid), clickedChat);
+//                Fragment frag = new ChatFragment();
+//                frag.setArguments(args);
+//                onWaitFragmentInteractionHide();
+//                loadFragment(frag);
+//            } else {
+//                Log.e("ERROR!", "No data array");
+//                //notify user
+//                onWaitFragmentInteractionHide();
+//            }
+//        } catch (JSONException e) {
+//            e.printStackTrace();
+//            Log.e("ERROR!", e.getMessage());
+//            //notify user
+//            onWaitFragmentInteractionHide();
+//        }
     }
 
     /**
@@ -492,9 +397,8 @@ public class HomeActivity extends AppCompatActivity
                 .beginTransaction()
                 .remove(getSupportFragmentManager().findFragmentByTag("WAIT"))
                 .commit();
-        getSupportFragmentManager().popBackStack();
+        getSupportFragmentManager(); //.popBackStack();
     }
-
     /**
      * This is the logout method
      * @author Trung Thai
@@ -504,47 +408,31 @@ public class HomeActivity extends AppCompatActivity
     }
 
     /**
-     * Handles a click on a specific chat in the chat list and transitions to the fragment
-     * to view/send messages in the chat room.
+     * Opens the chat fragment and sends in the JWToken, Credentials, and the
+     * clicked chatId.
      * @param item  the chat room to be opened.
      */
     @Override
     public void onListFragmentInteraction(Chat item) {
         clickedChat = item.getId();
-//        ChatFragment chatFrag = new ChatFragment();
-//        Bundle args = new Bundle();
-//        args.putSerializable(getString(R.string.keys_intent_jwt), mJwToken);
-//        args.putSerializable(getString(R.string.key_credentials), mCreds);
-//        args.putSerializable(getString(R.string.key_chatid), item.getId());
-//        chatFrag.setArguments(args);
-//        FragmentTransaction transaction = getSupportFragmentManager()
-//                .beginTransaction()
-//                .replace(R.id.fragment_container, chatFrag)
-//                .addToBackStack(null);
-//        transaction.commit();
 
-        //Create the url for getting all messages in chat
-        Uri uri = new Uri.Builder()
-                .scheme("https")
-                .appendPath(getString(R.string.ep_base_url))
-                .appendPath(getString(R.string.ep_messaging_base))
-                .appendPath(getString(R.string.ep_chats_get_messages))
-                .build();
+        ChatFragment chatFrag = new ChatFragment();
+        Bundle args = new Bundle();
+        args.putSerializable(getString(R.string.keys_intent_jwt), mJwToken);
+        args.putSerializable(getString(R.string.key_credentials), mCreds);
+        args.putSerializable(getString(R.string.key_chatid), clickedChat);
+        chatFrag.setArguments(args);
+        loadFragment(chatFrag);
 
-        // Create the JSON object with given chatID
-        JSONObject msg = new JSONObject();
-        try {
-            msg.put("chatId", item.getId());
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        System.out.println(msg);
-        new SendPostAsyncTask.Builder(uri.toString(), msg)
-                .onPreExecute(this::onWaitFragmentInteractionShow)
-                .onPostExecute(this::handleChatsMessagesPostOnPostExecute)
-                .onCancelled(this::handleErrorsInTask)
-                .addHeaderField("authorization", mJwToken) //add the JWT as a header
-                .build().execute();
+    }
+
+    @Override
+    public void onRetrieveMessage() {
+
+    }
+
+    @Override
+    public void onReceivedMessage() {
 
     }
 
