@@ -29,6 +29,7 @@ import java.util.List;
 import me.pushy.sdk.Pushy;
 import tcss450.uw.edu.chapp.blog.BlogPost;
 import tcss450.uw.edu.chapp.chat.Chat;
+import tcss450.uw.edu.chapp.chat.Message;
 import tcss450.uw.edu.chapp.model.Credentials;
 import tcss450.uw.edu.chapp.setlist.SetList;
 import tcss450.uw.edu.chapp.utils.SendPostAsyncTask;
@@ -49,6 +50,7 @@ public class HomeActivity extends AppCompatActivity
     private Credentials mCreds;
 
     private String mJwToken;
+    private String clickedChat;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -86,6 +88,7 @@ public class HomeActivity extends AppCompatActivity
                         , mJwToken);
                 if (getIntent().getBooleanExtra(getString(R.string.keys_intent_notification_msg), false)) {
                     fragment = new ChatFragment();
+                    ///LOAD THE OLD MESSAGES
                     fragment.setArguments(args);
 
                     loadFragment(fragment);
@@ -107,7 +110,7 @@ public class HomeActivity extends AppCompatActivity
                             .replace(R.id.fragment_container, fragment)
                             .addToBackStack(null);
                     // Commit the transaction (obviously)
-                    transaction.add(R.id.framelayout_homelanding_email, successFragment);
+                    transaction.replace(R.id.framelayout_homelanding_email, successFragment);
                     //transaction.add(R.id.framelayout_homelanding_chatlist, chats);
 
                     transaction.commit();
@@ -155,40 +158,6 @@ public class HomeActivity extends AppCompatActivity
         // Handle navigation view item clicks here.
         int id = item.getItemId();
 
-//        if (id == R.id.nav_home) {
-//            SuccessFragment successFrag = new SuccessFragment();
-//            Bundle args = new Bundle();
-//            args.putSerializable(getString(R.string.key_credentials), mCreds);
-//            successFrag.setArguments(args);
-//            loadFragment(successFrag);
-//        } else if (id == R.id.nav_blog_posts) {
-//            Uri uri = new Uri.Builder()
-//                    .scheme("https")
-//                    .appendPath(getString(R.string.ep_base_url))
-//                    .appendPath(getString(R.string.ep_phish))
-//                    .appendPath(getString(R.string.ep_blog))
-//                    .appendPath(getString(R.string.ep_get))
-//                    .build();
-//            new GetAsyncTask.Builder(uri.toString())
-//                    .onPreExecute(this::onWaitFragmentInteractionShow)
-//                    .onPostExecute(this::handleBlogGetOnPostExecute)
-//                    .addHeaderField("authorization", mJwToken) //add the JWT as a header
-//                    .build().execute();
-//
-//        } else if (id == R.id.nav_set_lists) {
-//            Uri uri = new Uri.Builder()
-//                    .scheme("https")
-//                    .appendPath(getString(R.string.ep_base_url))
-//                    .appendPath(getString(R.string.ep_phish))
-//                    .appendPath(getString(R.string.ep_setlists))
-//                    .appendPath(getString(R.string.ep_recent))
-//                    .build();
-//            new GetAsyncTask.Builder(uri.toString())
-//                    .onPreExecute(this::onWaitFragmentInteractionShow)
-//                    .onPostExecute(this::handleSetListGetOnPostExecute)
-//                    .addHeaderField("authorization", mJwToken)
-//                    .build().execute();
-//        }
         //Handle Navigation bar item press
         //TODO: FOR EACH NAVIGATION ITEM, CREATE URI TO BACKEND, THEN CREATE ASYNCTASK
         //TODO: AND CREATE HandleOnPostExecute FOR EACH ITEM TO LOAD NEW FRAGMENT.
@@ -404,6 +373,54 @@ public class HomeActivity extends AppCompatActivity
     }
 
     /**
+     * Post call for Async Task when returning from getting all messages from
+     * Database with the given chatID.
+     * @param result
+     */
+    private void handleChatsMessagesPostOnPostExecute(final String result) {
+        // parse JSON
+        try {
+            JSONObject root = new JSONObject(result);
+            if (root.has(getString(R.string.keys_json_chats_messages))) {
+
+                JSONArray data = root.getJSONArray(
+                        getString(R.string.keys_json_chats_messages));
+                List<Message> messages = new ArrayList<>();
+                for(int i = 0; i < data.length(); i++) {
+                    JSONObject jsonMessage = data.getJSONObject(i);
+                    messages.add(new Message.Builder(
+                            jsonMessage.getString(getString(R.string.keys_json_chats_username)),
+                            jsonMessage.getString(getString(R.string.keys_json_chats_message)),
+                            jsonMessage.getString(getString(R.string.keys_json_chats_time)))
+                            .build());
+                    Log.e("TAG",jsonMessage.getString(getString(R.string.keys_json_chats_message)));
+
+                }
+                Message[] messagesAsArray = new Message[messages.size()];
+                messagesAsArray = messages.toArray(messagesAsArray);
+                Bundle args = new Bundle();
+                args.putSerializable(ChatFragment.ARG_MESSAGE_LIST, messagesAsArray);
+                args.putSerializable(getString(R.string.keys_intent_credentials), mCreds);
+                args.putSerializable(getString(R.string.keys_intent_jwt), mJwToken);
+                args.putSerializable(getString(R.string.key_chatid), clickedChat);
+                Fragment frag = new ChatFragment();
+                frag.setArguments(args);
+                onWaitFragmentInteractionHide();
+                loadFragment(frag);
+            } else {
+                Log.e("ERROR!", "No data array");
+                //notify user
+                onWaitFragmentInteractionHide();
+            }
+        } catch (JSONException e) {
+            e.printStackTrace();
+            Log.e("ERROR!", e.getMessage());
+            //notify user
+            onWaitFragmentInteractionHide();
+        }
+    }
+
+    /**
      * Handle errors that may occur during the AsyncTask.
      * @param result the error message provide from the AsyncTask
      */
@@ -487,42 +504,48 @@ public class HomeActivity extends AppCompatActivity
     }
 
     /**
-     * Handles a click on a specific chat in the chat list and transitions to the frament
+     * Handles a click on a specific chat in the chat list and transitions to the fragment
      * to view/send messages in the chat room.
      * @param item  the chat room to be opened.
      */
     @Override
     public void onListFragmentInteraction(Chat item) {
-        ChatFragment chatFrag = new ChatFragment();
-        Bundle args = new Bundle();
-        args.putSerializable(getString(R.string.keys_intent_jwt), mJwToken);
-        args.putSerializable(getString(R.string.key_credentials), mCreds);
-        args.putSerializable(getString(R.string.key_chatid), item.getId());
-        chatFrag.setArguments(args);
-        FragmentTransaction transaction = getSupportFragmentManager()
-                .beginTransaction()
-                .replace(R.id.fragment_container, chatFrag)
-                .addToBackStack(null);
-        transaction.commit();
+        clickedChat = item.getId();
+//        ChatFragment chatFrag = new ChatFragment();
+//        Bundle args = new Bundle();
+//        args.putSerializable(getString(R.string.keys_intent_jwt), mJwToken);
+//        args.putSerializable(getString(R.string.key_credentials), mCreds);
+//        args.putSerializable(getString(R.string.key_chatid), item.getId());
+//        chatFrag.setArguments(args);
+//        FragmentTransaction transaction = getSupportFragmentManager()
+//                .beginTransaction()
+//                .replace(R.id.fragment_container, chatFrag)
+//                .addToBackStack(null);
+//        transaction.commit();
 
-        // do this stuff in the future, for now just hard replace it every time
-//        ChatFragment chatFrag;
-//
-//        chatFrag = (ChatFragment) getSupportFragmentManager().findFragmentById(R.id.fragment_chat);
-//
-//        if (chatFrag != null) {
-////            chatFrag.updateContent(item);
-//        } else {
-//            setListFrag = new SetListViewFragment();
-//            Bundle args = new Bundle();
-//            args.putSerializable(getString(R.string.key_set_list), setList);
-//            setListFrag.setArguments(args);
-//            FragmentTransaction transaction = getSupportFragmentManager()
-//                    .beginTransaction()
-//                    .replace(R.id.fragment_container, setListFrag)
-//                    .addToBackStack(null);
-//            transaction.commit();
-//        }
+        //Create the url for getting all messages in chat
+        Uri uri = new Uri.Builder()
+                .scheme("https")
+                .appendPath(getString(R.string.ep_base_url))
+                .appendPath(getString(R.string.ep_messaging_base))
+                .appendPath(getString(R.string.ep_chats_get_messages))
+                .build();
+
+        // Create the JSON object with given chatID
+        JSONObject msg = new JSONObject();
+        try {
+            msg.put("chatId", item.getId());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        System.out.println(msg);
+        new SendPostAsyncTask.Builder(uri.toString(), msg)
+                .onPreExecute(this::onWaitFragmentInteractionShow)
+                .onPostExecute(this::handleChatsMessagesPostOnPostExecute)
+                .onCancelled(this::handleErrorsInTask)
+                .addHeaderField("authorization", mJwToken) //add the JWT as a header
+                .build().execute();
+
     }
 
     // Deleting the Pushy device token must be done asynchronously. Good thing

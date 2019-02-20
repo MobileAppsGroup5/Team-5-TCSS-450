@@ -11,8 +11,6 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import tcss450.uw.edu.chapp.chat.Chat;
-import tcss450.uw.edu.chapp.dummy.DummyContent;
-import tcss450.uw.edu.chapp.dummy.DummyContent.DummyItem;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -40,8 +38,6 @@ public class AllChatsFragment extends Fragment {
     public AllChatsFragment() {
     }
 
-    // TODO: Customize parameter initialization
-    @SuppressWarnings("unused")
     public static AllChatsFragment newInstance(int columnCount) {
         AllChatsFragment fragment = new AllChatsFragment();
         Bundle args = new Bundle();

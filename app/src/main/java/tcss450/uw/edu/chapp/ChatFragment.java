@@ -20,6 +20,11 @@ import android.widget.TextView;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
+import tcss450.uw.edu.chapp.chat.Message;
 import tcss450.uw.edu.chapp.model.Credentials;
 import tcss450.uw.edu.chapp.utils.PushReceiver;
 import tcss450.uw.edu.chapp.utils.SendPostAsyncTask;
@@ -31,14 +36,18 @@ import tcss450.uw.edu.chapp.utils.SendPostAsyncTask;
 public class ChatFragment extends Fragment {
 
     private static final String TAG = "CHAT_FRAG";
+    public static final String ARG_MESSAGE_LIST = "message list";
 
     private TextView mMessageOutputTextView;
     private EditText mMessageInputEditText;
+    private List<Message> mMessages;
+
 
     private String mUsername;
     private String mJwToken;
     private String mSendUrl;
     private String mChatId;
+
 
     private PushMessageReceiver mPushMessageReciever;
 
@@ -52,9 +61,16 @@ public class ChatFragment extends Fragment {
         super.onStart();
         if (getArguments() != null) {
             //get the email and JWT from the Activity. Make sure the Keys match what you used
-            mUsername = ((Credentials)getArguments().get(getString(R.string.key_credentials))).getUsername();
+            mUsername = ((Credentials) getArguments().get(getString(R.string.keys_intent_credentials))).getUsername();
             mJwToken = getArguments().getString(getString(R.string.keys_intent_jwt));
             mChatId = getArguments().getString(getString(R.string.key_chatid));
+
+            //get the messages grabbed from the database
+            mMessages = new ArrayList<Message>(Arrays.asList((Message[]) getArguments().getSerializable(ARG_MESSAGE_LIST)));
+            updateMessages();
+        } else {
+            mMessages = new ArrayList<Message>();
+            Log.e("tag", "no messages received");
         }
         //We will use this url every time the user hits send. Let's only build it once, ya?
         mSendUrl = new Uri.Builder()
@@ -64,6 +80,17 @@ public class ChatFragment extends Fragment {
                 .appendPath(getString(R.string.ep_messaging_send))
                 .build()
                 .toString();
+
+    }
+
+    private void updateMessages(){
+        StringBuilder s = new StringBuilder();
+        for( Message m : mMessages){
+            s.append(m.getMessage());
+            s.append("\n");
+
+        }
+        mMessageOutputTextView.setText(s);
     }
 
 
@@ -102,10 +129,12 @@ public class ChatFragment extends Fragment {
             //This is the result from the web service
             JSONObject res = new JSONObject(result);
             if(res.has("success") && res.getBoolean("success")) {
+
+                //set the output text to show the sent message
+                mMessageOutputTextView.setText(mMessageInputEditText.getText().toString());
+
                 //The web service got our message. Time to clear out the input EditText
                 mMessageInputEditText.setText("");
-                //its up to you to decide if you want to send the message to the output here
-                //or wait for the message to come back from the web service.
             }
         } catch (JSONException e) {
             e.printStackTrace();
@@ -128,6 +157,7 @@ public class ChatFragment extends Fragment {
             getActivity().unregisterReceiver(mPushMessageReciever);
         }
     }
+
 
     /**
      * A BroadcastReceiver that listens for messages sent from PushReceiver
