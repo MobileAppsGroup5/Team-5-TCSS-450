@@ -4,7 +4,7 @@
     <color name="colorPrimaryDark">#1A477E</color>
     <color name="colorAccent">#006064</color>
     <color name="colorCardBackground">#C9F3E9</color> //b5f2ff
-    <color name="white">#FFFFFF</color>
+    <color name="white">#ffffff</color>
     <color name="colorBackgroundTransparent">#7F444444</color>
     <color name="divider">#444444</color>
     <color name="darkBackground">#212121</color>

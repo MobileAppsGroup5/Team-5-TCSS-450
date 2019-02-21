@@ -12,9 +12,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
 import android.widget.EditText;
-import android.widget.ImageButton;
 import android.widget.TextView;
 
 import org.json.JSONArray;
@@ -32,7 +30,11 @@ import tcss450.uw.edu.chapp.utils.SendPostAsyncTask;
 
 
 /**
- * A simple {@link Fragment} subclass.
+ * A Fragment that holds our chat UI and functionality.
+ * Makes a call to the database to retrieve messages for a given chatId.
+ *
+ * @author Mike Osborne, Jessica Medrzycki
+ * @version 02/21/19
  */
 public class ChatFragment extends Fragment {
 
@@ -84,6 +86,24 @@ public class ChatFragment extends Fragment {
 
     }
 
+    @Override
+    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+                             Bundle savedInstanceState) {
+        View rootLayout = inflater.inflate(R.layout.fragment_chat, container, false);
+
+        mMessageOutputTextView = rootLayout.findViewById(R.id.text_chat_message_display);
+        mMessageInputEditText = rootLayout.findViewById(R.id.edit_chat_message_input);
+        rootLayout.findViewById(R.id.button_chat_send).setOnClickListener(this::handleSendClick);
+
+
+        return rootLayout;
+    }
+
+
+    /**
+     * Begins the async task for grabbing the messages from the
+     * Database given the specified chatid.
+     */
     private void callWebServiceforMessages(){
         //Create the url for getting all messages in chat
         Uri uri = new Uri.Builder()
@@ -109,6 +129,13 @@ public class ChatFragment extends Fragment {
                 .build().execute();
     }
 
+
+    /**
+     * Post call for Async Task when returning from getting all messages from
+     * Database with the given chatID. Makes a call to update the UI to display
+     * the messages.
+     * @param result    the resulting Json string
+     */
     private void handleChatsMessagesOnPostExecute(final String result){
         try {
             JSONObject root = new JSONObject(result);
@@ -124,7 +151,7 @@ public class ChatFragment extends Fragment {
                             jsonMessage.getString(getString(R.string.keys_json_chats_message)),
                             jsonMessage.getString(getString(R.string.keys_json_chats_time)))
                             .build());
-                    Log.e("TAG",jsonMessage.getString(getString(R.string.keys_json_chats_message)));
+                    //Log.e(TAG,jsonMessage.getString(getString(R.string.keys_json_chats_message)));
 
                 }
                 Message[] messagesAsArray = new Message[messages.size()];
@@ -146,32 +173,33 @@ public class ChatFragment extends Fragment {
 
     }
 
+    /**
+     * Calls wait fragment to show in HomeActivity.
+     */
     private void handleWaitFragmentShow(){
         mListener.onWaitFragmentInteractionShow();
     }
 
+    /**
+     * Displays the messages in the UI after grabbing the list from the database.
+     */
     private void updateMessages(){
         StringBuilder s = new StringBuilder();
+        int max = mMessages.size();
+        String[] inOrder = new String[max];
         for( Message m : mMessages){
-            s.append(m.getMessage());
-            s.append("\n");
-
+            Log.e(TAG, "Size of index: " + max);
+            inOrder[max-1] = m.getUsername() + " : " + m.getMessage() + "\n";
+            max = max - 1;
+        }
+        for( Message m : mMessages){
+            Log.e(TAG, "Size of index: " + max);
+            s.append(inOrder[max]);
+            max++;
         }
         mMessageOutputTextView.setText(s);
     }
 
-
-    @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
-        View rootLayout = inflater.inflate(R.layout.fragment_chat, container, false);
-
-        mMessageOutputTextView = rootLayout.findViewById(R.id.text_chat_message_display);
-        mMessageInputEditText = rootLayout.findViewById(R.id.edit_chat_message_input);
-        rootLayout.findViewById(R.id.button_chat_send).setOnClickListener(this::handleSendClick);
-
-        return rootLayout;
-    }
 
 
     private void handleSendClick(final View theButton) {
@@ -198,7 +226,7 @@ public class ChatFragment extends Fragment {
             if(res.has("success") && res.getBoolean("success")) {
 
                 //set the output text to show the sent message
-                mMessageOutputTextView.setText(mMessageInputEditText.getText().toString());
+                callWebServiceforMessages();
 
                 //The web service got our message. Time to clear out the input EditText
                 mMessageInputEditText.setText("");
@@ -246,8 +274,6 @@ public class ChatFragment extends Fragment {
     }
 
     public interface OnChatMessageFragmentInteractionListener extends WaitFragment.OnFragmentInteractionListener {
-        void onRetrieveMessage();
-        void onReceivedMessage();
     }
     /**
      * A BroadcastReceiver that listens for messages sent from PushReceiver

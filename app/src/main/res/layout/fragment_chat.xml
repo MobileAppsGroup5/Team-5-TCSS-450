@@ -5,46 +5,46 @@
     android:id="@+id/fragment_chat"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@color/divider"
     tools:context=".ChatFragment">
 
     <TextView
         android:id="@+id/text_chat_message_display"
-        android:layout_width="379dp"
-        android:layout_height="576dp"
-        android:layout_marginStart="16dp"
-        android:layout_marginTop="64dp"
-        android:layout_marginEnd="16dp"
-        android:layout_marginBottom="16dp"
-        android:textColor="@android:color/black"
-        app:layout_constraintBottom_toTopOf="@+id/edit_chat_message_input"
+        android:layout_width="351dp"
+        android:layout_height="420dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginEnd="8dp"
+        android:textColor="@android:color/background_light"
+        android:textSize="18sp"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
     <EditText
         android:id="@+id/edit_chat_message_input"
-        android:layout_width="308dp"
-        android:layout_height="wrap_content"
+        android:layout_width="296dp"
+        android:layout_height="47dp"
         android:layout_marginStart="16dp"
-        android:layout_marginEnd="16dp"
         android:layout_marginBottom="16dp"
         android:ems="10"
         android:hint="Write a message"
         android:inputType="textPersonName"
-        android:textColor="@android:color/black"
+        android:textColor="@color/white"
         android:textColorHint="@android:color/darker_gray"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toStartOf="@+id/button_chat_send"
         app:layout_constraintStart_toStartOf="parent" />
 
     <ImageButton
         android:id="@+id/button_chat_send"
-        android:layout_width="55dp"
-        android:layout_height="wrap_content"
-        android:layout_marginEnd="16dp"
+        android:layout_width="51dp"
+        android:layout_height="51dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginEnd="4dp"
         android:layout_marginBottom="16dp"
         android:src="@android:drawable/ic_menu_send"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent" />
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toEndOf="@+id/edit_chat_message_input" />
 </android.support.constraint.ConstraintLayout>
