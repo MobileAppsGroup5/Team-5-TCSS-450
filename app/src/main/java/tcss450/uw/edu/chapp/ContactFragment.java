@@ -10,11 +10,8 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
-import tcss450.uw.edu.chapp.chat.Chat;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import tcss450.uw.edu.chapp.dummy.DummyContent;
+import tcss450.uw.edu.chapp.dummy.DummyContent.Contact;
 
 /**
  * A fragment representing a list of Items.
@@ -22,12 +19,11 @@ import java.util.List;
  * Activities containing this fragment MUST implement the {@link OnListFragmentInteractionListener}
  * interface.
  */
-public class AllChatsFragment extends Fragment {
+public class ContactFragment extends Fragment {
 
-    public static final String ARG_CHAT_LIST = "chats lists";
+    // TODO: Customize parameter argument names
     private static final String ARG_COLUMN_COUNT = "column-count";
-    private List<Chat> mChats;
-
+    // TODO: Customize parameters
     private int mColumnCount = 1;
     private OnListFragmentInteractionListener mListener;
 
@@ -35,13 +31,13 @@ public class AllChatsFragment extends Fragment {
      * Mandatory empty constructor for the fragment manager to instantiate the
      * fragment (e.g. upon screen orientation changes).
      */
-    public AllChatsFragment() {
+    public ContactFragment() {
     }
 
     // TODO: Customize parameter initialization
     @SuppressWarnings("unused")
-    public static AllChatsFragment newInstance(int columnCount) {
-        AllChatsFragment fragment = new AllChatsFragment();
+    public static ContactFragment newInstance(int columnCount) {
+        ContactFragment fragment = new ContactFragment();
         Bundle args = new Bundle();
         args.putInt(ARG_COLUMN_COUNT, columnCount);
         fragment.setArguments(args);
@@ -53,16 +49,14 @@ public class AllChatsFragment extends Fragment {
         super.onCreate(savedInstanceState);
 
         if (getArguments() != null) {
-            mChats = new ArrayList<Chat>(Arrays.asList((Chat[]) getArguments().getSerializable(ARG_CHAT_LIST)));
-        } else {
-            mChats = new ArrayList<>();
+            mColumnCount = getArguments().getInt(ARG_COLUMN_COUNT);
         }
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.fragment_allchats_list, container, false);
+        View view = inflater.inflate(R.layout.fragment_contact_list, container, false);
 
         // Set the adapter
         if (view instanceof RecyclerView) {
@@ -73,7 +67,7 @@ public class AllChatsFragment extends Fragment {
             } else {
                 recyclerView.setLayoutManager(new GridLayoutManager(context, mColumnCount));
             }
-            recyclerView.setAdapter(new MyAllChatsRecyclerViewAdapter(mChats, mListener));
+            recyclerView.setAdapter(new MyContactRecyclerViewAdapter(DummyContent.ITEMS, mListener));
         }
         return view;
     }
@@ -107,6 +101,7 @@ public class AllChatsFragment extends Fragment {
      * >Communicating with Other Fragments</a> for more information.
      */
     public interface OnListFragmentInteractionListener {
-        void onListFragmentInteraction(Chat item);
+        // TODO: Update argument type and name
+        void onListFragmentInteraction(Contact contact);
     }
 }
