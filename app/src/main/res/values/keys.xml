@@ -31,6 +31,7 @@
     <string name="key_blog_post">chapp_blog_post_information</string>
     <string name="key_set_list">chapp_set_list_information</string>
     <string name="key_chatid">chatid key</string>
+    <string name="key_username">username keys</string>
 
     <!-- Added this in Lab 5 -->
     <string name="key_email">email_key</string>

@@ -51,7 +51,8 @@ public class HomeActivity extends AppCompatActivity
         WaitFragment.OnFragmentInteractionListener,
         SetListFragment.OnListFragmentInteractionListener,
         AllChatsFragment.OnListFragmentInteractionListener,
-        ChatFragment.OnChatMessageFragmentInteractionListener{
+        ChatFragment.OnChatMessageFragmentInteractionListener,
+        MessageFragment.OnListFragmentInteractionListener {
 
     private Credentials mCreds;
 
@@ -236,12 +237,11 @@ public class HomeActivity extends AppCompatActivity
     }
 
     private void loadFragment(Fragment frag) {
-        FragmentTransaction transaction = getSupportFragmentManager()
+        getSupportFragmentManager()
                 .beginTransaction()
                 .replace(R.id.fragment_container, frag)
-                .addToBackStack(null);
-        // Commit the transaction (obviously)
-        transaction.commit();
+                .addToBackStack(null)
+                .commit();
     }
 
     /**
@@ -366,7 +366,6 @@ public class HomeActivity extends AppCompatActivity
         args.putSerializable(getString(R.string.key_chatid), item.getId());
         chatFrag.setArguments(args);
         loadFragment(chatFrag);
-
     }
 
     @Override
@@ -394,7 +393,10 @@ public class HomeActivity extends AppCompatActivity
         new DeleteTokenAsyncTask().execute();
     }
 
-
+    @Override
+    public void onListFragmentInteraction(Message item) {
+        // don't do anything for now, messages aren't able to be interacted with
+    }
 
 
     // Deleting the Pushy device token must be done asynchronously. Good thing

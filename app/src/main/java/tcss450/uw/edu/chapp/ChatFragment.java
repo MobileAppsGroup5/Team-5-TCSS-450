@@ -19,8 +19,11 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 
 import tcss450.uw.edu.chapp.chat.Message;
@@ -41,7 +44,7 @@ public class ChatFragment extends Fragment {
     private static final String TAG = "CHAT_FRAG";
     public static final String ARG_MESSAGE_LIST = "message list";
 
-    private TextView mMessageOutputTextView;
+    private MessageFragment mMessageFragment;
     private EditText mMessageInputEditText;
     private List<Message> mMessages;
     private OnChatMessageFragmentInteractionListener mListener;
@@ -91,7 +94,7 @@ public class ChatFragment extends Fragment {
                              Bundle savedInstanceState) {
         View rootLayout = inflater.inflate(R.layout.fragment_chat, container, false);
 
-        mMessageOutputTextView = rootLayout.findViewById(R.id.text_chat_message_display);
+//        mMessageOutputTextView = rootLayout.findViewById(R.id.text_chat_message_display);
         mMessageInputEditText = rootLayout.findViewById(R.id.edit_chat_message_input);
         rootLayout.findViewById(R.id.button_chat_send).setOnClickListener(this::handleSendClick);
 
@@ -154,12 +157,10 @@ public class ChatFragment extends Fragment {
                     //Log.e(TAG,jsonMessage.getString(getString(R.string.keys_json_chats_message)));
 
                 }
-                Message[] messagesAsArray = new Message[messages.size()];
-                messagesAsArray = messages.toArray(messagesAsArray);
-                mMessages = new ArrayList<Message>(Arrays.asList(messagesAsArray));
+                mMessages = new ArrayList<Message>(messages);
 
-                //now update UI to show messages
-                updateMessages();
+                // Now construct message recycler
+                constructMessages();
                 mListener.onWaitFragmentInteractionHide();
             } else {
                 Log.e("ERROR!", "No data array");
@@ -183,21 +184,21 @@ public class ChatFragment extends Fragment {
     /**
      * Displays the messages in the UI after grabbing the list from the database.
      */
-    private void updateMessages(){
-        StringBuilder s = new StringBuilder();
-        int max = mMessages.size();
-        String[] inOrder = new String[max];
-        for( Message m : mMessages){
-            Log.e(TAG, "Size of index: " + max);
-            inOrder[max-1] = m.getUsername() + " : " + m.getMessage() + "\n";
-            max = max - 1;
-        }
-        for( Message m : mMessages){
-            Log.e(TAG, "Size of index: " + max);
-            s.append(inOrder[max]);
-            max++;
-        }
-        mMessageOutputTextView.setText(s);
+    private void constructMessages(){
+        Bundle args = new Bundle();
+
+        // Do this swapping so we can send in an array of Messages not Objects
+        Message[] messagesAsArray = new Message[mMessages.size()];
+        messagesAsArray = mMessages.toArray(messagesAsArray);
+        args.putSerializable(MessageFragment.ARG_MESSAGE_LIST, messagesAsArray);
+        args.putSerializable(getString(R.string.key_username), mUsername);
+        mMessageFragment = new MessageFragment();
+        mMessageFragment.setArguments(args);
+
+        getActivity().getSupportFragmentManager()
+                .beginTransaction()
+                .replace(R.id.chat_messages_container, mMessageFragment)
+                .commit();
     }
 
 
@@ -260,8 +261,6 @@ public class ChatFragment extends Fragment {
         }
     }
 
-
-
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
@@ -271,6 +270,12 @@ public class ChatFragment extends Fragment {
             throw new RuntimeException(context.toString()
                     + " must implement OnChatMessageFragmentInteractionListener");
         }
+    }
+
+    private String currentTime() {
+        Date date = Calendar.getInstance().getTime();
+        DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        return dateFormat.format(date);
     }
 
     public interface OnChatMessageFragmentInteractionListener extends WaitFragment.OnFragmentInteractionListener {
@@ -287,10 +292,10 @@ public class ChatFragment extends Fragment {
                     && intent.hasExtra("CHATID")) {
                 String sender = intent.getStringExtra("SENDER");
                 String messageText = intent.getStringExtra("MESSAGE");
-                if (intent.getStringExtra("CHATID").equals(mChatId)) {
-                    mMessageOutputTextView.append(sender + ":" + messageText);
-                    mMessageOutputTextView.append(System.lineSeparator());
-                    mMessageOutputTextView.append(System.lineSeparator());
+                Message message = new Message.Builder(sender, messageText, currentTime()).build();
+                if (intent.getStringExtra("CHATID").equals(mChatId)
+                    && mMessageFragment != null) {
+                    mMessageFragment.append(message);
                 }
             }
         }
