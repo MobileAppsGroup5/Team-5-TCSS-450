@@ -6,6 +6,7 @@ import android.app.PendingIntent;
 import android.content.Intent;
 import android.content.Context;
 import android.content.BroadcastReceiver;
+import android.graphics.BitmapFactory;
 import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 
@@ -70,16 +71,26 @@ public class PushReceiver extends BroadcastReceiver {
             PendingIntent pendingIntent = PendingIntent.getActivity(context, 0,
                     i, PendingIntent.FLAG_UPDATE_CURRENT);
 
-            //research more on notifications the how to display them
-            //https://developer.android.com/guide/topics/ui/notifiers/notifications
             NotificationCompat.Builder builder = new NotificationCompat.Builder(context, CHANNEL_ID)
                     .setAutoCancel(true)
-//                    .setSmallIcon(R.)
-                    .setContentTitle("Message from: " + sender)
-                    .setContentText(messageText)
                     .setPriority(NotificationCompat.PRIORITY_DEFAULT)
-                    .setSmallIcon(R.drawable.ic_menu_chat)
+                    .setSmallIcon(R.mipmap.chapp_logo_trans_foreground)
                     .setContentIntent(pendingIntent);
+
+            if (typeOfMessage.equals("msg")) {
+                builder.setContentTitle("Message from: " + sender)
+                        .setContentText(messageText);
+            }
+            else if (typeOfMessage.equals("topic_msg")) {
+                builder.setContentTitle("Topic Message from: " + sender)
+                        .setContentText(messageText);
+            }
+            else {
+
+            }
+
+
+
 
             // Automatically configure a Notification Channel for devices running Android O+
             Pushy.setNotificationChannel(builder, context);

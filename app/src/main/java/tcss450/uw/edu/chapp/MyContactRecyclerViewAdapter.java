@@ -6,8 +6,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
-import tcss450.uw.edu.chapp.AllChatsFragment.OnListFragmentInteractionListener;
-import tcss450.uw.edu.chapp.chat.Chat;
+import tcss450.uw.edu.chapp.ContactFragment.OnListFragmentInteractionListener;
 import tcss450.uw.edu.chapp.dummy.DummyContent.Contact;
 
 import java.util.List;
@@ -15,13 +14,14 @@ import java.util.List;
 /**
  * {@link RecyclerView.Adapter} that can display a {@link Contact} and makes a call to the
  * specified {@link OnListFragmentInteractionListener}.
+ * TODO: Replace the implementation with code for your data type.
  */
-public class MyAllChatsRecyclerViewAdapter extends RecyclerView.Adapter<MyAllChatsRecyclerViewAdapter.ViewHolder> {
+public class MyContactRecyclerViewAdapter extends RecyclerView.Adapter<MyContactRecyclerViewAdapter.ViewHolder> {
 
-    private final List<Chat> mValues;
+    private final List<Contact> mValues;
     private final OnListFragmentInteractionListener mListener;
 
-    public MyAllChatsRecyclerViewAdapter(List<Chat> items, OnListFragmentInteractionListener listener) {
+    public MyContactRecyclerViewAdapter(List<Contact> items, OnListFragmentInteractionListener listener) {
         mValues = items;
         mListener = listener;
     }
@@ -29,14 +29,15 @@ public class MyAllChatsRecyclerViewAdapter extends RecyclerView.Adapter<MyAllCha
     @Override
     public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(parent.getContext())
-                .inflate(R.layout.fragment_allchats, parent, false);
+                .inflate(R.layout.fragment_contact, parent, false);
         return new ViewHolder(view);
     }
 
     @Override
     public void onBindViewHolder(final ViewHolder holder, int position) {
         holder.mItem = mValues.get(position);
-        holder.mNameView.setText(mValues.get(position).getName());
+        holder.mIdView.setText(mValues.get(position).id);
+        holder.mContentView.setText(mValues.get(position).username);
 
         holder.mView.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -57,18 +58,20 @@ public class MyAllChatsRecyclerViewAdapter extends RecyclerView.Adapter<MyAllCha
 
     public class ViewHolder extends RecyclerView.ViewHolder {
         public final View mView;
-        public final TextView mNameView;
-        public Chat mItem;
+        public final TextView mIdView;
+        public final TextView mContentView;
+        public Contact mItem;
 
         public ViewHolder(View view) {
             super(view);
             mView = view;
-            mNameView = (TextView) view.findViewById(R.id.list_item_chat_name);
+            mIdView = (TextView) view.findViewById(R.id.item_number);
+            mContentView = (TextView) view.findViewById(R.id.content);
         }
 
         @Override
         public String toString() {
-            return super.toString() + " '" + mNameView.getText() + "'";
+            return super.toString() + " '" + mContentView.getText() + "'";
         }
     }
 }

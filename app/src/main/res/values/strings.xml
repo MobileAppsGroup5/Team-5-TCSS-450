@@ -31,7 +31,15 @@
     <string name="action_logout">Logout</string>
     <string name="stay_logged_in">Remember my credentials</string>
 
-    <!-- TODO: Remove or change this placeholder text -->
-    <string name="hello_blank_fragment">Hello blank fragment</string>"
+    <string name="tv_contactname">Contact Name</string>"
+    <string name="tv_message_contact">Message Contact</string>"
+    <string name="imagebutton_message">Message Contact ImageButton</string>"
+    <string name="imagebutton_request">Request Contact ImageButton</string>"
+    <string name="tv_request_contact">Request Contact</string>"
 
+
+
+    <!-- TODO: Remove or change this placeholder text -->
+
+    <string name="hello_blank_fragment">Hello blank fragment</string>"
 </resources>

@@ -1,6 +1,7 @@
 package tcss450.uw.edu.chapp;
 
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.AsyncTask;
@@ -79,6 +80,16 @@ public class HomeActivity extends AppCompatActivity
 //        TextView logoutText = (TextView) findViewById(R.id.nav_logout);
 //        logoutText.setOnClickListener(this::onLogoutClick);
 
+        // Set the logout listener for the navigation drawer
+        TextView logoutText = (TextView) findViewById(R.id.nav_logout);
+        logoutText.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Log.d("CHAPP_LOGOUT", "Logout clicked in navigation bar");
+                logout();
+            }
+        });
+
         // Get values from the intent
         mCreds = (Credentials) getIntent().getSerializableExtra(getString(R.string.key_credentials));
         mJwToken = getIntent().getStringExtra(getString(R.string.keys_intent_jwt));
@@ -107,6 +118,9 @@ public class HomeActivity extends AppCompatActivity
                 } else {
                     loadHomeLandingPage();
                 }
+                fragment.setArguments(args);
+
+                loadFragment(fragment);
             }
         }
     }
@@ -162,13 +176,13 @@ public class HomeActivity extends AppCompatActivity
         // Handle action bar item clicks here. The action bar will
         // automatically handle clicks on the Home/Up button, so long
         // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
-
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.action_logout) {
-            logout();
-            return true;
-        }
+//        int id = item.getItemId();
+//
+//        //noinspection SimplifiableIfStatement
+//        if (id == R.id.action_logout) {
+//            logout();
+//            return true;
+//        }
 
         return super.onOptionsItemSelected(item);
     }
@@ -188,6 +202,12 @@ public class HomeActivity extends AppCompatActivity
                 break;
 
             case R.id.nav_connections:
+                ContactFragment contactFrag = new ContactFragment();
+                Bundle args = new Bundle();
+                args.putSerializable(getString(R.string.key_credentials), mCreds);
+                args.putSerializable(getString(R.string.keys_intent_jwt), mJwToken);
+                contactFrag.setArguments(args);
+                loadFragment(contactFrag);
                 break;
 
             case R.id.nav_chat:
@@ -217,8 +237,8 @@ public class HomeActivity extends AppCompatActivity
             case R.id.nav_weather:
                 break;
 
-//            case R.id.nav_logout:
-//                break;
+            case R.id.nav_logout:
+                break;
         }
         Log.i("NAVIGATION_INFORMATION", "Pressed: " + item.getTitle().toString());
 
@@ -301,10 +321,6 @@ public class HomeActivity extends AppCompatActivity
         Log.e("ASYNC_TASK_ERROR", result);
     }
 
-    /**
-     * Handles a click on a Blog Post item, and transitions to the blog post fragment
-     * @param blogPost
-     */
     @Override
     public void onListFragmentInteraction(BlogPost blogPost) {
         BlogPostFragment blogPostFrag;
@@ -326,10 +342,6 @@ public class HomeActivity extends AppCompatActivity
         }
     }
 
-    /**
-     * Handles a click on a Set List item, and transitions to the Set List View fragment
-     * @param setList
-     */
     @Override
     public void onListFragmentInteraction(SetList setList) {
         SetListViewFragment setListFrag;
@@ -398,6 +410,20 @@ public class HomeActivity extends AppCompatActivity
         // don't do anything for now, messages aren't able to be interacted with
     }
 
+    @Override
+    public void onListFragmentInteraction(DummyContent.Contact contact) {
+        ChatFragment chatFrag = new ChatFragment();
+        Bundle args = new Bundle();
+        args.putSerializable(getString(R.string.keys_intent_jwt), mJwToken);
+        args.putSerializable(getString(R.string.key_credentials), mCreds);
+        args.putSerializable(getString(R.string.key_chatid), contact.username);
+        chatFrag.setArguments(args);
+        FragmentTransaction transaction = getSupportFragmentManager()
+                .beginTransaction()
+                .replace(R.id.fragment_container, chatFrag)
+                .addToBackStack(null);
+        transaction.commit();
+    }
 
     // Deleting the Pushy device token must be done asynchronously. Good thing
     // we have something that allows us to do that.
@@ -425,12 +451,12 @@ public class HomeActivity extends AppCompatActivity
         protected void onPostExecute(Void aVoid) {
             super.onPostExecute(aVoid);
             //close the app
-            finishAndRemoveTask();
+            //finishAndRemoveTask();
             //or close this activity and bring back the Login
-            // Intent i = new Intent(this, MainActivity.class);
-            // startActivity(i);
+            Intent i = new Intent(getApplicationContext(), MainActivity.class);
+            startActivity(i);
             // //Ends this Activity and removes it from the Activity back stack.
-            // finish();
+            finish();
         }
     }
 
