@@ -19,9 +19,8 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.EditText;
-import android.widget.FrameLayout;
-import android.widget.TextView;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -58,7 +57,7 @@ public class ChatFragment extends Fragment {
     private OnChatMessageFragmentInteractionListener mListener;
 
 
-    private String mUsername;
+    private Credentials mCredentials;
     private String mJwToken;
     private String mSendUrl;
     private String mChatId;
@@ -85,7 +84,7 @@ public class ChatFragment extends Fragment {
         super.onStart();
         if (getArguments() != null) {
             //get the email and JWT from the Activity. Make sure the Keys match what you used
-            mUsername = ((Credentials) getArguments().get(getString(R.string.key_credentials))).getUsername();
+            mCredentials = ((Credentials) getArguments().get(getString(R.string.key_credentials)));
             mJwToken = getArguments().getString(getString(R.string.keys_intent_jwt));
             mChatId = getArguments().getString(getString(R.string.key_chatid));
 
@@ -135,6 +134,10 @@ public class ChatFragment extends Fragment {
     private boolean newChatMenuItemListener(MenuItem menuItem) {
         // do a sendAsyncTask to getallcontacts
         // which in the postExecute call the addNewContact fragment
+
+        // for now just call
+//        getActivity().getSupportFragmentManager()
+
         return true;
     }
 
@@ -158,9 +161,10 @@ public class ChatFragment extends Fragment {
         } catch (Exception e) {
             e.printStackTrace();
         }
+
         System.out.println(msg);
         new SendPostAsyncTask.Builder(uri.toString(), msg)
-                .onPreExecute(this::handleWaitFragmentShow)
+//                .onPreExecute(this::handleWaitFragmentShow)
                 .onPostExecute(this::handleChatsMessagesOnPostExecute)
                 .onCancelled(this::handleErrorsInTask)
                 .addHeaderField("authorization", mJwToken) //add the JWT as a header
@@ -196,7 +200,7 @@ public class ChatFragment extends Fragment {
 
                 // Now construct message recycler
                 constructMessages();
-                mListener.onWaitFragmentInteractionHide();
+//                mListener.onWaitFragmentInteractionHide();
             } else {
                 Log.e("ERROR!", "No data array");
                 //notify user
@@ -226,7 +230,7 @@ public class ChatFragment extends Fragment {
         Message[] messagesAsArray = new Message[mMessages.size()];
         messagesAsArray = mMessages.toArray(messagesAsArray);
         args.putSerializable(MessageFragment.ARG_MESSAGE_LIST, messagesAsArray);
-        args.putSerializable(getString(R.string.key_username), mUsername);
+        args.putSerializable(getString(R.string.key_credentials), mCredentials);
         mMessageFragment = new MessageFragment();
         mMessageFragment.setArguments(args);
 
@@ -243,7 +247,7 @@ public class ChatFragment extends Fragment {
         JSONObject messageJson = new JSONObject();
         try {
             messageJson.put("chatId", mChatId);
-            messageJson.put("username", mUsername);
+            messageJson.put("username", mCredentials.getUsername());
             messageJson.put("message", msg);
         } catch (JSONException e) {
             e.printStackTrace();
@@ -315,6 +319,7 @@ public class ChatFragment extends Fragment {
 
     public interface OnChatMessageFragmentInteractionListener extends WaitFragment.OnFragmentInteractionListener {
     }
+
     /**
      * A BroadcastReceiver that listens for messages sent from PushReceiver
      */
@@ -330,17 +335,15 @@ public class ChatFragment extends Fragment {
                 Message message = new Message.Builder(sender, messageText, currentTime()).build();
                 if (intent.getStringExtra("CHATID").equals(mChatId)
                     && mMessageFragment != null) {
-                    mMessageFragment.append(message);
-                } else {
-
+                    callWebServiceforMessages();
                 }
-                Snackbar snack = Snackbar.make(getActivity().findViewById(R.id.chat_messages_container), "MESSAGE", Snackbar.LENGTH_LONG);
-                View view = snack.getView();
-                CoordinatorLayout.LayoutParams params = (CoordinatorLayout.LayoutParams)view.getLayoutParams();
-                params.gravity = Gravity.TOP;
-                params.setMargins(0, 150, 0, 0);
-                view.setLayoutParams(params);
-                snack.show();
+//                Snackbar snack = Snackbar.make(getActivity().findViewById(R.id.chat_messages_container), "MESSAGE", Snackbar.LENGTH_LONG);
+//                View view = snack.getView();
+//                CoordinatorLayout.LayoutParams params = (CoordinatorLayout.LayoutParams)view.getLayoutParams();
+//                params.gravity = Gravity.TOP;
+//                params.setMargins(0, 150, 0, 0);
+//                view.setLayoutParams(params);
+//                snack.show();
             }
         }
     }

@@ -6,11 +6,13 @@ import android.support.v4.app.Fragment;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
 import tcss450.uw.edu.chapp.chat.Message;
+import tcss450.uw.edu.chapp.model.Credentials;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -27,7 +29,11 @@ public class MessageFragment extends Fragment {
     public static final String ARG_MESSAGE_LIST = "messages list";
     private static final String ARG_COLUMN_COUNT = "column-count";
     private List<Message> mMessages;
-    private String mUserName;
+    private Credentials mCredentials;
+
+    private RecyclerView mRecyclerView;
+    private GridLayoutManager mLayoutManager;
+    private MyMessageRecyclerViewAdapter mAdapter;
 
     private int mColumnCount = 1;
     private OnListFragmentInteractionListener mListener;
@@ -54,7 +60,7 @@ public class MessageFragment extends Fragment {
 
         if (getArguments() != null) {
             mMessages = new ArrayList<>(Arrays.asList((Message[])getArguments().getSerializable(ARG_MESSAGE_LIST)));
-            mUserName = (String)getArguments().getSerializable(getString(R.string.key_username));
+            mCredentials = (Credentials) getArguments().getSerializable(getString(R.string.key_credentials));
         } else {
             mMessages = new ArrayList<>();
         }
@@ -68,21 +74,31 @@ public class MessageFragment extends Fragment {
         // Set the adapter
         if (view instanceof RecyclerView) {
             Context context = view.getContext();
-            RecyclerView recyclerView = (RecyclerView) view;
+            mRecyclerView = (RecyclerView) view;
             if (mColumnCount <= 1) {
                 LinearLayoutManager linLay = new LinearLayoutManager(context);
                 linLay.setReverseLayout(true);
-                recyclerView.setLayoutManager(linLay);
+                mRecyclerView.setLayoutManager(linLay);
             } else {
-                recyclerView.setLayoutManager(new GridLayoutManager(context, mColumnCount));
+                mLayoutManager = new GridLayoutManager(context, mColumnCount);
+                mRecyclerView.setLayoutManager(mLayoutManager);
             }
-            recyclerView.setAdapter(new MyMessageRecyclerViewAdapter(mMessages, mListener, mUserName));
+            mAdapter = new MyMessageRecyclerViewAdapter(mMessages, mListener, mCredentials.getUsername());
+            mRecyclerView.setAdapter(mAdapter);
         }
         return view;
     }
 
     public void append(Message message) {
         mMessages.add(message);
+        Log.e("MESSAGES", mMessages.toString());
+        // Force the view to update
+//        mRecyclerView.setAdapter(null);
+//        mRecyclerView.setLayoutManager(null);
+//        mRecyclerView.setAdapter(mAdapter);
+//        mRecyclerView.setLayoutManager(mLayoutManager);
+        mAdapter.notifyDataSetChanged();
+        mAdapter.notifyItemInserted(mMessages.size() - 1);
     }
 
 

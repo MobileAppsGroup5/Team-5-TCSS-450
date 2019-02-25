@@ -28,7 +28,10 @@
     <string name="nav_logout">Logout</string>
 
     <!--Store Credentials -->
-    <string name ="action_logout">Logout</string>
-    <string name="stay_logged_in">Remember my credentials</string>"
+    <string name="action_logout">Logout</string>
+    <string name="stay_logged_in">Remember my credentials</string>
+
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>"
 
 </resources>
