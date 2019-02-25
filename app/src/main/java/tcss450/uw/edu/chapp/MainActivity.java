@@ -28,6 +28,7 @@ public class MainActivity extends AppCompatActivity implements LoginFragment.OnL
         if (getIntent().getExtras() != null) {
             if (getIntent().getExtras().containsKey("type")) {
                 mLoadFromChatNotification = getIntent().getExtras().getString("type").equals("msg");
+
             }
         }
 
