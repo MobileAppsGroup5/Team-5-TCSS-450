@@ -17,6 +17,7 @@ public class MainActivity extends AppCompatActivity implements LoginFragment.OnL
 
     private boolean mLoadFromChatNotification = false;
     private static final String TAG = MainActivity.class.getSimpleName();
+    private String notifChatId;
 
 
     @Override
@@ -28,6 +29,7 @@ public class MainActivity extends AppCompatActivity implements LoginFragment.OnL
         if (getIntent().getExtras() != null) {
             if (getIntent().getExtras().containsKey("type")) {
                 mLoadFromChatNotification = getIntent().getExtras().getString("type").equals("msg");
+                notifChatId = getIntent().getExtras().getString("chatid");
 
             }
         }
@@ -51,6 +53,7 @@ public class MainActivity extends AppCompatActivity implements LoginFragment.OnL
         intent.putExtra(getString(R.string.key_credentials), theCredentials);
         intent.putExtra(getString(R.string.keys_intent_notification_msg), mLoadFromChatNotification);
         intent.putExtra(getString(R.string.keys_intent_jwt), jwt);
+        intent.putExtra(getString(R.string.keys_intent_chatId), notifChatId);
         startActivity(intent);
         finish();
     }

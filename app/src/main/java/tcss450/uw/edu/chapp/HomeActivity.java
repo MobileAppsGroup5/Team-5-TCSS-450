@@ -91,6 +91,7 @@ public class HomeActivity extends AppCompatActivity
         mCreds = (Credentials) getIntent().getSerializableExtra(getString(R.string.key_credentials));
         mJwToken = getIntent().getStringExtra(getString(R.string.keys_intent_jwt));
 
+
         // Load SuccessFragment into content_home (aka fragment_container)
         if (savedInstanceState == null) {
             if (findViewById(R.id.fragment_container) != null) {
@@ -103,11 +104,10 @@ public class HomeActivity extends AppCompatActivity
                             , mCreds);
                     args.putSerializable(getString(R.string.keys_intent_jwt)
                             , mJwToken);
+                    args.putSerializable(getString(R.string.key_chatid),
+                            getIntent().getStringExtra(getString(R.string.keys_intent_chatId)));
                     fragment = new ChatFragment();
 
-                    //GET CHAT ID FROM INTENT SOMEHOW?
-                    //We need to bundle the chatId up in order to be able to show the messages
-                    //in the chat fragment
                     fragment.setArguments(args);
 
                     loadFragment(fragment);
