@@ -44,7 +44,7 @@ import tcss450.uw.edu.chapp.utils.SendPostAsyncTask;
  * Makes a call to the database to retrieve messages for a given chatId.
  *
  * @author Mike Osborne, Jessica Medrzycki
- * @version 02/21/19
+ * @version 02/25/19
  */
 public class ChatFragment extends Fragment {
 
@@ -63,7 +63,7 @@ public class ChatFragment extends Fragment {
     private String mChatId;
 
 
-    private PushMessageReceiver mPushMessageReciever;
+    //private PushMessageReceiver mPushMessageReciever;
 
 
     public ChatFragment() {
@@ -283,22 +283,22 @@ public class ChatFragment extends Fragment {
         Log.e("ASYNC_TASK_ERROR", result);
     }
 
-    @Override
-    public void onResume() {
-        super.onResume();
-        if (mPushMessageReciever == null) {
-            mPushMessageReciever = new PushMessageReceiver();
-        }
-        IntentFilter iFilter = new IntentFilter(PushReceiver.RECEIVED_NEW_MESSAGE);
-        getActivity().registerReceiver(mPushMessageReciever, iFilter);
-    }
-    @Override
-    public void onPause() {
-        super.onPause();
-        if (mPushMessageReciever != null){
-            getActivity().unregisterReceiver(mPushMessageReciever);
-        }
-    }
+//    @Override
+//    public void onResume() {
+//        super.onResume();
+//        if (mPushMessageReciever == null) {
+//            mPushMessageReciever = new PushMessageReceiver();
+//        }
+//        IntentFilter iFilter = new IntentFilter(PushReceiver.RECEIVED_NEW_MESSAGE);
+//        getActivity().registerReceiver(mPushMessageReciever, iFilter);
+//    }
+//    @Override
+//    public void onPause() {
+//        super.onPause();
+//        if (mPushMessageReciever != null){
+//            getActivity().unregisterReceiver(mPushMessageReciever);
+//        }
+//    }
 
     @Override
     public void onAttach(Context context) {
@@ -320,23 +320,23 @@ public class ChatFragment extends Fragment {
     public interface OnChatMessageFragmentInteractionListener extends WaitFragment.OnFragmentInteractionListener {
     }
 
-    /**
-     * A BroadcastReceiver that listens for messages sent from PushReceiver
-     */
-    private class PushMessageReceiver extends BroadcastReceiver {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            Log.e("WORLD", intent.getStringExtra("MESSAGE"));
-            if(intent.hasExtra("SENDER")
-                    && intent.hasExtra("MESSAGE")
-                    && intent.hasExtra("CHATID")) {
-                String sender = intent.getStringExtra("SENDER");
-                String messageText = intent.getStringExtra("MESSAGE");
-                Message message = new Message.Builder(sender, messageText, currentTime()).build();
-                if (intent.getStringExtra("CHATID").equals(mChatId)
-                    && mMessageFragment != null) {
-                    callWebServiceforMessages();
-                }
+//    /**
+//     * A BroadcastReceiver that listens for messages sent from PushReceiver
+//     */
+//    private class PushMessageReceiver extends BroadcastReceiver {
+//        @Override
+//        public void onReceive(Context context, Intent intent) {
+//            Log.e("WORLD", intent.getStringExtra("MESSAGE"));
+//            if(intent.hasExtra("SENDER")
+//                    && intent.hasExtra("MESSAGE")
+//                    && intent.hasExtra("CHATID")) {
+//                String sender = intent.getStringExtra("SENDER");
+//                String messageText = intent.getStringExtra("MESSAGE");
+//                Message message = new Message.Builder(sender, messageText, currentTime()).build();
+//                if (intent.getStringExtra("CHATID").equals(mChatId)
+//                    && mMessageFragment != null) {
+//                    callWebServiceforMessages();
+//                }
 //                Snackbar snack = Snackbar.make(getActivity().findViewById(R.id.chat_messages_container), "MESSAGE", Snackbar.LENGTH_LONG);
 //                View view = snack.getView();
 //                CoordinatorLayout.LayoutParams params = (CoordinatorLayout.LayoutParams)view.getLayoutParams();
@@ -344,7 +344,7 @@ public class ChatFragment extends Fragment {
 //                params.setMargins(0, 150, 0, 0);
 //                view.setLayoutParams(params);
 //                snack.show();
-            }
-        }
-    }
+//            }
+//        }
+//    }
 }

@@ -115,16 +115,5 @@ public class MainActivity extends AppCompatActivity implements LoginFragment.OnL
                 .commit();
     }
 
-    /**
-     *
-     */
-    private void login(final Credentials credentials, String jwt) {
-        Intent i = new Intent(this, HomeActivity.class);
-        i.putExtra(getString(R.string.key_email), (Serializable) credentials);
-        i.putExtra(getString(R.string.keys_intent_notification_msg), mLoadFromChatNotification);
-        i.putExtra(getString(R.string.keys_intent_jwt), jwt);
-        startActivity(i);
-        // End this Activity and remove it from the Activity back stack.
-        finish();
-    }
+
 }

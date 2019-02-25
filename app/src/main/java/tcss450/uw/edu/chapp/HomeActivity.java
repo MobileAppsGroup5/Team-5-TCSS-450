@@ -1,7 +1,11 @@
 package tcss450.uw.edu.chapp;
 
+import android.app.NotificationManager;
+import android.app.PendingIntent;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.AsyncTask;
@@ -9,6 +13,7 @@ import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
 import android.support.design.widget.NavigationView;
+import android.support.v4.app.NotificationCompat;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
@@ -24,6 +29,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -34,6 +40,7 @@ import tcss450.uw.edu.chapp.chat.Message;
 import tcss450.uw.edu.chapp.dummy.DummyContent;
 import tcss450.uw.edu.chapp.model.Credentials;
 import tcss450.uw.edu.chapp.setlist.SetList;
+import tcss450.uw.edu.chapp.utils.PushReceiver;
 import tcss450.uw.edu.chapp.utils.SendPostAsyncTask;
 
 /**
@@ -43,7 +50,7 @@ import tcss450.uw.edu.chapp.utils.SendPostAsyncTask;
  * Fragment.
  *
  * @author Mike Osborne, Trung Thai, Michael Josten, Jessica Medrzycki
- * @version 02/21/19
+ * @version 02/25/19
  *
  */
 public class HomeActivity extends AppCompatActivity
@@ -60,6 +67,13 @@ public class HomeActivity extends AppCompatActivity
     private Credentials mCreds;
 
     private String mJwToken;
+    private PushMessageReceiver mPushMessageReciever;
+    private static final String CHANNEL_ID = "1";
+    //for easy access to which chat room user has open
+    private String mCurrentChatId = "0";
+
+    //currently open fragment
+    private Fragment mChatfragment;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -76,11 +90,6 @@ public class HomeActivity extends AppCompatActivity
 
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
-
-
-//        // Set the logout listener for the navigation drawer
-//        TextView logoutText = (TextView) findViewById(R.id.nav_logout);
-//        logoutText.setOnClickListener(this::onLogoutClick);
 
         // Set the logout listener for the navigation drawer
         TextView logoutText = (TextView) findViewById(R.id.nav_logout);
@@ -100,27 +109,51 @@ public class HomeActivity extends AppCompatActivity
         // Load SuccessFragment into content_home (aka fragment_container)
         if (savedInstanceState == null) {
             if (findViewById(R.id.fragment_container) != null) {
+                //getIntent().getBooleanExtra(getString(R.string.keys_intent_notification_msg), false) OLD IF STATEMENT
 
-                if (getIntent().getBooleanExtra(getString(R.string.keys_intent_notification_msg), false)) {
-                    Fragment fragment;
+                //getIntent().getExtras().getString("type").equals("msg") ||
+                //                        getIntent().getExtras().getString("type").equals("topic_msg")
+
+                //getIntent().getExtras().containsKey("type")
+                if (getIntent().getExtras().containsKey("type") ||
+                        getIntent().getBooleanExtra(getString(R.string.keys_intent_notification_msg), false)) {
+
                     Bundle args = new Bundle();
                     // Get value from intent and put it in fragment args
+                    mCurrentChatId = getIntent().getStringExtra(getString(R.string.keys_intent_chatId));
                     args.putSerializable(getString(R.string.key_credentials)
                             , mCreds);
                     args.putSerializable(getString(R.string.keys_intent_jwt)
                             , mJwToken);
                     args.putSerializable(getString(R.string.key_chatid),
-                            getIntent().getStringExtra(getString(R.string.keys_intent_chatId)));
-                    fragment = new ChatFragment();
+                            mCurrentChatId);
+                    mChatfragment = new ChatFragment();
 
-                    fragment.setArguments(args);
+                    mChatfragment.setArguments(args);
 
-                    loadFragment(fragment);
+                    loadFragment(mChatfragment);
 
                 } else {
                     loadHomeLandingPage();
                 }
             }
+        }
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        if (mPushMessageReciever == null) {
+            mPushMessageReciever = new PushMessageReceiver();
+        }
+        IntentFilter iFilter = new IntentFilter(PushReceiver.RECEIVED_NEW_MESSAGE);
+        registerReceiver(mPushMessageReciever, iFilter);
+    }
+    @Override
+    public void onPause() {
+        super.onPause();
+        if (mPushMessageReciever != null){
+            unregisterReceiver(mPushMessageReciever);
         }
     }
 
@@ -459,6 +492,66 @@ public class HomeActivity extends AppCompatActivity
         }
     }
 
+     /**
+     * A BroadcastReceiver that listens for messages sent from PushReceiver
+     */
+    private class PushMessageReceiver extends BroadcastReceiver {
+
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            Log.e("Notification Receiver", "Received broadcast in home activity");
+
+            String typeOfMessage = intent.getStringExtra("type");
+            String sender = intent.getStringExtra("sender");
+            String messageText = intent.getStringExtra("message");
+            String chatid = intent.getStringExtra("chatid");
+
+
+            //if the chatFragment has not been loaded to view OR the
+            //chat id currently being viewed is not the one from the received notification
+            //then show the notification
+            if(mChatfragment == null || mCurrentChatId != chatid) {
+
+                //start up home activity again to route to correct fragment
+                Intent i = new Intent(context, HomeActivity.class);
+
+                //the data including type, message, sender and chatid
+                i.putExtras(intent.getExtras());
+
+                //must send these to HomeActivity since MainActivity usually sends them
+                i.putExtra(getString(R.string.key_credentials),(Serializable) mCreds);
+                i.putExtra(getString(R.string.keys_intent_jwt), mJwToken);
+                i.putExtra(getString(R.string.keys_intent_chatId), chatid);
+
+                PendingIntent pendingIntent = PendingIntent.getActivity(context, 0,
+                        i, PendingIntent.FLAG_UPDATE_CURRENT);
+
+                NotificationCompat.Builder builder = new NotificationCompat.Builder(context, CHANNEL_ID)
+                        .setAutoCancel(true)
+                        .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+                        .setSmallIcon(R.mipmap.chapp_logo_trans_foreground)
+                        .setContentIntent(pendingIntent);
+
+                //Update look of the message notification before building
+                if (typeOfMessage.equals("msg")) {
+                    builder.setContentTitle("Message from: " + sender)
+                            .setContentText(messageText);
+                } else if (typeOfMessage.equals("topic_msg")) {
+                    builder.setContentTitle("Topic Message from: " + sender)
+                            .setContentText(messageText);
+                }
+                // Automatically configure a Notification Channel for devices running Android O+
+                Pushy.setNotificationChannel(builder, context);
+
+                // Get an instance of the NotificationManager service
+                NotificationManager notificationManager = (NotificationManager) context.getSystemService(context.NOTIFICATION_SERVICE);
+
+                // Build the notification and display it
+                notificationManager.notify(1, builder.build());
+            }
+
+        }
+    }
 
 
 }
