@@ -6,6 +6,7 @@
     <string name="keys_fragment_register">registerFragmentTag</string>
     <string name="keys_intent_credentials">intent key for creds</string>
     <string name="keys_intent_jwt">intent key for jwt</string>
+    <string name="keys_intent_chatId">intent key for chatid</string>
     <string name="keys_json_login_success">success</string>
     <string name="keys_json_login_jwt">token</string>
     <string name="keys_json_response">response</string>
