@@ -63,7 +63,7 @@ public class MyNewChatMembersRecyclerViewAdapter extends RecyclerView.Adapter<My
         public ViewHolder(View view) {
             super(view);
             mView = view;
-            mNameView = (TextView) view.findViewById(R.id.text_view_new_chat_member_name);
+            mNameView = (TextView) view.findViewById(R.id.text_view_add_new_chat_member_name);
         }
 
         @Override

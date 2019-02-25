@@ -7,7 +7,7 @@
     tools:context=".NewChatFragment">
 
     <EditText
-        android:id="@+id/text_view_new_chat_member_name"
+        android:id="@+id/text_view_create_new_chat_member_name"
         android:layout_width="291dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
@@ -16,18 +16,18 @@
         android:ems="10"
         android:hint="Friend's Username"
         android:inputType="textPersonName"
-        app:layout_constraintEnd_toStartOf="@+id/button_add_new_chat_member"
+        app:layout_constraintEnd_toStartOf="@+id/button_create_new_chat"
         app:layout_constraintHorizontal_bias="1.0"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/text_view_new_chat_room_name" />
 
     <Button
-        android:id="@+id/button_add_new_chat_member"
+        android:id="@+id/button_create_new_chat"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="8dp"
         android:layout_marginEnd="16dp"
-        android:text="Add"
+        android:text="Create"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/text_view_new_chat_room_name" />
 
@@ -42,7 +42,7 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/text_view_new_chat_member_name">
+        app:layout_constraintTop_toBottomOf="@+id/text_view_create_new_chat_member_name">
 
     </FrameLayout>
 
@@ -50,6 +50,7 @@
         android:id="@+id/text_view_new_chat_room_name"
         android:layout_width="294dp"
         android:layout_height="42dp"
+        android:layout_marginStart="8dp"
         android:layout_marginTop="8dp"
         android:layout_marginEnd="8dp"
         android:ems="10"
@@ -57,11 +58,11 @@
         android:inputType="textPersonName"
         app:layout_constraintEnd_toStartOf="@+id/button_add_new_chat_member"
         app:layout_constraintHorizontal_bias="0.0"
-        app:layout_constraintStart_toStartOf="@+id/text_view_new_chat_member_name"
-        app:layout_constraintTop_toBottomOf="@+id/text_view_new_chat_result" />
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/text_view_add_chat_result" />
 
     <TextView
-        android:id="@+id/text_view_new_chat_result"
+        android:id="@+id/text_view_add_chat_result"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="8dp"

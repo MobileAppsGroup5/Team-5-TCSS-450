@@ -120,7 +120,7 @@ public class ChatFragment extends Fragment {
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         // Add menu entries
-        MenuItem newChatMenuItem = menu.add("New Chat");
+        MenuItem newChatMenuItem = menu.add("Add member");
         newChatMenuItem.setOnMenuItemClickListener(this::newChatMenuItemListener);
 
         // NOTE: this super call adds the logout button so we don't have to worry about that
@@ -132,10 +132,11 @@ public class ChatFragment extends Fragment {
         // which in the postExecute call the addNewContact fragment
 
         // for now just call the fragment
-        Fragment frag = new NewChatFragment();
+        Fragment frag = new AddChatMemberFragment();
         Bundle args = new Bundle();
         args.putSerializable(getString(R.string.key_credentials), mCreds);
         args.putSerializable(getString(R.string.keys_intent_jwt), mJwToken);
+        args.putSerializable(getString(R.string.key_chatid), mChatId);
         frag.setArguments(args);
         getActivity().getSupportFragmentManager()
                 .beginTransaction()
@@ -290,6 +291,7 @@ public class ChatFragment extends Fragment {
     @Override
     public void onResume() {
         super.onResume();
+        callWebServiceforMessages();
         if (mPushMessageReciever == null) {
             mPushMessageReciever = new PushMessageReceiver();
         }

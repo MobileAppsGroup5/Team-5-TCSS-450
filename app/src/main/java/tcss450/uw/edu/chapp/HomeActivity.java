@@ -290,6 +290,8 @@ public class HomeActivity extends AppCompatActivity
                     chatsAsArray = chats.toArray(chatsAsArray);
                     Bundle args = new Bundle();
                     args.putSerializable(AllChatsFragment.ARG_CHAT_LIST, chatsAsArray);
+                    args.putSerializable(getString(R.string.key_credentials), mCreds);
+                    args.putSerializable(getString(R.string.keys_intent_jwt), mJwToken);
                     Fragment frag = new AllChatsFragment();
                     frag.setArguments(args);
                     onWaitFragmentInteractionHide();
