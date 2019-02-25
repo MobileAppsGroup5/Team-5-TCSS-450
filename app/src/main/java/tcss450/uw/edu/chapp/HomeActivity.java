@@ -31,6 +31,7 @@ import me.pushy.sdk.Pushy;
 import tcss450.uw.edu.chapp.blog.BlogPost;
 import tcss450.uw.edu.chapp.chat.Chat;
 import tcss450.uw.edu.chapp.chat.Message;
+import tcss450.uw.edu.chapp.dummy.DummyContent;
 import tcss450.uw.edu.chapp.model.Credentials;
 import tcss450.uw.edu.chapp.setlist.SetList;
 import tcss450.uw.edu.chapp.utils.SendPostAsyncTask;
@@ -53,7 +54,8 @@ public class HomeActivity extends AppCompatActivity
         SetListFragment.OnListFragmentInteractionListener,
         AllChatsFragment.OnListFragmentInteractionListener,
         ChatFragment.OnChatMessageFragmentInteractionListener,
-        MessageFragment.OnListFragmentInteractionListener {
+        MessageFragment.OnListFragmentInteractionListener,
+        ContactFragment.OnListFragmentInteractionListener {
 
     private Credentials mCreds;
 
@@ -118,9 +120,6 @@ public class HomeActivity extends AppCompatActivity
                 } else {
                     loadHomeLandingPage();
                 }
-                fragment.setArguments(args);
-
-                loadFragment(fragment);
             }
         }
     }
