@@ -513,10 +513,11 @@ public class HomeActivity extends AppCompatActivity
             String chatid = intent.getStringExtra("chatid");
 
 
+           // Log.e("testing", findViewById(R.id.fragment_chat).toString());
             //if the chatFragment has not been loaded to view OR the
             //chat id currently being viewed is not the one from the received notification
-            //then show the notification
-            if(mChatfragment == null || mCurrentChatId != chatid) {
+            //then show the notification //mChatfragment == null || mCurrentChatId != chatid
+            if(findViewById(R.id.fragment_chat)== null) {
 
                 //start up home activity again to route to correct fragment
                 Intent i = new Intent(context, HomeActivity.class);
