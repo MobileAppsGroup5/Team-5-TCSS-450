@@ -7,9 +7,13 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.net.Uri;
 import android.os.Bundle;
+import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
@@ -63,6 +67,15 @@ public class ChatFragment extends Fragment {
         // Required empty public constructor
     }
 
+    /**
+     * Override onCreate just to specify that we have an options menu
+     */
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setHasOptionsMenu(true);
+    }
+
     @Override
     public void onStart() {
         super.onStart();
@@ -102,6 +115,24 @@ public class ChatFragment extends Fragment {
         return rootLayout;
     }
 
+    /**
+     * Override onCreateOptionsMenu to populate the options menu
+     */
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        // Add menu entries
+        MenuItem newChatMenuItem = menu.add("New Chat");
+        newChatMenuItem.setOnMenuItemClickListener(this::newChatMenuItemListener);
+
+        // NOTE: this super call adds the logout button so we don't have to worry about that
+        super.onCreateOptionsMenu(menu, inflater);
+    }
+
+    private boolean newChatMenuItemListener(MenuItem menuItem) {
+        // do a sendAsyncTask to getallcontacts
+        // which in the postExecute call the addNewContact fragment
+        
+    }
 
     /**
      * Begins the async task for grabbing the messages from the
