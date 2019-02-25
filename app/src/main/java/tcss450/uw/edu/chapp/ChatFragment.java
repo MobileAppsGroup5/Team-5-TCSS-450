@@ -140,6 +140,7 @@ public class ChatFragment extends Fragment {
         getActivity().getSupportFragmentManager()
                 .beginTransaction()
                 .replace(R.id.fragment_container, frag)
+                .addToBackStack(null)
                 .commit();
 
         return true;
@@ -269,7 +270,7 @@ public class ChatFragment extends Fragment {
             if(res.has("success") && res.getBoolean("success")) {
 
                 //set the output text to show the sent message
-
+                callWebServiceforMessages();
 
                 //The web service got our message. Time to clear out the input EditText
                 mMessageInputEditText.setText("");

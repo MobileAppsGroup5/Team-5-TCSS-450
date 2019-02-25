@@ -4,6 +4,7 @@ import android.content.Context;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -46,10 +47,12 @@ public class NewChatFragment extends Fragment {
 
         // Add action listener to button
         v.findViewById(R.id.button_add_new_chat_member).setOnClickListener(this::createNewChat);
-        return inflater.inflate(R.layout.fragment_new_chat, container, false);
+
+        return v;
     }
 
     private void createNewChat(View view) {
+        Log.e("LCCKOKSOKFGD","CLICKED NEW CHAT");
         Uri uri = new Uri.Builder()
                 .scheme("https")
                 .appendPath(getString(R.string.ep_base_url))
