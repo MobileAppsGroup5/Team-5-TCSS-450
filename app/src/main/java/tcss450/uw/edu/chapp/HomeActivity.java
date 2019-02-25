@@ -11,6 +11,7 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.design.widget.NavigationView;
 import android.support.v4.app.NotificationCompat;
@@ -191,11 +192,14 @@ public class HomeActivity extends AppCompatActivity
         frag.setArguments(args);
 
 //        loadFragment(successFragment);
+        getSupportFragmentManager().popBackStack(null, FragmentManager.POP_BACK_STACK_INCLUSIVE);
 
         getSupportFragmentManager()
                 .beginTransaction()
                 .replace(R.id.fragment_container, successFragment)
                 .commit();
+
+
         //ORIGINAL SCROLL VIEW WITH BLOG POST SCROLLING
 //        FragmentTransaction transaction = getSupportFragmentManager()
 //                .beginTransaction()
@@ -528,6 +532,7 @@ public class HomeActivity extends AppCompatActivity
 
                 //start up home activity again to route to correct fragment
                 Intent i = new Intent(context, HomeActivity.class);
+                i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
 
                 //the data including type, message, sender and chatid
                 i.putExtras(intent.getExtras());
