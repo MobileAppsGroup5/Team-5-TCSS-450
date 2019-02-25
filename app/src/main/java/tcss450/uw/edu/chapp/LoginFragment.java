@@ -45,7 +45,7 @@ public class LoginFragment extends Fragment {
         EditText emailEditText = getActivity().findViewById(R.id.edit_login_email);
         EditText passwordEditText = getActivity().findViewById(R.id.edit_login_password);
 
-        String email = emailEditText.getText().toString();
+        String email = emailEditText.getText().toString().toLowerCase();
         String password = passwordEditText.getText().toString();
 
         // Validate
@@ -68,7 +68,7 @@ public class LoginFragment extends Fragment {
       //      Credentials credentials = new Credentials.Builder(email, password).build();
 
             doLogin(new Credentials.Builder(
-                    emailEditText.getText().toString(),
+                    emailEditText.getText().toString().toLowerCase(),
                     passwordEditText.getText().toString())
                     .build());
 
