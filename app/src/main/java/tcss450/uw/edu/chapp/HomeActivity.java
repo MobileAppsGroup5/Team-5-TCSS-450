@@ -32,6 +32,7 @@ import tcss450.uw.edu.chapp.blog.BlogPost;
 import tcss450.uw.edu.chapp.chat.Chat;
 import tcss450.uw.edu.chapp.chat.Message;
 import tcss450.uw.edu.chapp.dummy.DummyContent;
+import tcss450.uw.edu.chapp.chat.NewChatMember;
 import tcss450.uw.edu.chapp.model.Credentials;
 import tcss450.uw.edu.chapp.setlist.SetList;
 import tcss450.uw.edu.chapp.utils.SendPostAsyncTask;
@@ -54,8 +55,9 @@ public class HomeActivity extends AppCompatActivity
         SetListFragment.OnListFragmentInteractionListener,
         AllChatsFragment.OnListFragmentInteractionListener,
         ChatFragment.OnChatMessageFragmentInteractionListener,
+        ContactFragment.OnListFragmentInteractionListener,
         MessageFragment.OnListFragmentInteractionListener,
-        ContactFragment.OnListFragmentInteractionListener {
+        NewChatMembersFragment.OnListFragmentInteractionListener {
 
     private Credentials mCreds;
 
@@ -279,6 +281,8 @@ public class HomeActivity extends AppCompatActivity
                     chatsAsArray = chats.toArray(chatsAsArray);
                     Bundle args = new Bundle();
                     args.putSerializable(AllChatsFragment.ARG_CHAT_LIST, chatsAsArray);
+                    args.putSerializable(getString(R.string.key_credentials), mCreds);
+                    args.putSerializable(getString(R.string.keys_intent_jwt), mJwToken);
                     Fragment frag = new AllChatsFragment();
                     frag.setArguments(args);
                     onWaitFragmentInteractionHide();
@@ -414,6 +418,12 @@ public class HomeActivity extends AppCompatActivity
                 .addToBackStack(null);
         transaction.commit();
     }
+
+    @Override
+    public void onListFragmentInteraction(NewChatMember item) {
+
+    }
+
 
     // Deleting the Pushy device token must be done asynchronously. Good thing
     // we have something that allows us to do that.

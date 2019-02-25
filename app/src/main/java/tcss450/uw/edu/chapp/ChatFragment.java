@@ -8,18 +8,14 @@ import android.content.IntentFilter;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
-import android.support.design.widget.CoordinatorLayout;
-import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
 import android.util.Log;
-import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
 import android.widget.EditText;
 
 import org.json.JSONArray;
@@ -57,7 +53,7 @@ public class ChatFragment extends Fragment {
     private OnChatMessageFragmentInteractionListener mListener;
 
 
-    private Credentials mCredentials;
+    private Credentials mCreds;
     private String mJwToken;
     private String mSendUrl;
     private String mChatId;
@@ -84,7 +80,7 @@ public class ChatFragment extends Fragment {
         super.onStart();
         if (getArguments() != null) {
             //get the email and JWT from the Activity. Make sure the Keys match what you used
-            mCredentials = ((Credentials) getArguments().get(getString(R.string.key_credentials)));
+            mCreds = ((Credentials) getArguments().get(getString(R.string.key_credentials)));
             mJwToken = getArguments().getString(getString(R.string.keys_intent_jwt));
             mChatId = getArguments().getString(getString(R.string.key_chatid));
 
@@ -124,7 +120,7 @@ public class ChatFragment extends Fragment {
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         // Add menu entries
-        MenuItem newChatMenuItem = menu.add("New Chat");
+        MenuItem newChatMenuItem = menu.add("Add member");
         newChatMenuItem.setOnMenuItemClickListener(this::newChatMenuItemListener);
 
         // NOTE: this super call adds the logout button so we don't have to worry about that
@@ -135,8 +131,18 @@ public class ChatFragment extends Fragment {
         // do a sendAsyncTask to getallcontacts
         // which in the postExecute call the addNewContact fragment
 
-        // for now just call
-//        getActivity().getSupportFragmentManager()
+        // for now just call the fragment
+        Fragment frag = new AddChatMemberFragment();
+        Bundle args = new Bundle();
+        args.putSerializable(getString(R.string.key_credentials), mCreds);
+        args.putSerializable(getString(R.string.keys_intent_jwt), mJwToken);
+        args.putSerializable(getString(R.string.key_chatid), mChatId);
+        frag.setArguments(args);
+        getActivity().getSupportFragmentManager()
+                .beginTransaction()
+                .replace(R.id.fragment_container, frag)
+                .addToBackStack(null)
+                .commit();
 
         return true;
     }
@@ -162,7 +168,6 @@ public class ChatFragment extends Fragment {
             e.printStackTrace();
         }
 
-        System.out.println(msg);
         new SendPostAsyncTask.Builder(uri.toString(), msg)
 //                .onPreExecute(this::handleWaitFragmentShow)
                 .onPostExecute(this::handleChatsMessagesOnPostExecute)
@@ -230,7 +235,7 @@ public class ChatFragment extends Fragment {
         Message[] messagesAsArray = new Message[mMessages.size()];
         messagesAsArray = mMessages.toArray(messagesAsArray);
         args.putSerializable(MessageFragment.ARG_MESSAGE_LIST, messagesAsArray);
-        args.putSerializable(getString(R.string.key_credentials), mCredentials);
+        args.putSerializable(getString(R.string.key_credentials), mCreds);
         mMessageFragment = new MessageFragment();
         mMessageFragment.setArguments(args);
 
@@ -247,7 +252,7 @@ public class ChatFragment extends Fragment {
         JSONObject messageJson = new JSONObject();
         try {
             messageJson.put("chatId", mChatId);
-            messageJson.put("username", mCredentials.getUsername());
+            messageJson.put("username", mCreds.getUsername());
             messageJson.put("message", msg);
         } catch (JSONException e) {
             e.printStackTrace();
@@ -286,6 +291,7 @@ public class ChatFragment extends Fragment {
     @Override
     public void onResume() {
         super.onResume();
+        callWebServiceforMessages();
         if (mPushMessageReciever == null) {
             mPushMessageReciever = new PushMessageReceiver();
         }
