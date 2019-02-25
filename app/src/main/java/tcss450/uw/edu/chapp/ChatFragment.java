@@ -8,8 +8,11 @@ import android.content.IntentFilter;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.design.widget.CoordinatorLayout;
+import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -17,6 +20,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
+import android.widget.FrameLayout;
 import android.widget.TextView;
 
 import org.json.JSONArray;
@@ -131,7 +135,7 @@ public class ChatFragment extends Fragment {
     private boolean newChatMenuItemListener(MenuItem menuItem) {
         // do a sendAsyncTask to getallcontacts
         // which in the postExecute call the addNewContact fragment
-        
+        return true;
     }
 
     /**
@@ -327,7 +331,16 @@ public class ChatFragment extends Fragment {
                 if (intent.getStringExtra("CHATID").equals(mChatId)
                     && mMessageFragment != null) {
                     mMessageFragment.append(message);
+                } else {
+
                 }
+                Snackbar snack = Snackbar.make(getActivity().findViewById(R.id.chat_messages_container), "MESSAGE", Snackbar.LENGTH_LONG);
+                View view = snack.getView();
+                CoordinatorLayout.LayoutParams params = (CoordinatorLayout.LayoutParams)view.getLayoutParams();
+                params.gravity = Gravity.TOP;
+                params.setMargins(0, 150, 0, 0);
+                view.setLayoutParams(params);
+                snack.show();
             }
         }
     }
