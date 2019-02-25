@@ -133,7 +133,10 @@ public class HomeActivity extends AppCompatActivity
 
                     mChatfragment.setArguments(args);
 
-                    loadFragment(mChatfragment);
+                    getSupportFragmentManager()
+                            .beginTransaction()
+                            .replace(R.id.fragment_container, mChatfragment)
+                            .commit();
 
                 } else {
                     loadHomeLandingPage();
@@ -187,8 +190,12 @@ public class HomeActivity extends AppCompatActivity
         successFragment.setArguments(args);
         frag.setArguments(args);
 
-        loadFragment(successFragment);
+//        loadFragment(successFragment);
 
+        getSupportFragmentManager()
+                .beginTransaction()
+                .replace(R.id.fragment_container, successFragment)
+                .commit();
         //ORIGINAL SCROLL VIEW WITH BLOG POST SCROLLING
 //        FragmentTransaction transaction = getSupportFragmentManager()
 //                .beginTransaction()
