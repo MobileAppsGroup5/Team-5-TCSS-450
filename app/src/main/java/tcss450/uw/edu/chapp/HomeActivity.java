@@ -30,6 +30,7 @@ import java.util.List;
 import me.pushy.sdk.Pushy;
 import tcss450.uw.edu.chapp.blog.BlogPost;
 import tcss450.uw.edu.chapp.chat.Chat;
+import tcss450.uw.edu.chapp.dummy.DummyContent;
 import tcss450.uw.edu.chapp.model.Credentials;
 import tcss450.uw.edu.chapp.setlist.SetList;
 import tcss450.uw.edu.chapp.utils.SendPostAsyncTask;
@@ -45,7 +46,7 @@ public class HomeActivity extends AppCompatActivity
         BlogPostFragment.OnFragmentInteractionListener,
         WaitFragment.OnFragmentInteractionListener,
         SetListFragment.OnListFragmentInteractionListener,
-        AllChatsFragment.OnListFragmentInteractionListener {
+        AllChatsFragment.OnListFragmentInteractionListener, ContactFragment.OnListFragmentInteractionListener {
 
     private Credentials mCreds;
 
@@ -185,6 +186,12 @@ public class HomeActivity extends AppCompatActivity
                 break;
 
             case R.id.nav_connections:
+                ContactFragment contactFrag = new ContactFragment();
+                Bundle args = new Bundle();
+                args.putSerializable(getString(R.string.key_credentials), mCreds);
+                args.putSerializable(getString(R.string.keys_intent_jwt), mJwToken);
+                contactFrag.setArguments(args);
+                loadFragment(contactFrag);
                 break;
 
             case R.id.nav_chat:
@@ -490,6 +497,21 @@ public class HomeActivity extends AppCompatActivity
 //                    .addToBackStack(null);
 //            transaction.commit();
 //        }
+    }
+
+    @Override
+    public void onListFragmentInteraction(DummyContent.Contact contact) {
+        ChatFragment chatFrag = new ChatFragment();
+        Bundle args = new Bundle();
+        args.putSerializable(getString(R.string.keys_intent_jwt), mJwToken);
+        args.putSerializable(getString(R.string.key_credentials), mCreds);
+        args.putSerializable(getString(R.string.key_chatid), contact.username);
+        chatFrag.setArguments(args);
+        FragmentTransaction transaction = getSupportFragmentManager()
+                .beginTransaction()
+                .replace(R.id.fragment_container, chatFrag)
+                .addToBackStack(null);
+        transaction.commit();
     }
 
     // Deleting the Pushy device token must be done asynchronously. Good thing

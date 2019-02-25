@@ -16,34 +16,34 @@ public class DummyContent {
     /**
      * An array of sample (dummy) items.
      */
-    public static final List<DummyItem> ITEMS = new ArrayList<DummyItem>();
+    public static final List<Contact> ITEMS = new ArrayList<Contact>();
 
     /**
      * A map of sample (dummy) items, by ID.
      */
-    public static final Map<String, DummyItem> ITEM_MAP = new HashMap<String, DummyItem>();
+    public static final Map<String, Contact> CONTACTS_MAP = new HashMap<String, Contact>();
 
     private static final int COUNT = 25;
 
     static {
         // Add some sample items.
         for (int i = 1; i <= COUNT; i++) {
-            addItem(createDummyItem(i));
+            addItem(createContacts(i));
         }
     }
 
-    private static void addItem(DummyItem item) {
-        ITEMS.add(item);
-        ITEM_MAP.put(item.id, item);
+    private static void addItem(Contact contactName) {
+        ITEMS.add(contactName);
+        CONTACTS_MAP.put(contactName.id, contactName);
     }
 
-    private static DummyItem createDummyItem(int position) {
-        return new DummyItem(String.valueOf(position), "Item " + position, makeDetails(position));
+    private static Contact createContacts(int position) {
+        return new Contact(String.valueOf(position), "Contact " + position, makeDetails(position));
     }
 
     private static String makeDetails(int position) {
         StringBuilder builder = new StringBuilder();
-        builder.append("Details about Item: ").append(position);
+        builder.append("Details about Contact: ").append(position);
         for (int i = 0; i < position; i++) {
             builder.append("\nMore details information here.");
         }
@@ -53,20 +53,20 @@ public class DummyContent {
     /**
      * A dummy item representing a piece of content.
      */
-    public static class DummyItem {
+    public static class Contact {
         public final String id;
-        public final String content;
+        public final String username;
         public final String details;
 
-        public DummyItem(String id, String content, String details) {
+        public Contact(String id, String content, String details) {
             this.id = id;
-            this.content = content;
+            this.username = content;
             this.details = details;
         }
 
         @Override
         public String toString() {
-            return content;
+            return username;
         }
     }
 }
