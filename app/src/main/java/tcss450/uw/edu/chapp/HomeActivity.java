@@ -38,6 +38,7 @@ import tcss450.uw.edu.chapp.blog.BlogPost;
 import tcss450.uw.edu.chapp.chat.Chat;
 import tcss450.uw.edu.chapp.chat.Message;
 import tcss450.uw.edu.chapp.dummy.DummyContent;
+import tcss450.uw.edu.chapp.chat.NewChatMember;
 import tcss450.uw.edu.chapp.model.Credentials;
 import tcss450.uw.edu.chapp.setlist.SetList;
 import tcss450.uw.edu.chapp.utils.PushReceiver;
@@ -61,8 +62,9 @@ public class HomeActivity extends AppCompatActivity
         SetListFragment.OnListFragmentInteractionListener,
         AllChatsFragment.OnListFragmentInteractionListener,
         ChatFragment.OnChatMessageFragmentInteractionListener,
+        ContactFragment.OnListFragmentInteractionListener,
         MessageFragment.OnListFragmentInteractionListener,
-        ContactFragment.OnListFragmentInteractionListener {
+        NewChatMembersFragment.OnListFragmentInteractionListener {
 
     private Credentials mCreds;
 
@@ -185,15 +187,18 @@ public class HomeActivity extends AppCompatActivity
         successFragment.setArguments(args);
         frag.setArguments(args);
 
-        FragmentTransaction transaction = getSupportFragmentManager()
-                .beginTransaction()
-                .replace(R.id.fragment_container, frag)
-                .addToBackStack(null);
-        // Commit the transaction (obviously)
-        transaction.replace(R.id.framelayout_homelanding_email, successFragment);
-        //transaction.add(R.id.framelayout_homelanding_chatlist, chats);
+        loadFragment(successFragment);
 
-        transaction.commit();
+        //ORIGINAL SCROLL VIEW WITH BLOG POST SCROLLING
+//        FragmentTransaction transaction = getSupportFragmentManager()
+//                .beginTransaction()
+//                .replace(R.id.fragment_container, frag)
+//                .addToBackStack(null);
+//         //Commit the transaction (obviously)
+//        transaction.replace(R.id.framelayout_homelanding_email, successFragment);
+//        //transaction.add(R.id.framelayout_homelanding_chatlist, chats);
+//
+//        transaction.commit();
     }
 
     @Override
@@ -279,14 +284,7 @@ public class HomeActivity extends AppCompatActivity
         return true;
     }
 
-    /**
-     * Logout click listener for the logout button in the navigation drawer
-     * TODO: logout the user
-     * @param theText the TextView that was pressed
-     */
-    public void onLogoutClick(View theText) {
-        Log.i("NAVIGATION_INFORMATION", "Pressed: " + ((TextView)theText).getText().toString());
-    }
+
 
     private void loadFragment(Fragment frag) {
         getSupportFragmentManager()
@@ -321,6 +319,8 @@ public class HomeActivity extends AppCompatActivity
                     chatsAsArray = chats.toArray(chatsAsArray);
                     Bundle args = new Bundle();
                     args.putSerializable(AllChatsFragment.ARG_CHAT_LIST, chatsAsArray);
+                    args.putSerializable(getString(R.string.key_credentials), mCreds);
+                    args.putSerializable(getString(R.string.keys_intent_jwt), mJwToken);
                     Fragment frag = new AllChatsFragment();
                     frag.setArguments(args);
                     onWaitFragmentInteractionHide();
@@ -456,6 +456,12 @@ public class HomeActivity extends AppCompatActivity
                 .addToBackStack(null);
         transaction.commit();
     }
+
+    @Override
+    public void onListFragmentInteraction(NewChatMember item) {
+
+    }
+
 
     // Deleting the Pushy device token must be done asynchronously. Good thing
     // we have something that allows us to do that.
