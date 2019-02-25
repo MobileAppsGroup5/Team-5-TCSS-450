@@ -85,6 +85,7 @@ public class PushReceiver extends BroadcastReceiver {
                 builder.setContentTitle("Topic Message from: " + sender)
                         .setContentText(messageText);
             }
+            //else if connection
             else {
 
             }

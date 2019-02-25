@@ -152,15 +152,18 @@ public class HomeActivity extends AppCompatActivity
         successFragment.setArguments(args);
         frag.setArguments(args);
 
-        FragmentTransaction transaction = getSupportFragmentManager()
-                .beginTransaction()
-                .replace(R.id.fragment_container, frag)
-                .addToBackStack(null);
-        // Commit the transaction (obviously)
-        transaction.replace(R.id.framelayout_homelanding_email, successFragment);
-        //transaction.add(R.id.framelayout_homelanding_chatlist, chats);
+        loadFragment(successFragment);
 
-        transaction.commit();
+        //ORIGINAL SCROLL VIEW WITH BLOG POST SCROLLING
+//        FragmentTransaction transaction = getSupportFragmentManager()
+//                .beginTransaction()
+//                .replace(R.id.fragment_container, frag)
+//                .addToBackStack(null);
+//         //Commit the transaction (obviously)
+//        transaction.replace(R.id.framelayout_homelanding_email, successFragment);
+//        //transaction.add(R.id.framelayout_homelanding_chatlist, chats);
+//
+//        transaction.commit();
     }
 
     @Override
@@ -246,14 +249,7 @@ public class HomeActivity extends AppCompatActivity
         return true;
     }
 
-    /**
-     * Logout click listener for the logout button in the navigation drawer
-     * TODO: logout the user
-     * @param theText the TextView that was pressed
-     */
-    public void onLogoutClick(View theText) {
-        Log.i("NAVIGATION_INFORMATION", "Pressed: " + ((TextView)theText).getText().toString());
-    }
+
 
     private void loadFragment(Fragment frag) {
         getSupportFragmentManager()

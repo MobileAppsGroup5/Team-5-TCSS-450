@@ -47,7 +47,13 @@ public class SuccessFragment extends Fragment {
 
     private void updateUserInfo(Credentials creds) {
         TextView centerText = getActivity().findViewById(R.id.text_success_email);
-        centerText.setText(creds.getEmail());
+        String message = "Welcome to Chapp ";
+        if (!creds.getUsername().isEmpty()) {
+            centerText.setText(message + creds.getUsername() + "!");
+        } else {
+            centerText.setText(message + creds.getEmail() + "!");
+        }
+
     }
 
 //    @Override
