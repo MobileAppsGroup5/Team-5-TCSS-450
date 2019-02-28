@@ -38,7 +38,7 @@ import me.pushy.sdk.Pushy;
 import tcss450.uw.edu.chapp.blog.BlogPost;
 import tcss450.uw.edu.chapp.chat.Chat;
 import tcss450.uw.edu.chapp.chat.Message;
-import tcss450.uw.edu.chapp.dummy.DummyContent;
+import tcss450.uw.edu.chapp.connections.Connection;
 import tcss450.uw.edu.chapp.chat.NewChatMember;
 import tcss450.uw.edu.chapp.model.Credentials;
 import tcss450.uw.edu.chapp.setlist.SetList;
@@ -63,7 +63,7 @@ public class HomeActivity extends AppCompatActivity
         SetListFragment.OnListFragmentInteractionListener,
         AllChatsFragment.OnListFragmentInteractionListener,
         ChatFragment.OnChatMessageFragmentInteractionListener,
-        ContactFragment.OnListFragmentInteractionListener,
+        AllConnectionsFragment.OnListFragmentInteractionListener,
         MessageFragment.OnListFragmentInteractionListener,
         NewChatMembersFragment.OnListFragmentInteractionListener {
 
@@ -240,6 +240,8 @@ public class HomeActivity extends AppCompatActivity
     public boolean onNavigationItemSelected(MenuItem item) {
         // Handle navigation view item clicks here.
         int id = item.getItemId();
+        Uri uri;
+        JSONObject msg;
 
         //Handle Navigation bar item press
         //TODO: FOR EACH NAVIGATION ITEM, CREATE URI TO BACKEND, THEN CREATE ASYNCTASK
@@ -250,30 +252,31 @@ public class HomeActivity extends AppCompatActivity
                 break;
 
             case R.id.nav_connections:
-                ContactFragment contactFrag = new ContactFragment();
-                Bundle args = new Bundle();
-                args.putSerializable(getString(R.string.key_credentials), mCreds);
-                args.putSerializable(getString(R.string.keys_intent_jwt), mJwToken);
-                contactFrag.setArguments(args);
-                loadFragment(contactFrag);
+                uri = new Uri.Builder()
+                        .scheme("https")
+                        .appendPath(getString(R.string.ep_base_url))
+                        .appendPath(getString(R.string.ep_contacts_base))
+                        .appendPath(getString(R.string.ep_contacts_get_contacts))
+                        .build();
+                // Pass the credentials
+                msg = mCreds.asJSONObject();
+                new SendPostAsyncTask.Builder(uri.toString(), msg)
+                        .onPreExecute(this::onWaitFragmentInteractionShow)
+                        .onPostExecute(this::handleContactsPostOnPostExecute)
+                        .onCancelled(this::handleErrorsInTask)
+                        .addHeaderField("authorization", mJwToken) //add the JWT as a header
+                        .build().execute();
                 break;
 
             case R.id.nav_chat:
-                Uri uri = new Uri.Builder()
+                uri = new Uri.Builder()
                     .scheme("https")
                     .appendPath(getString(R.string.ep_base_url))
                     .appendPath(getString(R.string.ep_chats_base))
                     .appendPath(getString(R.string.ep_chats_get_chats))
                     .build();
-                // Create the JSON object with our username
-                JSONObject msg = mCreds.asJSONObject();
-                msg = new JSONObject();
-                try {
-                    msg.put("username", mCreds.getUsername());
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-                System.out.println(msg);
+                // Pass the credentials
+                msg = mCreds.asJSONObject();
                 new SendPostAsyncTask.Builder(uri.toString(), msg)
                     .onPreExecute(this::onWaitFragmentInteractionShow)
                     .onPostExecute(this::handleChatsPostOnPostExecute)
@@ -295,6 +298,50 @@ public class HomeActivity extends AppCompatActivity
         return true;
     }
 
+    /**
+     * Post call for retrieving the all of the contacts the current user is a part of from the database
+     * and sending them into contactfragment
+     * @param result the chatId and name of the chats from the result to display in UI
+     */
+    private void handleContactsPostOnPostExecute(String result) {
+        // parse JSON
+        try {
+            JSONObject root = new JSONObject(result);
+            if (root.has(getString(R.string.keys_json_connections))) {
+
+                JSONArray data = root.getJSONArray(
+                        getString(R.string.keys_json_connections));
+                List<Connection> connections = new ArrayList<>();
+                for(int i = 0; i < data.length(); i++) {
+                    JSONObject jsonChat = data.getJSONObject(i);
+                    connections.add(new Connection.Builder(
+                            jsonChat.getString(getString(R.string.keys_json_connections_from)),
+                            jsonChat.getString(getString(R.string.keys_json_connections_to)),
+                            Integer.parseInt(jsonChat.getString(getString(R.string.keys_json_connections_verified))))
+                            .build());
+                }
+                Connection[] connectionsAsArray = new Connection[connections.size()];
+                connectionsAsArray = connections.toArray(connectionsAsArray);
+                Bundle args = new Bundle();
+                args.putSerializable(AllConnectionsFragment.ARG_CONNECTIONS_LIST, connectionsAsArray);
+                args.putSerializable(getString(R.string.key_credentials), mCreds);
+                args.putSerializable(getString(R.string.keys_intent_jwt), mJwToken);
+                Fragment frag = new AllConnectionsFragment();
+                frag.setArguments(args);
+                onWaitFragmentInteractionHide();
+                loadFragment(frag);
+            } else {
+                Log.e("ERROR!", "No data array");
+                //notify user
+                onWaitFragmentInteractionHide();
+            }
+        } catch (JSONException e) {
+            e.printStackTrace();
+            Log.e("ERROR!", e.getMessage());
+            //notify user
+            onWaitFragmentInteractionHide();
+        }
+    }
 
 
     private void loadFragment(Fragment frag) {
@@ -453,23 +500,28 @@ public class HomeActivity extends AppCompatActivity
         // don't do anything for now, messages aren't able to be interacted with
     }
 
-    @Override
-    public void onListFragmentInteraction(DummyContent.Contact contact) {
-        ChatFragment chatFrag = new ChatFragment();
-        Bundle args = new Bundle();
-        args.putSerializable(getString(R.string.keys_intent_jwt), mJwToken);
-        args.putSerializable(getString(R.string.key_credentials), mCreds);
-        args.putSerializable(getString(R.string.key_chatid), contact.username);
-        chatFrag.setArguments(args);
-        FragmentTransaction transaction = getSupportFragmentManager()
-                .beginTransaction()
-                .replace(R.id.fragment_container, chatFrag)
-                .addToBackStack(null);
-        transaction.commit();
-    }
+//    @Override
+//    public void onListFragmentInteraction(DummyContent.Contact contact) {
+//        ChatFragment chatFrag = new ChatFragment();
+//        Bundle args = new Bundle();
+//        args.putSerializable(getString(R.string.keys_intent_jwt), mJwToken);
+//        args.putSerializable(getString(R.string.key_credentials), mCreds);
+//        args.putSerializable(getString(R.string.key_chatid), contact.username);
+//        chatFrag.setArguments(args);
+//        FragmentTransaction transaction = getSupportFragmentManager()
+//                .beginTransaction()
+//                .replace(R.id.fragment_container, chatFrag)
+//                .addToBackStack(null);
+//        transaction.commit();
+//    }
 
     @Override
     public void onListFragmentInteraction(NewChatMember item) {
+
+    }
+
+    @Override
+    public void onListFragmentInteraction(Connection connection) {
 
     }
 

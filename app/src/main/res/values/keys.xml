@@ -47,4 +47,10 @@
     <string name="keys_json_register_success">success</string>
     <string name="keys_json_register_code">code</string>
 
+    <!-- connections keys -->
+    <string name="keys_json_connections">contacts</string>
+    <string name="keys_json_connections_from">from</string>
+    <string name="keys_json_connections_to">to</string>
+    <string name="keys_json_connections_verified">verified</string>
+
 </resources>

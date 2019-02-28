@@ -10,8 +10,12 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
-import tcss450.uw.edu.chapp.dummy.DummyContent;
-import tcss450.uw.edu.chapp.dummy.DummyContent.Contact;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
+import tcss450.uw.edu.chapp.connections.Connection;
+import tcss450.uw.edu.chapp.model.Credentials;
 
 /**
  * A fragment representing a list of Items.
@@ -19,11 +23,15 @@ import tcss450.uw.edu.chapp.dummy.DummyContent.Contact;
  * Activities containing this fragment MUST implement the {@link OnListFragmentInteractionListener}
  * interface.
  */
-public class ContactFragment extends Fragment {
+public class AllConnectionsFragment extends Fragment {
 
-    // TODO: Customize parameter argument names
+    // Misspell this to lower the change of a tag conflict
+    public static final String ARG_CONNECTIONS_LIST = "connections lists";
     private static final String ARG_COLUMN_COUNT = "column-count";
-    // TODO: Customize parameters
+    private List<Connection> mConnections;
+    private Credentials mCreds;
+    private String mJwToken;
+
     private int mColumnCount = 1;
     private OnListFragmentInteractionListener mListener;
 
@@ -31,13 +39,12 @@ public class ContactFragment extends Fragment {
      * Mandatory empty constructor for the fragment manager to instantiate the
      * fragment (e.g. upon screen orientation changes).
      */
-    public ContactFragment() {
+    public AllConnectionsFragment() {
     }
 
-    // TODO: Customize parameter initialization
-    @SuppressWarnings("unused")
-    public static ContactFragment newInstance(int columnCount) {
-        ContactFragment fragment = new ContactFragment();
+
+    public static AllConnectionsFragment newInstance(int columnCount) {
+        AllConnectionsFragment fragment = new AllConnectionsFragment();
         Bundle args = new Bundle();
         args.putInt(ARG_COLUMN_COUNT, columnCount);
         fragment.setArguments(args);
@@ -49,14 +56,20 @@ public class ContactFragment extends Fragment {
         super.onCreate(savedInstanceState);
 
         if (getArguments() != null) {
-            mColumnCount = getArguments().getInt(ARG_COLUMN_COUNT);
+            mConnections = new ArrayList<>(Arrays.asList((Connection[])getArguments().getSerializable(ARG_CONNECTIONS_LIST)));
+            mCreds = (Credentials)getArguments().getSerializable(getString(R.string.key_credentials));
+            mJwToken = (String)getArguments().getSerializable(getString(R.string.keys_intent_jwt));
+
+//            callWebServiceforChats();
+        } else {
+            mConnections = new ArrayList<>();
         }
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.fragment_contact_list, container, false);
+        View view = inflater.inflate(R.layout.fragment_all_connections_list, container, false);
 
         // Set the adapter
         if (view instanceof RecyclerView) {
@@ -67,7 +80,7 @@ public class ContactFragment extends Fragment {
             } else {
                 recyclerView.setLayoutManager(new GridLayoutManager(context, mColumnCount));
             }
-            recyclerView.setAdapter(new MyContactRecyclerViewAdapter(DummyContent.ITEMS, mListener));
+            recyclerView.setAdapter(new MyAllConnectionsRecyclerViewAdapter(mConnections, mListener, mCreds));
         }
         return view;
     }
@@ -101,7 +114,6 @@ public class ContactFragment extends Fragment {
      * >Communicating with Other Fragments</a> for more information.
      */
     public interface OnListFragmentInteractionListener {
-        // TODO: Update argument type and name
-        void onListFragmentInteraction(Contact contact);
+        void onListFragmentInteraction(Connection connection);
     }
 }

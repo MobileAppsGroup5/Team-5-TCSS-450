@@ -8,12 +8,11 @@ import android.widget.TextView;
 
 import tcss450.uw.edu.chapp.AllChatsFragment.OnListFragmentInteractionListener;
 import tcss450.uw.edu.chapp.chat.Chat;
-import tcss450.uw.edu.chapp.dummy.DummyContent.Contact;
 
 import java.util.List;
 
 /**
- * {@link RecyclerView.Adapter} that can display a {@link Contact} and makes a call to the
+ * {@link RecyclerView.Adapter} that can display a {@link tcss450.uw.edu.chapp.connections.Connection} and makes a call to the
  * specified {@link OnListFragmentInteractionListener}.
  */
 public class MyAllChatsRecyclerViewAdapter extends RecyclerView.Adapter<MyAllChatsRecyclerViewAdapter.ViewHolder> {
