@@ -15,7 +15,7 @@ import tcss450.uw.edu.chapp.model.Credentials;
 import java.util.List;
 
 /**
- * {@link RecyclerView.Adapter} that can display a {@link Contact} and makes a call to the
+ * {@link RecyclerView.Adapter} that can display a {@link Connection} and makes a call to the
  * specified {@link OnListFragmentInteractionListener}.
  * TODO: Replace the implementation with code for your data type.
  */
@@ -93,7 +93,14 @@ public class MyAllConnectionsRecyclerViewAdapter extends RecyclerView.Adapter<My
         } else {
             // display the username that sent the connection to us
             holder.mUsernameView.setText(mValues.get(position).getUsernameA());
+            // Accept only shows up if this is recieved and not verified
+            if (holder.getItemViewType() == RECIEVED_NOT_VERIFIED) {
+                holder.mView.findViewById(R.id.image_accept_contact).setOnClickListener(this::handleAcceptContact);
+            }
         }
+
+        // All adapter items will have a cancel button, handle it with one listener
+        holder.mView.findViewById(R.id.image_cancel_contact).setOnClickListener(this::handleDeclineCancelContact);
 
         holder.mView.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -105,6 +112,18 @@ public class MyAllConnectionsRecyclerViewAdapter extends RecyclerView.Adapter<My
                 }
             }
         });
+    }
+
+    private void handleDeclineCancelContact(View view) {
+        View parent = (View) view.getParent();
+        Log.e("CONTACTSBUTTONCLICKED", "DECLINE CLICKED ON "
+                + ((TextView)parent.findViewById(R.id.list_item_connection_name)).getText().toString());
+    }
+
+    private void handleAcceptContact(View view) {
+        View parent = (View) view.getParent();
+        Log.e("CONTACTSBUTTONCLICKED", "ACCEPT CLICKED ON "
+                + ((TextView)parent.findViewById(R.id.list_item_connection_name)).getText().toString());
     }
 
     @Override
