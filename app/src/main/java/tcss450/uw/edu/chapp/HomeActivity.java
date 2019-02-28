@@ -1,5 +1,6 @@
 package tcss450.uw.edu.chapp;
 
+import android.Manifest;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
@@ -7,9 +8,11 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
@@ -25,6 +28,9 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.TextView;
+
+import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationServices;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -65,7 +71,8 @@ public class HomeActivity extends AppCompatActivity
         ChatFragment.OnChatMessageFragmentInteractionListener,
         ContactFragment.OnListFragmentInteractionListener,
         MessageFragment.OnListFragmentInteractionListener,
-        NewChatMembersFragment.OnListFragmentInteractionListener {
+        NewChatMembersFragment.OnListFragmentInteractionListener,
+        CurrentWeatherFragment.OnCurrentWeatherFragmentInteractionListener {
 
     private Credentials mCreds;
 
@@ -111,6 +118,8 @@ public class HomeActivity extends AppCompatActivity
 
         // Load SuccessFragment into content_home (aka fragment_container)
         if (savedInstanceState == null) {
+
+
             if (findViewById(R.id.fragment_container) != null) {
                 //getIntent().getBooleanExtra(getString(R.string.keys_intent_notification_msg), false) OLD IF STATEMENT
 
@@ -144,6 +153,8 @@ public class HomeActivity extends AppCompatActivity
                 }
             }
         }
+
+
     }
 
     @Override
@@ -283,6 +294,8 @@ public class HomeActivity extends AppCompatActivity
                 break;
 
             case R.id.nav_weather:
+                CurrentWeatherFragment cwf = new CurrentWeatherFragment();
+                loadFragment(cwf);
                 break;
 
             case R.id.nav_logout:
@@ -472,6 +485,8 @@ public class HomeActivity extends AppCompatActivity
     public void onListFragmentInteraction(NewChatMember item) {
 
     }
+
+
 
 
     // Deleting the Pushy device token must be done asynchronously. Good thing
