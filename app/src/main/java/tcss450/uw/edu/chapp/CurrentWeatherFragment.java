@@ -5,7 +5,6 @@ import android.Manifest;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.location.Location;
-import android.location.LocationManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -41,7 +40,7 @@ public class CurrentWeatherFragment extends Fragment {
     /*
      * desired interval for location updates, inexact. updates may be more or less frequent
      */
-    public static final long UPDATE_INTERVAL_IN_MILLISECONDS = 10000;
+    public static final long UPDATE_INTERVAL_IN_MILLISECONDS = 100;
 
     /*
      * fastest rate for active location updates. exact. updates will never be more frequent than
@@ -54,7 +53,6 @@ public class CurrentWeatherFragment extends Fragment {
 
     private static final int MY_PERMISSION_LOCATIONS = 8414;
     private LocationRequest mLocationRequest;
-    private Location mCurrentLocation;
     private FusedLocationProviderClient mFusedLocationClient;
     private LocationCallback mLocationCallback;
 
@@ -96,32 +94,11 @@ public class CurrentWeatherFragment extends Fragment {
                     MY_PERMISSION_LOCATIONS);
 
         } else { //user already allowed locations
-            requestLocation();
+            //requestLocation();
+            createLocationRequest();
+            setLocationCallback();
+            startLocationUpdates();
         }
-
-//        mLocationCallback = new LocationCallback() {
-//            @Override
-//            public void onLocationResult(LocationResult locationResult) {
-//                if (locationResult == null) {
-//                    return;
-//                }
-//                for (Location location : locationResult.getLocations()) {
-//                    //Update UI with location data
-//                    //...
-//                    //setLocation(location);
-//                    Log.d("WEATHER LOCATION UPDATE!", location.toString());
-//                }
-//            }
-//        };
-//
-//        createLocationRequest();
-//
-//        //if the currentLocation is not null
-//        if (mCurrentLocation != null) {
-//            setWeather();
-//        }
-
-
 
 
         //get the current location
@@ -131,6 +108,25 @@ public class CurrentWeatherFragment extends Fragment {
         //display icon based on weather code.
 
         return v;
+    }
+
+    private void setLocationCallback() {
+        mLocationCallback = new LocationCallback() {
+            @Override
+            public void onLocationResult(LocationResult locationResult) {
+                if (locationResult == null) {
+                    return;
+                }
+                for (Location location : locationResult.getLocations()) {
+                    //Update UI with location data
+                    //...
+                    //setLocation(location);
+                    stopLocationUpdates();
+                    setWeather(location);
+
+                }
+            }
+        };
     }
 
 //    @Override
@@ -146,26 +142,19 @@ public class CurrentWeatherFragment extends Fragment {
 //    }
 
     private void startLocationUpdates() {
-        Log.wtf("WEATHER", "start location updates");
         if (ActivityCompat.checkSelfPermission(getActivity(), Manifest.permission.ACCESS_FINE_LOCATION)
                 == PackageManager.PERMISSION_GRANTED
                 && ActivityCompat.checkSelfPermission(getActivity(), Manifest.permission.ACCESS_COARSE_LOCATION)
                 == PackageManager.PERMISSION_GRANTED) {
-            Log.wtf("WEATHER", "start update permission granted");
+
             mFusedLocationClient.requestLocationUpdates(mLocationRequest,
                     mLocationCallback,
                     null /*looper */);
         }
-        Log.wtf("WEATHER start location update", Boolean.toString(ActivityCompat.checkSelfPermission(getActivity(), Manifest.permission.ACCESS_FINE_LOCATION)
-                == PackageManager.PERMISSION_GRANTED
-                && ActivityCompat.checkSelfPermission(getActivity(), Manifest.permission.ACCESS_COARSE_LOCATION)
-                == PackageManager.PERMISSION_GRANTED));
-        Log.wtf("WEATHER fine location", Integer.toString(
-                ActivityCompat.checkSelfPermission(getActivity(), Manifest.permission.ACCESS_FINE_LOCATION)));
+
     }
 
     private void stopLocationUpdates() {
-        Log.wtf("WEATHER", "stop location updates");
         mFusedLocationClient.removeLocationUpdates(mLocationCallback);
     }
 
@@ -193,7 +182,10 @@ public class CurrentWeatherFragment extends Fragment {
 
                     //permission was granted
                     //do the location task needed to do
-                    requestLocation();
+                    //requestLocation();
+                    createLocationRequest();
+                    setLocationCallback();
+                    startLocationUpdates();
 
                 } else {
                     //permission denied
@@ -226,7 +218,7 @@ public class CurrentWeatherFragment extends Fragment {
                             //got last known location
                             if (location != null) {
                                 Log.wtf("WEATHER", "onSuccess: " + location.toString());
-                                mCurrentLocation = location;
+                                //mCurrentLocation = location;
                                 setWeather(location);
                             }
                         }
@@ -236,20 +228,12 @@ public class CurrentWeatherFragment extends Fragment {
     }
 
     /**
-     * helper method that will set the current location.
-     * @param location
-     */
-    private void setLocation(final Location location) {
-        mCurrentLocation = location;
-    }
-
-    /**
      * Helper method that will set the weather by calling
      * weather endpoint with a GetAsyncTask
      */
     private void setWeather(Location location) {
         //build uri to the weather backend
-        if (mCurrentLocation != null) {
+        if (location != null) {
             Uri uri = new Uri.Builder()
                     .scheme("https")
                     .appendPath(getString(R.string.ep_base_url))
@@ -267,7 +251,7 @@ public class CurrentWeatherFragment extends Fragment {
                     .build().execute();
         }
         else {
-            Log.e("WEATHER", "Can't get weather, mCurrentLocation is null");
+            Log.e("WEATHER", "Can't get weather, location is null");
         }
 
     }
@@ -282,8 +266,8 @@ public class CurrentWeatherFragment extends Fragment {
 
     }
 
-    private void setCity(String city) {
-        mCurrentCityText.setText(city);
+    private void setCity(String city, String country) {
+        mCurrentCityText.setText(city + ", " + country);
     }
 
     private void setCondition(String condition) {
@@ -317,7 +301,7 @@ public class CurrentWeatherFragment extends Fragment {
                     JSONObject weather = weatherInfo.getJSONObject("weather");
 
 
-                    setCity(weatherInfo.getString("city_name"));
+                    setCity(weatherInfo.getString("city_name"), weatherInfo.getString("country_code"));
                     setCondition(weather.getString("description"));
                     setTemperature(weatherInfo.getDouble("temp"));
                     setIcon(weather.getString("icon"));
