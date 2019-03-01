@@ -333,13 +333,16 @@ public class ChatFragment extends Fragment {
     private class PushMessageReceiver extends BroadcastReceiver {
         @Override
         public void onReceive(Context context, Intent intent) {
-            Log.e("WORLD", intent.getStringExtra("MESSAGE"));
+            Log.e("CHAT FRAGMENT RECEIVER", intent.getStringExtra("MESSAGE"));
             if(intent.hasExtra("SENDER")
                     && intent.hasExtra("MESSAGE")
                     && intent.hasExtra("CHATID")) {
                 String sender = intent.getStringExtra("SENDER");
                 String messageText = intent.getStringExtra("MESSAGE");
                 Message message = new Message.Builder(sender, messageText, currentTime()).build();
+
+                //Checks if the current chat that's open matches the one
+                //incoming with the notification
                 if (intent.getStringExtra("CHATID").equals(mChatId)
                     && mMessageFragment != null) {
                     callWebServiceforMessages();

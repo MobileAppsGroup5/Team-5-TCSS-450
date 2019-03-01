@@ -1,26 +1,26 @@
 package tcss450.uw.edu.chapp;
 
-import android.app.NotificationManager;
-import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
+import android.graphics.Typeface;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.design.widget.NavigationView;
-import android.support.v4.app.NotificationCompat;
 import android.support.v4.view.GravityCompat;
+import android.support.v4.view.MenuItemCompat;
 import android.support.v4.widget.DrawerLayout;
-import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -30,18 +30,17 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
 import me.pushy.sdk.Pushy;
-import tcss450.uw.edu.chapp.blog.BlogPost;
 import tcss450.uw.edu.chapp.chat.Chat;
 import tcss450.uw.edu.chapp.chat.Message;
 import tcss450.uw.edu.chapp.dummy.DummyContent;
 import tcss450.uw.edu.chapp.chat.NewChatMember;
 import tcss450.uw.edu.chapp.model.Credentials;
-import tcss450.uw.edu.chapp.setlist.SetList;
+import tcss450.uw.edu.chapp.utils.BadgeDrawerIconDrawable;
+import tcss450.uw.edu.chapp.utils.BadgeDrawerToggle;
 import tcss450.uw.edu.chapp.utils.PushReceiver;
 import tcss450.uw.edu.chapp.utils.SendPostAsyncTask;
 
@@ -57,10 +56,7 @@ import tcss450.uw.edu.chapp.utils.SendPostAsyncTask;
  */
 public class HomeActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener,
-        BlogFragment.OnBlogListFragmentInteractionListener,
-        BlogPostFragment.OnFragmentInteractionListener,
         WaitFragment.OnFragmentInteractionListener,
-        SetListFragment.OnListFragmentInteractionListener,
         AllChatsFragment.OnListFragmentInteractionListener,
         ChatFragment.OnChatMessageFragmentInteractionListener,
         ContactFragment.OnListFragmentInteractionListener,
@@ -68,12 +64,20 @@ public class HomeActivity extends AppCompatActivity
         NewChatMembersFragment.OnListFragmentInteractionListener {
 
     private Credentials mCreds;
-
     private String mJwToken;
+
     private PushMessageReceiver mPushMessageReciever;
+
+    //NavDrawer Icon constants
+    private BadgeDrawerToggle toggleBadgeIcon;
+    private BadgeDrawerIconDrawable badgeDrawable;
+    private TextView mChatCounterView;
+    private TextView mContactCounterView;
+    private boolean mHasNotifications = false;
+    private int mChatCounter;
+    private int mContactCounter;
+
     private static final String CHANNEL_ID = "1";
-    //for easy access to which chat room user has open
-    private String mCurrentChatId = "0";
 
     //currently open fragment
     private Fragment mChatfragment;
@@ -84,15 +88,27 @@ public class HomeActivity extends AppCompatActivity
         setContentView(R.layout.activity_home);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-
-        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
-        ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
-                this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
-        drawer.addDrawerListener(toggle);
-        toggle.syncState();
-
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
+
+        // Initialize drawer icon and it's ActionBarDrawerToggle object to
+        // manage the on and off red dot for notifications.
+        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        toggleBadgeIcon = new BadgeDrawerToggle(this, drawer,toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
+        badgeDrawable = new BadgeDrawerIconDrawable(getSupportActionBar().getThemedContext());
+        toggleBadgeIcon.setDrawerArrowDrawable(badgeDrawable);
+        drawer.addDrawerListener(toggleBadgeIcon);
+        toggleBadgeIcon.syncState();
+        badgeDrawable.setEnabled(false);
+
+        //initialize the navigation drawer counter badges
+        mChatCounterView = (TextView) MenuItemCompat.getActionView(navigationView.getMenu().
+                findItem(R.id.nav_chat));
+        mContactCounterView = (TextView) MenuItemCompat.getActionView(navigationView.getMenu().
+                findItem(R.id.nav_connections));
+        initializeCountDrawer(mChatCounterView);
+        initializeCountDrawer(mContactCounterView);
+
 
         // Set the logout listener for the navigation drawer
         TextView logoutText = (TextView) findViewById(R.id.nav_logout);
@@ -118,18 +134,16 @@ public class HomeActivity extends AppCompatActivity
                 //                        getIntent().getExtras().getString("type").equals("topic_msg")
 
                 //getIntent().getExtras().containsKey("type")
-                if (getIntent().getExtras().containsKey("type") ||
-                        getIntent().getBooleanExtra(getString(R.string.keys_intent_notification_msg), false)) {
-
+                if (getIntent().getBooleanExtra(getString(R.string.keys_intent_notification_msg), false)) {
                     Bundle args = new Bundle();
                     // Get value from intent and put it in fragment args
-                    mCurrentChatId = getIntent().getStringExtra(getString(R.string.keys_intent_chatId));
+                    String chatid = getIntent().getStringExtra(getString(R.string.keys_intent_chatId));
                     args.putSerializable(getString(R.string.key_credentials)
                             , mCreds);
                     args.putSerializable(getString(R.string.keys_intent_jwt)
                             , mJwToken);
                     args.putSerializable(getString(R.string.key_chatid),
-                            mCurrentChatId);
+                            chatid);
                     mChatfragment = new ChatFragment();
 
                     mChatfragment.setArguments(args);
@@ -144,6 +158,19 @@ public class HomeActivity extends AppCompatActivity
                 }
             }
         }
+    }
+
+    /**
+     * Initializes the textviews to display on the Navigation Drawer
+     * Action Items.
+     * @param viewCounter   the text view counter to be initialized
+     */
+    private void initializeCountDrawer(TextView viewCounter){
+        //Gravity property aligns the text
+        viewCounter.setGravity(Gravity.CENTER_VERTICAL);
+        viewCounter.setTypeface(null, Typeface.BOLD);
+        viewCounter.setTextColor(getResources().getColor(R.color.colorLogoText)); //Color.RED
+        //set the viewcounter text to a number or "" to change the counter!
     }
 
     @Override
@@ -235,21 +262,30 @@ public class HomeActivity extends AppCompatActivity
         return super.onOptionsItemSelected(item);
     }
 
+    /**
+     * Navigation drawer item listener.
+     * When action item has been clicked, the counter for notifications gets set to not show.
+     * Then loads the correct fragment.
+     * @param item
+     * @return
+     */
     @SuppressWarnings("StatementWithEmptyBody")
     @Override
     public boolean onNavigationItemSelected(MenuItem item) {
         // Handle navigation view item clicks here.
         int id = item.getItemId();
 
-        //Handle Navigation bar item press
-        //TODO: FOR EACH NAVIGATION ITEM, CREATE URI TO BACKEND, THEN CREATE ASYNCTASK
-        //TODO: AND CREATE HandleOnPostExecute FOR EACH ITEM TO LOAD NEW FRAGMENT.
         switch(id) {
             case R.id.nav_home:
                 loadHomeLandingPage();
                 break;
 
             case R.id.nav_connections:
+                mContactCounterView.setText("");
+                badgeDrawable.setEnabled(false);
+//                if (!mHasNotifications) {
+//                    badgeDrawable.setEnabled(false);
+//                }
                 ContactFragment contactFrag = new ContactFragment();
                 Bundle args = new Bundle();
                 args.putSerializable(getString(R.string.key_credentials), mCreds);
@@ -259,6 +295,11 @@ public class HomeActivity extends AppCompatActivity
                 break;
 
             case R.id.nav_chat:
+                mChatCounterView.setText("");
+                badgeDrawable.setEnabled(false);
+//                if (!mHasNotifications) {
+//                    badgeDrawable.setEnabled(false);
+//                }
                 Uri uri = new Uri.Builder()
                     .scheme("https")
                     .appendPath(getString(R.string.ep_base_url))
@@ -266,8 +307,7 @@ public class HomeActivity extends AppCompatActivity
                     .appendPath(getString(R.string.ep_chats_get_chats))
                     .build();
                 // Create the JSON object with our username
-                JSONObject msg = mCreds.asJSONObject();
-                msg = new JSONObject();
+                JSONObject msg = new JSONObject();
                 try {
                     msg.put("username", mCreds.getUsername());
                 } catch (Exception e) {
@@ -362,48 +402,6 @@ public class HomeActivity extends AppCompatActivity
      */
     private void handleErrorsInTask(String result) {
         Log.e("ASYNC_TASK_ERROR", result);
-    }
-
-    @Override
-    public void onListFragmentInteraction(BlogPost blogPost) {
-        BlogPostFragment blogPostFrag;
-
-        blogPostFrag = (BlogPostFragment) getSupportFragmentManager().findFragmentById(R.id.fragment_blog_post);
-
-        if (blogPostFrag != null) {
-            blogPostFrag.updateContent(blogPost);
-        } else {
-            blogPostFrag = new BlogPostFragment();
-            Bundle args = new Bundle();
-            args.putSerializable(getString(R.string.key_blog_post), blogPost);
-            blogPostFrag.setArguments(args);
-            FragmentTransaction transaction = getSupportFragmentManager()
-                    .beginTransaction()
-                    .replace(R.id.fragment_container, blogPostFrag)
-                    .addToBackStack(null);
-            transaction.commit();
-        }
-    }
-
-    @Override
-    public void onListFragmentInteraction(SetList setList) {
-        SetListViewFragment setListFrag;
-
-        setListFrag = (SetListViewFragment) getSupportFragmentManager().findFragmentById(R.id.fragment_set_list_view);
-
-        if (setListFrag != null) {
-            setListFrag.updateContent(setList);
-        } else {
-            setListFrag = new SetListViewFragment();
-            Bundle args = new Bundle();
-            args.putSerializable(getString(R.string.key_set_list), setList);
-            setListFrag.setArguments(args);
-            FragmentTransaction transaction = getSupportFragmentManager()
-                    .beginTransaction()
-                    .replace(R.id.fragment_container, setListFrag)
-                    .addToBackStack(null);
-            transaction.commit();
-        }
     }
 
     /**
@@ -510,7 +508,8 @@ public class HomeActivity extends AppCompatActivity
     }
 
      /**
-     * A BroadcastReceiver that listens for messages sent from PushReceiver
+     * A BroadcastReceiver that listens for messages sent from PushReceiver while
+      * the Home Activity is open (i.e. in App Notifications)
      */
     private class PushMessageReceiver extends BroadcastReceiver {
 
@@ -523,51 +522,19 @@ public class HomeActivity extends AppCompatActivity
             String messageText = intent.getStringExtra("message");
             String chatid = intent.getStringExtra("chatid");
 
-
-           // Log.e("testing", findViewById(R.id.fragment_chat).toString());
-            //if the chatFragment has not been loaded to view OR the
-            //chat id currently being viewed is not the one from the received notification
-            //then show the notification //mChatfragment == null || mCurrentChatId != chatid
-            if(findViewById(R.id.fragment_chat)== null) {
-
-                //start up home activity again to route to correct fragment
-                Intent i = new Intent(context, HomeActivity.class);
-                i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
-
-                //the data including type, message, sender and chatid
-                i.putExtras(intent.getExtras());
-
-                //must send these to HomeActivity since MainActivity usually sends them
-                i.putExtra(getString(R.string.key_credentials),(Serializable) mCreds);
-                i.putExtra(getString(R.string.keys_intent_jwt), mJwToken);
-                i.putExtra(getString(R.string.keys_intent_chatId), chatid);
-
-                PendingIntent pendingIntent = PendingIntent.getActivity(context, 0,
-                        i, PendingIntent.FLAG_UPDATE_CURRENT);
-
-                NotificationCompat.Builder builder = new NotificationCompat.Builder(context, CHANNEL_ID)
-                        .setAutoCancel(true)
-                        .setPriority(NotificationCompat.PRIORITY_DEFAULT)
-                        .setSmallIcon(R.mipmap.chapp_logo_trans_foreground)
-                        .setContentIntent(pendingIntent);
-
-                //Update look of the message notification before building
-                if (typeOfMessage.equals("msg")) {
-                    builder.setContentTitle("Message from: " + sender)
-                            .setContentText(messageText);
-                } else if (typeOfMessage.equals("topic_msg")) {
-                    builder.setContentTitle("Topic Message from: " + sender)
-                            .setContentText(messageText);
-                }
-                // Automatically configure a Notification Channel for devices running Android O+
-                Pushy.setNotificationChannel(builder, context);
-
-                // Get an instance of the NotificationManager service
-                NotificationManager notificationManager = (NotificationManager) context.getSystemService(context.NOTIFICATION_SERVICE);
-
-                // Build the notification and display it
-                notificationManager.notify(1, builder.build());
+            if(typeOfMessage.equals("msg")){ //if received broadcast from message notification.
+                //update global boolean for badge icon to show
+                mHasNotifications = true;
+                badgeDrawable.setEnabled(true);
+                mChatCounterView.setText("1");
+                //could add global counter to increment the amount of chat messages
+                //how to add in red dot alongside specific chat room?
+                Log.e("Notification Receiver", "Received message type: msg");
+                Log.e("Notification Receiver", "toggle: " + toggleBadgeIcon.isBadgeEnabled());
+            } else {
+                //add in logic for new connection request, new chat room request
             }
+
 
         }
     }
