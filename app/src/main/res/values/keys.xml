@@ -52,5 +52,9 @@
     <string name="keys_json_connections_from">from</string>
     <string name="keys_json_connections_to">to</string>
     <string name="keys_json_connections_verified">verified</string>
+    <string name="keys_json_connections_decline_cancel_username">decliningUsername</string>
+    <string name="keys_json_connections_request_username">requestUsername</string>
+    <string name="keys_json_connections_accept_username">acceptingUsername</string>
+
 
 </resources>

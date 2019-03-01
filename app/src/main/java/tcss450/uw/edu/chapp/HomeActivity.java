@@ -78,6 +78,9 @@ public class HomeActivity extends AppCompatActivity
     //currently open fragment
     private Fragment mChatfragment;
 
+    // The list of connections for the current user.
+    private List<Connection> mConnections;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -252,20 +255,7 @@ public class HomeActivity extends AppCompatActivity
                 break;
 
             case R.id.nav_connections:
-                uri = new Uri.Builder()
-                        .scheme("https")
-                        .appendPath(getString(R.string.ep_base_url))
-                        .appendPath(getString(R.string.ep_contacts_base))
-                        .appendPath(getString(R.string.ep_contacts_get_contacts))
-                        .build();
-                // Pass the credentials
-                msg = mCreds.asJSONObject();
-                new SendPostAsyncTask.Builder(uri.toString(), msg)
-                        .onPreExecute(this::onWaitFragmentInteractionShow)
-                        .onPostExecute(this::handleContactsPostOnPostExecute)
-                        .onCancelled(this::handleErrorsInTask)
-                        .addHeaderField("authorization", mJwToken) //add the JWT as a header
-                        .build().execute();
+                callWebServiceforConnections();
                 break;
 
             case R.id.nav_chat:
@@ -296,6 +286,75 @@ public class HomeActivity extends AppCompatActivity
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
         return true;
+    }
+
+    /**
+     * Begins the async task for grabbing the messages from the
+     * Database given the specified chatid.
+     */
+    private void callWebServiceforConnections(){
+        Uri uri = new Uri.Builder()
+                .scheme("https")
+                .appendPath(getString(R.string.ep_base_url))
+                .appendPath(getString(R.string.ep_connections_base))
+                .appendPath(getString(R.string.ep_connections_get_contacts))
+                .build();
+        // Pass the credentials
+        JSONObject msg = mCreds.asJSONObject();
+        new SendPostAsyncTask.Builder(uri.toString(), msg)
+                .onPostExecute(this::handleConnectionsOnPostExecute)
+                .onCancelled(error -> Log.e("AllConnectionsFragment", error))
+                .addHeaderField("authorization", mJwToken) //add the JWT as a header
+                .build().execute();
+    }
+
+    private void handleConnectionsOnPostExecute(String result) {
+        // parse JSON
+        try {
+            JSONObject root = new JSONObject(result);
+            if (root.has(getString(R.string.keys_json_connections))) {
+
+                JSONArray data = root.getJSONArray(
+                        getString(R.string.keys_json_connections));
+                List<Connection> connections = new ArrayList<>();
+                for(int i = 0; i < data.length(); i++) {
+                    JSONObject jsonChat = data.getJSONObject(i);
+                    connections.add(new Connection.Builder(
+                            jsonChat.getString(getString(R.string.keys_json_connections_from)),
+                            jsonChat.getString(getString(R.string.keys_json_connections_to)),
+                            Integer.parseInt(jsonChat.getString(getString(R.string.keys_json_connections_verified))))
+                            .build());
+                }
+                mConnections = new ArrayList<>(connections);
+                Log.e("CDSOCNDSFGSA", mConnections.toString());
+
+                constructConnections();
+            } else {
+                Log.e("ERROR!", "No data array");
+            }
+        } catch (JSONException e) {
+            e.printStackTrace();
+            Log.e("ERROR!", e.getMessage());
+        }
+    }
+
+    private void constructConnections() {
+        Bundle args = new Bundle();
+
+        // Do this swapping so we can send in an array of Messages not Objects
+        Connection[] connectionsAsArray = new Connection[mConnections.size()];
+        connectionsAsArray = mConnections.toArray(connectionsAsArray);
+        args.putSerializable(AllConnectionsFragment.ARG_CONNECTIONS_LIST, connectionsAsArray);
+        args.putSerializable(getString(R.string.key_credentials), mCreds);
+        args.putSerializable(getString(R.string.keys_intent_jwt), mJwToken);
+        AllConnectionsFragment frag = new AllConnectionsFragment();
+        frag.setArguments(args);
+
+        getSupportFragmentManager()
+                .beginTransaction()
+                .replace(R.id.fragment_container, frag)
+                .commit();
+
     }
 
     /**
@@ -521,8 +580,63 @@ public class HomeActivity extends AppCompatActivity
     }
 
     @Override
-    public void onListFragmentInteraction(Connection connection) {
+    public void onXClicked(Connection c) {
+        String otherUsername = ((TextView)findViewById(R.id.list_item_connection_name)).getText().toString();
+        JSONObject messageJson = new JSONObject();
+        try {
+            messageJson.put("decliningUsername", mCreds.getUsername());
+            messageJson.put("requestUsername", otherUsername);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
 
+        Uri uri = new Uri.Builder()
+                .scheme("https")
+                .appendPath(getString(R.string.ep_base_url))
+                .appendPath(getString(R.string.ep_connections_base))
+                .appendPath(getString(R.string.ep_connections_decline_request))
+                .build();
+        new SendPostAsyncTask.Builder(uri.toString(), messageJson)
+                .onPostExecute(this::handleConnectionsChangePostExecute)
+                .onCancelled(error -> Log.e("MyAllConnectionsRecyclerViewAdapter", error))
+                .addHeaderField("authorization", mJwToken)
+                .build().execute();
+
+        Log.e("CONTACTSBUTTONCLICKED", "DECLINE CLICKED ON "
+                + ((TextView)findViewById(R.id.list_item_connection_name)).getText().toString());
+    }
+
+    @Override
+    public void onCheckClicked(Connection c) {
+        String otherUsername = ((TextView)findViewById(R.id.list_item_connection_name)).getText().toString();
+        JSONObject messageJson = new JSONObject();
+        try {
+            messageJson.put("acceptingUsername", mCreds.getUsername());
+            messageJson.put("requestUsername", otherUsername);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+        Uri uri = new Uri.Builder()
+                .scheme("https")
+                .appendPath(getString(R.string.ep_base_url))
+                .appendPath(getString(R.string.ep_connections_base))
+                .appendPath(getString(R.string.ep_connections_accept_request))
+                .build();
+        new SendPostAsyncTask.Builder(uri.toString(), messageJson)
+                .onPostExecute(this::handleConnectionsChangePostExecute)
+                .onCancelled(error -> Log.e("HomeActivity", error))
+                .addHeaderField("authorization", mJwToken)
+                .build().execute();
+
+        Log.e("CONTACTSBUTTONCLICKED", "ACCEPT CLICKED ON "
+                + ((TextView)findViewById(R.id.list_item_connection_name)).getText().toString());
+    }
+
+    private void handleConnectionsChangePostExecute(String result) {
+        // for now, reload the fragment regardless
+        // TODO: in the future handle error catching and displaying
+        callWebServiceforConnections();
     }
 
 

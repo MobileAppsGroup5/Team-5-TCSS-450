@@ -1,5 +1,7 @@
 package tcss450.uw.edu.chapp;
 
+import android.content.Context;
+import android.net.Uri;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -8,11 +10,21 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import tcss450.uw.edu.chapp.AllConnectionsFragment.OnListFragmentInteractionListener;
+import tcss450.uw.edu.chapp.chat.Message;
 import tcss450.uw.edu.chapp.connections.Connection;
 import tcss450.uw.edu.chapp.model.Credentials;
+import tcss450.uw.edu.chapp.utils.SendPostAsyncTask;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
+import java.util.function.Consumer;
+import java.util.function.Predicate;
 
 /**
  * {@link RecyclerView.Adapter} that can display a {@link Connection} and makes a call to the
@@ -33,14 +45,19 @@ public class MyAllConnectionsRecyclerViewAdapter extends RecyclerView.Adapter<My
     // sent from us
     public static final int SENT = 0;
 
-    private final List<Connection> mValues;
+    private List<Connection> mValues;
     private final OnListFragmentInteractionListener mListener;
     private Credentials mCredentials;
+    private Context mContext;
+    private String mJwToken;
 
-    public MyAllConnectionsRecyclerViewAdapter(List<Connection> items, OnListFragmentInteractionListener listener, Credentials credentials) {
+    public MyAllConnectionsRecyclerViewAdapter(List<Connection> items, OnListFragmentInteractionListener listener,
+                                               Credentials credentials, String jwToken, Context context) {
         mValues = items;
         mListener = listener;
         mCredentials = credentials;
+        mContext = context;
+        mJwToken = jwToken;
     }
 
     @Override
@@ -70,7 +87,7 @@ public class MyAllConnectionsRecyclerViewAdapter extends RecyclerView.Adapter<My
     @Override
     public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         View view;
-        if (viewType == SENT) {
+        if (viewType == SENT || viewType == RECIEVED_VERIFIED) {
             // sent from us
             view = LayoutInflater.from(parent.getContext())
                     .inflate(R.layout.fragment_all_connections_outgoing, parent, false);
@@ -86,7 +103,6 @@ public class MyAllConnectionsRecyclerViewAdapter extends RecyclerView.Adapter<My
     public void onBindViewHolder(final ViewHolder holder, int position) {
         holder.mItem = mValues.get(position);
 
-        // TODO: SET CLICK LISTENERS HERE FOR THE IMAGES
         if (holder.getItemViewType() == SENT) {
             // display the username we sent to
             holder.mUsernameView.setText(mValues.get(position).getUsernameB());
@@ -95,35 +111,128 @@ public class MyAllConnectionsRecyclerViewAdapter extends RecyclerView.Adapter<My
             holder.mUsernameView.setText(mValues.get(position).getUsernameA());
             // Accept only shows up if this is recieved and not verified
             if (holder.getItemViewType() == RECIEVED_NOT_VERIFIED) {
-                holder.mView.findViewById(R.id.image_accept_contact).setOnClickListener(this::handleAcceptContact);
+                holder.mView.findViewById(R.id.image_accept_contact).setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        mListener.onCheckClicked(holder.mItem);
+                    }
+                });
             }
         }
 
         // All adapter items will have a cancel button, handle it with one listener
-        holder.mView.findViewById(R.id.image_cancel_contact).setOnClickListener(this::handleDeclineCancelContact);
-
-        holder.mView.setOnClickListener(new View.OnClickListener() {
+        holder.mView.findViewById(R.id.image_cancel_contact).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (null != mListener) {
-                    // Notify the active callbacks interface (the activity, if the
-                    // fragment is attached to one) that an item has been selected.
-                    mListener.onListFragmentInteraction(holder.mItem);
-                }
+                mListener.onXClicked(holder.mItem);
             }
         });
     }
 
+    public void updateItems(List<Connection> theConnections) {
+        mValues = theConnections;
+        notifyDataSetChanged();
+    }
+
     private void handleDeclineCancelContact(View view) {
         View parent = (View) view.getParent();
+        String otherUsername = ((TextView)parent.findViewById(R.id.list_item_connection_name)).getText().toString();
+        JSONObject messageJson = new JSONObject();
+        try {
+            messageJson.put("decliningUsername", mCredentials.getUsername());
+            messageJson.put("requestUsername", otherUsername);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+        Uri uri = new Uri.Builder()
+                .scheme("https")
+                .appendPath(mContext.getString(R.string.ep_base_url))
+                .appendPath(mContext.getString(R.string.ep_connections_base))
+                .appendPath(mContext.getString(R.string.ep_connections_decline_request))
+                .build();
+        new SendPostAsyncTask.Builder(uri.toString(), messageJson)
+                .onPostExecute(this::handleConnectionsChangePostExecute)
+                .onCancelled(error -> Log.e("MyAllConnectionsRecyclerViewAdapter", error))
+                .addHeaderField("authorization", mJwToken)
+                .build().execute();
+
         Log.e("CONTACTSBUTTONCLICKED", "DECLINE CLICKED ON "
                 + ((TextView)parent.findViewById(R.id.list_item_connection_name)).getText().toString());
     }
 
     private void handleAcceptContact(View view) {
         View parent = (View) view.getParent();
+        String otherUsername = ((TextView)parent.findViewById(R.id.list_item_connection_name)).getText().toString();
+        JSONObject messageJson = new JSONObject();
+        try {
+            messageJson.put("acceptingUsername", mCredentials.getUsername());
+            messageJson.put("requestUsername", otherUsername);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+        Uri uri = new Uri.Builder()
+                .scheme("https")
+                .appendPath(mContext.getString(R.string.ep_base_url))
+                .appendPath(mContext.getString(R.string.ep_connections_base))
+                .appendPath(mContext.getString(R.string.ep_connections_accept_request))
+                .build();
+        new SendPostAsyncTask.Builder(uri.toString(), messageJson)
+                .onPostExecute(this::handleConnectionsChangePostExecute)
+                .onCancelled(error -> Log.e("MyAllConnectionsRecyclerViewAdapter", error))
+                .addHeaderField("authorization", mJwToken)
+                .build().execute();
+
         Log.e("CONTACTSBUTTONCLICKED", "ACCEPT CLICKED ON "
                 + ((TextView)parent.findViewById(R.id.list_item_connection_name)).getText().toString());
+    }
+
+    private void handleConnectionsChangePostExecute(String result) {
+        // run the runnable, let someone else handle it
+//        mUpdateRunnable.run();
+
+
+        // We successfully accepted/rejected/something. Update the list
+//        String requestUsername = "";
+//        String declineCancelUsername = null;
+//        String acceptUsername = null;
+//
+//        try {
+//            JSONObject root = new JSONObject(result);
+//            // We only get request username back if successful, so check for this
+//            if (root.has(mContext.getString(R.string.keys_json_connections_request_username))) {
+//
+//                requestUsername = root.getString(mContext.getString(R.string.keys_json_connections_request_username));
+//                if (root.has(mContext.getString(R.string.keys_json_connections_decline_cancel_username))) {
+//                    declineCancelUsername = root.getString(mContext.getString(R.string.keys_json_connections_decline_cancel_username));
+//                }
+//                if (root.has(mContext.getString(R.string.keys_json_connections_accept_username))) {
+//                    acceptUsername = root.getString(mContext.getString(R.string.keys_json_connections_accept_username));
+//                }
+//
+//            } else {
+//                Log.e("ERROR!", "invalid response");
+//            }
+//        } catch (JSONException e) {
+//            e.printStackTrace();
+//            Log.e("ERROR!", e.getMessage());
+//        }
+//
+//        int clickedIndex = 0;
+//        // find the element that matches the request
+//        for (int i = 0; i < mValues.size(); i++) {
+//            if (mValues.get(i).getUsernameA().equals(requestUsername)) {
+//                clickedIndex = i;
+//            }
+//        }
+//
+//        if (Objects.nonNull(declineCancelUsername)) {
+//            mValues.remove(clickedIndex);
+//        } else if (Objects.nonNull(acceptUsername)) {
+//
+//        }
+//        notifyDataSetChanged();
     }
 
     @Override
@@ -153,5 +262,20 @@ public class MyAllConnectionsRecyclerViewAdapter extends RecyclerView.Adapter<My
         public String toString() {
             return super.toString() + " '" + mUsernameView.getText() + "'";
         }
+    }
+
+    /**
+     * This interface must be implemented by activities that contain this
+     * fragment to allow an interaction in this fragment to be communicated
+     * to the activity and potentially other fragments contained in that
+     * activity.
+     * <p>
+     * See the Android Training lesson <a href=
+     * "http://developer.android.com/training/basics/fragments/communicating.html"
+     * >Communicating with Other Fragments</a> for more information.
+     */
+    public interface OnFragmentInteractionListener {
+        void onWaitFragmentInteractionShow();
+        void onWaitFragmentInteractionHide();
     }
 }

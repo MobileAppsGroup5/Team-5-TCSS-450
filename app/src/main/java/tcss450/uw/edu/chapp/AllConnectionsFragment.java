@@ -1,14 +1,20 @@
 package tcss450.uw.edu.chapp;
 
 import android.content.Context;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -16,6 +22,7 @@ import java.util.List;
 
 import tcss450.uw.edu.chapp.connections.Connection;
 import tcss450.uw.edu.chapp.model.Credentials;
+import tcss450.uw.edu.chapp.utils.SendPostAsyncTask;
 
 /**
  * A fragment representing a list of Items.
@@ -31,6 +38,7 @@ public class AllConnectionsFragment extends Fragment {
     private List<Connection> mConnections;
     private Credentials mCreds;
     private String mJwToken;
+    private MyAllConnectionsRecyclerViewAdapter mAdapter;
 
     private int mColumnCount = 1;
     private OnListFragmentInteractionListener mListener;
@@ -60,7 +68,6 @@ public class AllConnectionsFragment extends Fragment {
             mCreds = (Credentials)getArguments().getSerializable(getString(R.string.key_credentials));
             mJwToken = (String)getArguments().getSerializable(getString(R.string.keys_intent_jwt));
 
-//            callWebServiceforChats();
         } else {
             mConnections = new ArrayList<>();
         }
@@ -80,7 +87,8 @@ public class AllConnectionsFragment extends Fragment {
             } else {
                 recyclerView.setLayoutManager(new GridLayoutManager(context, mColumnCount));
             }
-            recyclerView.setAdapter(new MyAllConnectionsRecyclerViewAdapter(mConnections, mListener, mCreds));
+            mAdapter = new MyAllConnectionsRecyclerViewAdapter(mConnections, mListener, mCreds, mJwToken, getContext());
+            recyclerView.setAdapter(mAdapter);
         }
         return view;
     }
@@ -114,6 +122,7 @@ public class AllConnectionsFragment extends Fragment {
      * >Communicating with Other Fragments</a> for more information.
      */
     public interface OnListFragmentInteractionListener {
-        void onListFragmentInteraction(Connection connection);
+        void onXClicked(Connection c);
+        void onCheckClicked(Connection c);
     }
 }
