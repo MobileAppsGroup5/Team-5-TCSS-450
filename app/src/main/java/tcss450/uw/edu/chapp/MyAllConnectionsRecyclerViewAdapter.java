@@ -2,6 +2,7 @@ package tcss450.uw.edu.chapp;
 
 import android.content.Context;
 import android.net.Uri;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -20,6 +21,8 @@ import tcss450.uw.edu.chapp.connections.Connection;
 import tcss450.uw.edu.chapp.model.Credentials;
 import tcss450.uw.edu.chapp.utils.SendPostAsyncTask;
 
+import java.beans.PropertyChangeListener;
+import java.beans.PropertyChangeSupport;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -33,6 +36,8 @@ import java.util.function.Predicate;
  */
 public class MyAllConnectionsRecyclerViewAdapter extends RecyclerView.Adapter<MyAllConnectionsRecyclerViewAdapter.ViewHolder> {
 
+    public static final String PROPERTY_CONNECTIONS_CHANGED = "connections changed}{";
+
     // used for the ViewHolder's viewType
     // connections sent to us from another person AND NOT VERIFIED YET
     public static final int RECIEVED_NOT_VERIFIED = 2;
@@ -44,6 +49,11 @@ public class MyAllConnectionsRecyclerViewAdapter extends RecyclerView.Adapter<My
     // used for the ViewHolder's viewType
     // sent from us
     public static final int SENT = 0;
+
+    // Property change support for firing events when users click on the fragments. Allows
+    // other fragments to easily listen for events and update accordingly. (For example, call
+    // to a web service and refresh our data)
+    private PropertyChangeSupport myPcs;
 
     private List<Connection> mValues;
     private final OnListFragmentInteractionListener mListener;
@@ -58,6 +68,7 @@ public class MyAllConnectionsRecyclerViewAdapter extends RecyclerView.Adapter<My
         mCredentials = credentials;
         mContext = context;
         mJwToken = jwToken;
+        myPcs = new PropertyChangeSupport(this);
     }
 
     @Override
@@ -111,22 +122,12 @@ public class MyAllConnectionsRecyclerViewAdapter extends RecyclerView.Adapter<My
             holder.mUsernameView.setText(mValues.get(position).getUsernameA());
             // Accept only shows up if this is recieved and not verified
             if (holder.getItemViewType() == RECIEVED_NOT_VERIFIED) {
-                holder.mView.findViewById(R.id.image_accept_contact).setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        mListener.onCheckClicked(holder.mItem);
-                    }
-                });
+                holder.mView.findViewById(R.id.image_accept_contact).setOnClickListener(this::handleAcceptContact);
             }
         }
 
         // All adapter items will have a cancel button, handle it with one listener
-        holder.mView.findViewById(R.id.image_cancel_contact).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                mListener.onXClicked(holder.mItem);
-            }
-        });
+        holder.mView.findViewById(R.id.image_cancel_contact).setOnClickListener(this::handleDeclineCancelContact);
     }
 
     public void updateItems(List<Connection> theConnections) {
@@ -137,6 +138,23 @@ public class MyAllConnectionsRecyclerViewAdapter extends RecyclerView.Adapter<My
     private void handleDeclineCancelContact(View view) {
         View parent = (View) view.getParent();
         String otherUsername = ((TextView)parent.findViewById(R.id.list_item_connection_name)).getText().toString();
+
+        // confirm with the user
+        AlertDialog.Builder builder = new AlertDialog.Builder(mContext);
+        builder.setMessage("Are you sure you want to cancel/delete " + otherUsername + "?")
+                .setTitle("Delete/Cancel?")
+                .setPositiveButton("YES", (dialog, which) -> {
+                    deleteContact(otherUsername);
+                })
+                .setNegativeButton("CANCEL", (dialog, which) -> {});
+        AlertDialog dialog = builder.create();
+        dialog.show();
+
+        Log.e("CONTACTSBUTTONCLICKED", "DECLINE CLICKED ON "
+                + ((TextView)parent.findViewById(R.id.list_item_connection_name)).getText().toString());
+    }
+
+    private void deleteContact(String otherUsername) {
         JSONObject messageJson = new JSONObject();
         try {
             messageJson.put("decliningUsername", mCredentials.getUsername());
@@ -156,9 +174,6 @@ public class MyAllConnectionsRecyclerViewAdapter extends RecyclerView.Adapter<My
                 .onCancelled(error -> Log.e("MyAllConnectionsRecyclerViewAdapter", error))
                 .addHeaderField("authorization", mJwToken)
                 .build().execute();
-
-        Log.e("CONTACTSBUTTONCLICKED", "DECLINE CLICKED ON "
-                + ((TextView)parent.findViewById(R.id.list_item_connection_name)).getText().toString());
     }
 
     private void handleAcceptContact(View view) {
@@ -189,6 +204,9 @@ public class MyAllConnectionsRecyclerViewAdapter extends RecyclerView.Adapter<My
     }
 
     private void handleConnectionsChangePostExecute(String result) {
+        // Our list changed, notify listeners that we need to be refreshed
+        myPcs.firePropertyChange(PROPERTY_CONNECTIONS_CHANGED, null, result);
+
         // run the runnable, let someone else handle it
 //        mUpdateRunnable.run();
 
@@ -262,6 +280,14 @@ public class MyAllConnectionsRecyclerViewAdapter extends RecyclerView.Adapter<My
         public String toString() {
             return super.toString() + " '" + mUsernameView.getText() + "'";
         }
+    }
+
+    public void addPropertyChangeListener(PropertyChangeListener listener) {
+        myPcs.addPropertyChangeListener(listener);
+    }
+
+    public void removePropertyChangeListener(PropertyChangeListener listener) {
+        myPcs.removePropertyChangeListener(listener);
     }
 
     /**

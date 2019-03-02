@@ -9,6 +9,9 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 
@@ -16,6 +19,9 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
+import java.beans.PropertyChangeSupport;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -30,7 +36,7 @@ import tcss450.uw.edu.chapp.utils.SendPostAsyncTask;
  * Activities containing this fragment MUST implement the {@link OnListFragmentInteractionListener}
  * interface.
  */
-public class AllConnectionsFragment extends Fragment {
+public class AllConnectionsFragment extends Fragment implements PropertyChangeListener {
 
     // Misspell this to lower the change of a tag conflict
     public static final String ARG_CONNECTIONS_LIST = "connections lists";
@@ -42,6 +48,8 @@ public class AllConnectionsFragment extends Fragment {
 
     private int mColumnCount = 1;
     private OnListFragmentInteractionListener mListener;
+
+    private PropertyChangeSupport myPcs = new PropertyChangeSupport(this);
 
     /**
      * Mandatory empty constructor for the fragment manager to instantiate the
@@ -88,11 +96,12 @@ public class AllConnectionsFragment extends Fragment {
                 recyclerView.setLayoutManager(new GridLayoutManager(context, mColumnCount));
             }
             mAdapter = new MyAllConnectionsRecyclerViewAdapter(mConnections, mListener, mCreds, mJwToken, getContext());
+            mAdapter.addPropertyChangeListener(this);
             recyclerView.setAdapter(mAdapter);
         }
+
         return view;
     }
-
 
     @Override
     public void onAttach(Context context) {
@@ -111,6 +120,23 @@ public class AllConnectionsFragment extends Fragment {
         mListener = null;
     }
 
+    public void addPropertyChangeListener(PropertyChangeListener listener) {
+        myPcs.addPropertyChangeListener(listener);
+    }
+
+    public void removePropertyChangeListener(PropertyChangeListener listener) {
+        myPcs.removePropertyChangeListener(listener);
+    }
+
+    @Override
+    public void propertyChange(PropertyChangeEvent evt) {
+        // Wrap the adapter's connections changed adapter and put that up.
+        if (evt.getPropertyName() == MyAllConnectionsRecyclerViewAdapter.PROPERTY_CONNECTIONS_CHANGED) {
+            myPcs.firePropertyChange(MyAllConnectionsRecyclerViewAdapter.PROPERTY_CONNECTIONS_CHANGED,
+                    null, evt.getNewValue());
+        }
+    }
+
     /**
      * This interface must be implemented by activities that contain this
      * fragment to allow an interaction in this fragment to be communicated
@@ -124,5 +150,6 @@ public class AllConnectionsFragment extends Fragment {
     public interface OnListFragmentInteractionListener {
         void onXClicked(Connection c);
         void onCheckClicked(Connection c);
+        void callWebServiceforConnections();
     }
 }

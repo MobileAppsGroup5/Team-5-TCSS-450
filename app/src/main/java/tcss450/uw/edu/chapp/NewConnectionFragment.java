@@ -1,6 +1,6 @@
 package tcss450.uw.edu.chapp;
 
-
+import android.content.Context;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -20,15 +20,21 @@ import tcss450.uw.edu.chapp.utils.SendPostAsyncTask;
 
 /**
  * A simple {@link Fragment} subclass.
+ * Activities that contain this fragment must implement the
+ * {@link NewConnectionFragment.OnFragmentInteractionListener} interface
+ * to handle interaction events.
+ * Use the {@link NewConnectionFragment#newInstance} factory method to
+ * create an instance of this fragment.
  */
-public class AddChatMemberFragment extends Fragment {
+public class NewConnectionFragment extends Fragment {
+
     private Credentials mCreds;
     private String mJwToken;
     private String mChatId;
 
 //    private OnFragmentInteractionListener mListener;
 
-    public AddChatMemberFragment() {
+    public NewConnectionFragment() {
         // Required empty public constructor
     }
 
@@ -48,24 +54,23 @@ public class AddChatMemberFragment extends Fragment {
         View v = inflater.inflate(R.layout.fragment_add_chat_member, container, false);
 
         // Add action listener to button
-        v.findViewById(R.id.button_add_new_chat_member).setOnClickListener(this::addNewMemberToChat);
+        v.findViewById(R.id.button_add_new_chat_member).setOnClickListener(this::createNewConnection);
 
         return v;
     }
 
-    private void addNewMemberToChat(View view) {
+    private void createNewConnection(View view) {
         Uri uri = new Uri.Builder()
                 .scheme("https")
                 .appendPath(getString(R.string.ep_base_url))
-                .appendPath(getString(R.string.ep_chats_base))
-                .appendPath(getString(R.string.ep_chats_add_member))
+                .appendPath(getString(R.string.ep_connections_base))
+                .appendPath(getString(R.string.ep_connections_submit_request))
                 .build();
 
         JSONObject msg = new JSONObject();
         try {
-//            Log.e("STUFF", )
-            msg.put("username", ((EditText) getActivity().findViewById(R.id.text_view_add_new_chat_member_name)).getText().toString());
-            msg.put("chatId", mChatId);
+            msg.put("to", ((EditText) getActivity().findViewById(R.id.text_view_add_new_chat_member_name)).getText().toString());
+            msg.put("from", mCreds.getUsername());
         } catch (JSONException e) {
             e.printStackTrace();
         }
@@ -96,5 +101,4 @@ public class AddChatMemberFragment extends Fragment {
             e.printStackTrace();
         }
     }
-
 }

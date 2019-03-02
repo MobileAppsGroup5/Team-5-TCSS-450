@@ -123,7 +123,7 @@ public class ChatFragment extends Fragment {
         MenuItem newChatMenuItem = menu.add("Add member");
         newChatMenuItem.setOnMenuItemClickListener(this::newChatMenuItemListener);
 
-        // NOTE: this super call adds the logout button so we don't have to worry about that
+        // NOTE: this super call adds the parent's items so we don't have to worry about that
         super.onCreateOptionsMenu(menu, inflater);
     }
 

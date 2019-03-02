@@ -66,7 +66,8 @@ public class HomeActivity extends AppCompatActivity
         ChatFragment.OnChatMessageFragmentInteractionListener,
         AllConnectionsFragment.OnListFragmentInteractionListener,
         MessageFragment.OnListFragmentInteractionListener,
-        NewChatMembersFragment.OnListFragmentInteractionListener {
+        NewChatMembersFragment.OnListFragmentInteractionListener,
+        ConnectionsContainerFragment.OnListFragmentInteractionListener {
 
     private Credentials mCreds;
 
@@ -256,7 +257,12 @@ public class HomeActivity extends AppCompatActivity
                 break;
 
             case R.id.nav_connections:
-                callWebServiceforConnections();
+                Fragment frag = new ConnectionsContainerFragment();
+                Bundle args = new Bundle();
+                args.putSerializable(getString(R.string.keys_intent_jwt), mJwToken);
+                args.putSerializable(getString(R.string.key_credentials), mCreds);
+                frag.setArguments(args);
+                loadFragment(frag);
                 break;
 
             case R.id.nav_chat:
@@ -293,7 +299,8 @@ public class HomeActivity extends AppCompatActivity
      * Begins the async task for grabbing the messages from the
      * Database given the specified chatid.
      */
-    private void callWebServiceforConnections(){
+    public void callWebServiceforConnections(){
+        onWaitFragmentInteractionShow();
         Uri uri = new Uri.Builder()
                 .scheme("https")
                 .appendPath(getString(R.string.ep_base_url))
@@ -329,6 +336,7 @@ public class HomeActivity extends AppCompatActivity
                 mConnections = new ArrayList<>(connections);
 
                 constructConnections();
+                onWaitFragmentInteractionHide();
             } else {
                 Log.e("ERROR!", "No data array");
             }
@@ -579,6 +587,11 @@ public class HomeActivity extends AppCompatActivity
 
     }
 
+    /**
+     * Called when you click x on a contact in {@link AllConnectionsFragment}
+     * Prompts the user if they want to delete the contact, then deletes it on confirm
+     * @param c The connection that was clicked on
+     */
     @Override
     public void onXClicked(Connection c) {
         String otherUsername = ((TextView)findViewById(R.id.list_item_connection_name)).getText().toString();
@@ -597,7 +610,10 @@ public class HomeActivity extends AppCompatActivity
                 + ((TextView)findViewById(R.id.list_item_connection_name)).getText().toString());
     }
 
-
+    /**
+     * Helper method for onXClicked, called when the user confirms they want to delete/cancel contact
+     * @param otherUsername The username of the other person in the contact.
+     */
     private void deleteContact(String otherUsername) {
         JSONObject messageJson = new JSONObject();
         try {
@@ -620,6 +636,10 @@ public class HomeActivity extends AppCompatActivity
                 .build().execute();
     }
 
+    /**
+     * Called when you click check on a contact in {@link AllConnectionsFragment}
+     * @param c The connection that was clicked on
+     */
     @Override
     public void onCheckClicked(Connection c) {
         String otherUsername = ((TextView)findViewById(R.id.list_item_connection_name)).getText().toString();
