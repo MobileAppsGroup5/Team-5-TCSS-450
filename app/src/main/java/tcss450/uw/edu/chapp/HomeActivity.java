@@ -18,6 +18,7 @@ import android.support.v4.app.NotificationCompat;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
@@ -326,7 +327,6 @@ public class HomeActivity extends AppCompatActivity
                             .build());
                 }
                 mConnections = new ArrayList<>(connections);
-                Log.e("CDSOCNDSFGSA", mConnections.toString());
 
                 constructConnections();
             } else {
@@ -582,6 +582,23 @@ public class HomeActivity extends AppCompatActivity
     @Override
     public void onXClicked(Connection c) {
         String otherUsername = ((TextView)findViewById(R.id.list_item_connection_name)).getText().toString();
+
+        // confirm with the user
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setMessage("Are you sure you want to cancel/delete " + otherUsername + "?")
+                .setTitle("Delete/Cancel?")
+                .setPositiveButton("YES", (dialog, which) -> {
+                    deleteContact(otherUsername);
+                })
+                .setNegativeButton("CANCEL", (dialog, which) -> {});
+        AlertDialog dialog = builder.create();
+        dialog.show();
+        Log.e("CONTACTSBUTTONCLICKED", "DECLINE CLICKED ON "
+                + ((TextView)findViewById(R.id.list_item_connection_name)).getText().toString());
+    }
+
+
+    private void deleteContact(String otherUsername) {
         JSONObject messageJson = new JSONObject();
         try {
             messageJson.put("decliningUsername", mCreds.getUsername());
@@ -601,9 +618,6 @@ public class HomeActivity extends AppCompatActivity
                 .onCancelled(error -> Log.e("MyAllConnectionsRecyclerViewAdapter", error))
                 .addHeaderField("authorization", mJwToken)
                 .build().execute();
-
-        Log.e("CONTACTSBUTTONCLICKED", "DECLINE CLICKED ON "
-                + ((TextView)findViewById(R.id.list_item_connection_name)).getText().toString());
     }
 
     @Override
