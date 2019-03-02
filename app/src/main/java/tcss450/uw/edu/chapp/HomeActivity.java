@@ -1,6 +1,5 @@
 package tcss450.uw.edu.chapp;
 
-import android.Manifest;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
@@ -8,11 +7,9 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
-import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
@@ -29,9 +26,6 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.TextView;
 
-import com.google.android.gms.location.FusedLocationProviderClient;
-import com.google.android.gms.location.LocationServices;
-
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -41,6 +35,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import me.pushy.sdk.Pushy;
+import tcss450.uw.edu.chapp.weather.CurrentWeatherFragment;
 import tcss450.uw.edu.chapp.blog.BlogPost;
 import tcss450.uw.edu.chapp.chat.Chat;
 import tcss450.uw.edu.chapp.chat.Message;
@@ -50,6 +45,7 @@ import tcss450.uw.edu.chapp.model.Credentials;
 import tcss450.uw.edu.chapp.setlist.SetList;
 import tcss450.uw.edu.chapp.utils.PushReceiver;
 import tcss450.uw.edu.chapp.utils.SendPostAsyncTask;
+import tcss450.uw.edu.chapp.weather.WeatherFragment;
 
 /**
  *
@@ -72,7 +68,8 @@ public class HomeActivity extends AppCompatActivity
         ContactFragment.OnListFragmentInteractionListener,
         MessageFragment.OnListFragmentInteractionListener,
         NewChatMembersFragment.OnListFragmentInteractionListener,
-        CurrentWeatherFragment.OnCurrentWeatherFragmentInteractionListener {
+        CurrentWeatherFragment.OnCurrentWeatherFragmentInteractionListener,
+        WeatherFragment.OnFragmentInteractionListener {
 
     private Credentials mCreds;
 
@@ -296,6 +293,8 @@ public class HomeActivity extends AppCompatActivity
             case R.id.nav_weather:
                 CurrentWeatherFragment cwf = new CurrentWeatherFragment();
                 loadFragment(cwf);
+//                WeatherFragment wf = new WeatherFragment();
+//                loadFragment(wf);
                 break;
 
             case R.id.nav_logout:

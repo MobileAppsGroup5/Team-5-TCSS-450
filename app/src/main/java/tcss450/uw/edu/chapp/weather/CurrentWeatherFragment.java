@@ -1,4 +1,4 @@
-package tcss450.uw.edu.chapp;
+package tcss450.uw.edu.chapp.weather;
 
 
 import android.Manifest;
@@ -27,6 +27,8 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import tcss450.uw.edu.chapp.R;
+import tcss450.uw.edu.chapp.WaitFragment;
 import tcss450.uw.edu.chapp.utils.GetAsyncTask;
 
 
