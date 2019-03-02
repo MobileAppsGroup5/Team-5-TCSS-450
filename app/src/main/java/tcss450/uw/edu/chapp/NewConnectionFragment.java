@@ -30,7 +30,6 @@ public class NewConnectionFragment extends Fragment {
 
     private Credentials mCreds;
     private String mJwToken;
-    private String mChatId;
 
 //    private OnFragmentInteractionListener mListener;
 
@@ -43,18 +42,17 @@ public class NewConnectionFragment extends Fragment {
         super.onCreate(savedInstanceState);
         if (getArguments() != null) {
             mCreds = (Credentials) getArguments().getSerializable(getString(R.string.key_credentials));
-            mJwToken = getArguments().getString(getString(R.string.keys_intent_jwt));
-            mChatId = getArguments().getString(getString(R.string.key_chatid));
+            mJwToken = (String) getArguments().getSerializable(getString(R.string.keys_intent_jwt));
         }
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        View v = inflater.inflate(R.layout.fragment_add_chat_member, container, false);
+        View v = inflater.inflate(R.layout.fragment_new_connection, container, false);
 
         // Add action listener to button
-        v.findViewById(R.id.button_add_new_chat_member).setOnClickListener(this::createNewConnection);
+        v.findViewById(R.id.button_add_new_connection).setOnClickListener(this::createNewConnection);
 
         return v;
     }
@@ -69,7 +67,7 @@ public class NewConnectionFragment extends Fragment {
 
         JSONObject msg = new JSONObject();
         try {
-            msg.put("to", ((EditText) getActivity().findViewById(R.id.text_view_add_new_chat_member_name)).getText().toString());
+            msg.put("to", ((EditText) getActivity().findViewById(R.id.text_view_add_new_connection_name)).getText().toString());
             msg.put("from", mCreds.getUsername());
         } catch (JSONException e) {
             e.printStackTrace();
@@ -82,7 +80,7 @@ public class NewConnectionFragment extends Fragment {
     }
 
     private void handleAddMemberPostExecute(String result) {
-        TextView tv = getActivity().findViewById(R.id.text_view_add_chat_result);
+        TextView tv = getActivity().findViewById(R.id.text_view_add_connection_result);
         tv.setVisibility(View.VISIBLE);
         try {
             //This is the result from the web service

@@ -69,6 +69,10 @@ public class ConnectionsContainerFragment extends Fragment implements PropertyCh
 
     private boolean newConnectionMenuItemListener(MenuItem menuItem) {
         Fragment frag = new NewConnectionFragment();
+        Bundle args = new Bundle();
+        args.putSerializable(getString(R.string.key_credentials), mCreds);
+        args.putSerializable(getString(R.string.keys_intent_jwt), mJwToken);
+        frag.setArguments(args);
         getActivity().getSupportFragmentManager()
                 .beginTransaction()
                 .replace(R.id.fragment_container, frag)
