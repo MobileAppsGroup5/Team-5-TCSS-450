@@ -1,0 +1,55 @@
+{
+  "project_info": {
+    "project_number": "936887902445",
+    "firebase_url": "https://team-5-tcss-450-030119.firebaseio.com",
+    "project_id": "team-5-tcss-450-030119",
+    "storage_bucket": "team-5-tcss-450-030119.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:936887902445:android:3530cab7ccd4907d",
+        "android_client_info": {
+          "package_name": "tcss450.uw.edu.chapp"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "936887902445-7gcia6j82eif4o8qgd2gu8923p5lgcpu.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "tcss450.uw.edu.chapp",
+            "certificate_hash": "27a399b21aacad9e82df9f99fe7afdfdcbf8d0c8"
+          }
+        },
+        {
+          "client_id": "936887902445-e3bgo82sv96va6nk56cq3arsci3hdnq3.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAMf2regilKS8otoPVfggdKzVeXW9FHdaQ"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 2,
+          "other_platform_oauth_client": [
+            {
+              "client_id": "936887902445-e3bgo82sv96va6nk56cq3arsci3hdnq3.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

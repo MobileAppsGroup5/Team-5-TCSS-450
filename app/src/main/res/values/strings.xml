@@ -36,4 +36,11 @@
     <string name="imagebutton_message">Message Contact ImageButton</string>"
     <string name="imagebutton_request">Request Contact ImageButton</string>"
     <string name="tv_request_contact">Request Contact</string>"
+
+    <!-- Forgot Password Strings -->
+    <string name="tv_forgot_password">Forgot Password?</string>
+    <string name="btn_reset_password">Reset Password</string>
+
+
+
 </resources>
