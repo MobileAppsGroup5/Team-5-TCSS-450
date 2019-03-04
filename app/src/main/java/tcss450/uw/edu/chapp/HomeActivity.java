@@ -791,7 +791,7 @@ public class HomeActivity extends AppCompatActivity
                     unreadChatList.add(chatid);
                     //update home icon and the counter
                     badgeDrawable.setEnabled(true);
-                    mChatCounterView.setText(unreadChatList.size());
+                    mChatCounterView.setText("1"); //TO BE CHANGE TO the chat list size
 
                     //how to add in red dot alongside specific chat room?
                     //call backend to get all chatIds with unread messages

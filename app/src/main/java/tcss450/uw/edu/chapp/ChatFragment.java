@@ -350,7 +350,7 @@ public class ChatFragment extends Fragment {
                 } else {    //msg was received from a user in a separate chat than one being viewed
 
                     //update home fragments list of notifications to be viewed.
-                    mListener.incrementUnreadChatNotifications(chatId);
+                   // mListener.incrementUnreadChatNotifications(chatId);
 
                 }
 //                Snackbar snack = Snackbar.make(getActivity().findViewById(R.id.chat_messages_container), "MESSAGE", Snackbar.LENGTH_LONG);
