@@ -69,7 +69,8 @@ public class HomeActivity extends AppCompatActivity
         AllConnectionsFragment.OnListFragmentInteractionListener,
         MessageFragment.OnListFragmentInteractionListener,
         NewChatMembersFragment.OnListFragmentInteractionListener,
-        ConnectionsContainerFragment.OnListFragmentInteractionListener {
+        ConnectionsContainerFragment.OnListFragmentInteractionListener,
+        WeatherFragment.OnFragmentInteractionListener {
 
     private Credentials mCreds;
 
