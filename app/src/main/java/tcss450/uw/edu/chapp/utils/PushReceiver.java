@@ -63,6 +63,10 @@ public class PushReceiver extends BroadcastReceiver {
 
         } else {
             //app is in the background so create and post a notification
+            //need to add check here if the item recieved from pushy is related to the user.
+            //i.e. sent messages should only notify those who should be recieving. not everybody.
+
+
             Log.d("ChappApp", "Message received in background: " + messageText);
 
             Intent i = new Intent(context, MainActivity.class);

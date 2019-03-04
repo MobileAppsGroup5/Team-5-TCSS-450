@@ -9,7 +9,6 @@ import android.graphics.Typeface;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.preference.PreferenceManager;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
@@ -17,6 +16,7 @@ import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.view.MenuItemCompat;
 import android.support.v4.widget.DrawerLayout;
+import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
@@ -40,7 +40,6 @@ import tcss450.uw.edu.chapp.dummy.DummyContent;
 import tcss450.uw.edu.chapp.chat.NewChatMember;
 import tcss450.uw.edu.chapp.model.Credentials;
 import tcss450.uw.edu.chapp.utils.BadgeDrawerIconDrawable;
-import tcss450.uw.edu.chapp.utils.BadgeDrawerToggle;
 import tcss450.uw.edu.chapp.utils.PushReceiver;
 import tcss450.uw.edu.chapp.utils.SendPostAsyncTask;
 
@@ -69,11 +68,13 @@ public class HomeActivity extends AppCompatActivity
     private PushMessageReceiver mPushMessageReciever;
 
     //NavDrawer Icon constants
-    private BadgeDrawerToggle toggleBadgeIcon;
     private BadgeDrawerIconDrawable badgeDrawable;
     private TextView mChatCounterView;
     private TextView mContactCounterView;
+    //tells if the user unread notifications
     private boolean mHasNotifications = false;
+
+    private ArrayList<String> unreadChatList; //holds the chatIDs received from notifications
     private int mChatCounter;
     private int mContactCounter;
 
@@ -94,11 +95,11 @@ public class HomeActivity extends AppCompatActivity
         // Initialize drawer icon and it's ActionBarDrawerToggle object to
         // manage the on and off red dot for notifications.
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
-        toggleBadgeIcon = new BadgeDrawerToggle(this, drawer,toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
+        ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(this, drawer,toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
         badgeDrawable = new BadgeDrawerIconDrawable(getSupportActionBar().getThemedContext());
-        toggleBadgeIcon.setDrawerArrowDrawable(badgeDrawable);
-        drawer.addDrawerListener(toggleBadgeIcon);
-        toggleBadgeIcon.syncState();
+        toggle.setDrawerArrowDrawable(badgeDrawable);
+        drawer.addDrawerListener(toggle);
+        toggle.syncState();
         badgeDrawable.setEnabled(false);
 
         //initialize the navigation drawer counter badges
@@ -108,6 +109,7 @@ public class HomeActivity extends AppCompatActivity
                 findItem(R.id.nav_connections));
         initializeCountDrawer(mChatCounterView);
         initializeCountDrawer(mContactCounterView);
+        unreadChatList = new ArrayList<String>();
 
 
         // Set the logout listener for the navigation drawer
@@ -412,14 +414,16 @@ public class HomeActivity extends AppCompatActivity
      */
     @Override
     public void onListFragmentInteraction(Chat item) {
-        ChatFragment chatFrag = new ChatFragment();
+        mChatfragment = new ChatFragment();             //ChatFragment chatfrag
         Bundle args = new Bundle();
         args.putSerializable(getString(R.string.keys_intent_jwt), mJwToken);
         args.putSerializable(getString(R.string.key_credentials), mCreds);
         args.putSerializable(getString(R.string.key_chatid), item.getId());
-        chatFrag.setArguments(args);
-        loadFragment(chatFrag);
+        mChatfragment.setArguments(args);
+        loadFragment(mChatfragment);
     }
+
+
 
     @Override
     public void onWaitFragmentInteractionShow() {
@@ -471,6 +475,35 @@ public class HomeActivity extends AppCompatActivity
 
     }
 
+    /**
+     * From the ChatFragment interface that updates the count of unread
+     * chat Ids from notifications.
+     * @param chatId    chatId to add to the list
+     */
+    @Override
+    public void incrementUnreadChatNotifications(String chatId) {
+
+        //adds the chatId to list of unread chats
+        //show badge on home button.
+        //show number on nav menu chat button
+
+        mHasNotifications = true;
+        unreadChatList.add(chatId);
+        badgeDrawable.setEnabled(true);
+        mChatCounterView.setText(unreadChatList.size());
+        //show badge on recycler view item in all chats.
+    }
+
+//    /**
+//     * From the ChatFragment interface that removes a viewed chatid from the counter
+//     * of unread chat ids
+//     * @param chatId    the chatId already viewed.
+//     */
+//    @Override
+//    public void updateViewedChatroom(String chatId) {
+//        unreadChatList.remove(chatId);
+//    }
+
 
     // Deleting the Pushy device token must be done asynchronously. Good thing
     // we have something that allows us to do that.
@@ -508,7 +541,7 @@ public class HomeActivity extends AppCompatActivity
     }
 
      /**
-     * A BroadcastReceiver that listens for messages sent from PushReceiver while
+      * A BroadcastReceiver that listens for messages sent from PushReceiver while
       * the Home Activity is open (i.e. in App Notifications)
      */
     private class PushMessageReceiver extends BroadcastReceiver {
@@ -522,15 +555,36 @@ public class HomeActivity extends AppCompatActivity
             String messageText = intent.getStringExtra("message");
             String chatid = intent.getStringExtra("chatid");
 
+            /*
+             * CASES: For viewing notifications in app
+             *
+             * MSG NOTIFICATIONS
+             * 1. User is viewing OTHER Fragment and msg notification is received.
+             * 2. User is viewing chat room fragment and msg inside of chat is received.
+             * 3. User is viewing chat room fragment and msg from another chat is received.
+             *
+             *
+             *
+            */
+
+
+
             if(typeOfMessage.equals("msg")){ //if received broadcast from message notification.
-                //update global boolean for badge icon to show
-                mHasNotifications = true;
-                badgeDrawable.setEnabled(true);
-                mChatCounterView.setText("1");
-                //could add global counter to increment the amount of chat messages
-                //how to add in red dot alongside specific chat room?
-                Log.e("Notification Receiver", "Received message type: msg");
-                Log.e("Notification Receiver", "toggle: " + toggleBadgeIcon.isBadgeEnabled());
+                if (findViewById(R.id.fragment_chat) == null){ //case where user is NOT in chat fragment
+                    //update global boolean for badge icon to show
+                    mHasNotifications = true;
+                    unreadChatList.add(chatid);
+                    //update home icon and the counter
+                    badgeDrawable.setEnabled(true);
+                    mChatCounterView.setText(unreadChatList.size());
+
+                    //how to add in red dot alongside specific chat room?
+                    //call backend to get all chatIds with unread messages
+                    //then add to global list, increment counts and count views.
+                    Log.e("Notification Receiver", "Received message type: msg");
+                }
+
+
             } else {
                 //add in logic for new connection request, new chat room request
             }
