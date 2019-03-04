@@ -39,4 +39,13 @@
 
     <!-- current weather strings -->
     <string name="current_weather_no_location_permission_error">Can\'t display weather without location permission</string>
+    
+    <string name="tv_request_contact">Request Contact</string>
+
+    <string-array name="member_search_values">
+        <item>Username</item>
+        <item>Email</item>
+        <item>First Name</item>
+        <item>Last Name</item>
+    </string-array>
 </resources>
