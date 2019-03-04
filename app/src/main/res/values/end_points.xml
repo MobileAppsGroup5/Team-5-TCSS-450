@@ -17,4 +17,19 @@
     <string name="ep_chats_get_chats">getChats</string>
     <string name="ep_chats_get_messages">getAll</string>
     <string name="ep_chats_add_member">addUserToChat</string>
+    <!-- weather end points -->
+    <string name="ep_weather_base">weather</string>
+    <string name="ep_weather_current">current</string>
+    <string name="ep_weather_24h">24h</string>
+    <string name="ep_weather_10d">10d</string>
+    <string name="ep_connections_base">connections</string>
+    <string name="ep_connections_get_contacts">getAllConnectionsAndRequests</string>
+    <string name="ep_connections_accept_request">acceptRequest</string>
+    <string name="ep_connections_decline_request">declineCancelOrDeleteRequest</string>
+    <string name="ep_connections_submit_request">submitRequest</string>
+    <string name="ep_connections_get_all_member_info">getAllMemberData</string>
+
+
+
+
 </resources>

@@ -127,7 +127,7 @@ public class ChatFragment extends Fragment {
         MenuItem newChatMenuItem = menu.add("Add member");
         newChatMenuItem.setOnMenuItemClickListener(this::newChatMenuItemListener);
 
-        // NOTE: this super call adds the logout button so we don't have to worry about that
+        // NOTE: this super call adds the parent's items so we don't have to worry about that
         super.onCreateOptionsMenu(menu, inflater);
     }
 
@@ -198,7 +198,7 @@ public class ChatFragment extends Fragment {
                 for(int i = 0; i < data.length(); i++) {
                     JSONObject jsonMessage = data.getJSONObject(i);
                     messages.add(new Message.Builder(
-                            jsonMessage.getString(getString(R.string.keys_json_chats_username)),
+                            jsonMessage.getString(getString(R.string.keys_json_username)),
                             jsonMessage.getString(getString(R.string.keys_json_chats_message)),
                             jsonMessage.getString(getString(R.string.keys_json_chats_time)))
                             .build());

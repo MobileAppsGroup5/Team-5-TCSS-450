@@ -22,8 +22,6 @@ import tcss450.uw.edu.chapp.utils.SendPostAsyncTask;
  * A simple {@link Fragment} subclass.
  */
 public class AddChatMemberFragment extends Fragment {
-
-
     private Credentials mCreds;
     private String mJwToken;
     private String mChatId;
