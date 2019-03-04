@@ -15,7 +15,6 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_margin="8dp"
-            android:text="1pm"
             android:textAlignment="center"
             android:textAppearance="?attr/textAppearanceListItem"
             android:textSize="14sp" />
@@ -27,15 +26,13 @@
             android:adjustViewBounds="true"
             android:maxWidth="20dp"
             android:maxHeight="20dp"
-            android:scaleType="fitCenter"
-            app:srcCompat="@android:drawable/ic_menu_compass" />
+            android:scaleType="fitCenter" />
 
         <TextView
             android:id="@+id/weather_hour_temp"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_margin="8dp"
-            android:text="50°"
             android:textAlignment="center"
             android:textAppearance="?attr/textAppearanceListItem"
             android:textSize="14sp" />

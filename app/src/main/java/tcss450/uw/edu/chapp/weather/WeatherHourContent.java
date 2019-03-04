@@ -46,10 +46,10 @@ public class WeatherHourContent {
     public static class WeatherHourItem {
         public final String id;
         public final String time;
-        public final int temp;
+        public final double temp;
         public final String icon;
 
-        public WeatherHourItem(String id, String time, int temp, String icon) {
+        public WeatherHourItem(String id, String time, double temp, String icon) {
             this.id = id;
             this.time = time;
             this.temp = temp;

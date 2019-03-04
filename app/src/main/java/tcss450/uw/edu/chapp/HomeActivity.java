@@ -291,10 +291,10 @@ public class HomeActivity extends AppCompatActivity
                 break;
 
             case R.id.nav_weather:
-                CurrentWeatherFragment cwf = new CurrentWeatherFragment();
-                loadFragment(cwf);
-//                WeatherFragment wf = new WeatherFragment();
-//                loadFragment(wf);
+//                CurrentWeatherFragment cwf = new CurrentWeatherFragment();
+//                loadFragment(cwf);
+                WeatherFragment wf = new WeatherFragment();
+                loadFragment(wf);
                 break;
 
             case R.id.nav_logout:

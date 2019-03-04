@@ -269,7 +269,8 @@ public class CurrentWeatherFragment extends Fragment {
     }
 
     private void setCity(String city, String country) {
-        mCurrentCityText.setText(city + ", " + country);
+        String cityString = city + ", " + country;
+        mCurrentCityText.setText(cityString);
     }
 
     private void setCondition(String condition) {

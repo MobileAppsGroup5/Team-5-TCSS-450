@@ -37,6 +37,9 @@ public class MyWeatherHourRecyclerViewAdapter extends RecyclerView.Adapter<MyWea
         holder.mItem = mValues.get(position);
         holder.mWeatherTimeText.setText(mValues.get(position).time);
 
+        String temp = mValues.get(position).temp + "°";
+        holder.mWeatherTempText.setText(temp);
+
         int resId = mContext.getResources().getIdentifier(mValues.get(position).icon, "drawable", mContext.getPackageName());
         holder.mWeatherIcon.setImageResource(resId);
 
