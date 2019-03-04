@@ -35,6 +35,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import me.pushy.sdk.Pushy;
+import tcss450.uw.edu.chapp.weather.CurrentWeatherFragment;
 import tcss450.uw.edu.chapp.blog.BlogPost;
 import tcss450.uw.edu.chapp.chat.Chat;
 import tcss450.uw.edu.chapp.chat.Message;
@@ -44,6 +45,7 @@ import tcss450.uw.edu.chapp.model.Credentials;
 import tcss450.uw.edu.chapp.setlist.SetList;
 import tcss450.uw.edu.chapp.utils.PushReceiver;
 import tcss450.uw.edu.chapp.utils.SendPostAsyncTask;
+import tcss450.uw.edu.chapp.weather.WeatherFragment;
 
 /**
  *
@@ -65,7 +67,9 @@ public class HomeActivity extends AppCompatActivity
         ChatFragment.OnChatMessageFragmentInteractionListener,
         ContactFragment.OnListFragmentInteractionListener,
         MessageFragment.OnListFragmentInteractionListener,
-        NewChatMembersFragment.OnListFragmentInteractionListener {
+        NewChatMembersFragment.OnListFragmentInteractionListener,
+        CurrentWeatherFragment.OnCurrentWeatherFragmentInteractionListener,
+        WeatherFragment.OnFragmentInteractionListener {
 
     private Credentials mCreds;
 
@@ -111,6 +115,8 @@ public class HomeActivity extends AppCompatActivity
 
         // Load SuccessFragment into content_home (aka fragment_container)
         if (savedInstanceState == null) {
+
+
             if (findViewById(R.id.fragment_container) != null) {
                 //getIntent().getBooleanExtra(getString(R.string.keys_intent_notification_msg), false) OLD IF STATEMENT
 
@@ -144,6 +150,8 @@ public class HomeActivity extends AppCompatActivity
                 }
             }
         }
+
+
     }
 
     @Override
@@ -283,6 +291,10 @@ public class HomeActivity extends AppCompatActivity
                 break;
 
             case R.id.nav_weather:
+//                CurrentWeatherFragment cwf = new CurrentWeatherFragment();
+//                loadFragment(cwf);
+                WeatherFragment wf = new WeatherFragment();
+                loadFragment(wf);
                 break;
 
             case R.id.nav_logout:
@@ -472,6 +484,8 @@ public class HomeActivity extends AppCompatActivity
     public void onListFragmentInteraction(NewChatMember item) {
 
     }
+
+
 
 
     // Deleting the Pushy device token must be done asynchronously. Good thing
