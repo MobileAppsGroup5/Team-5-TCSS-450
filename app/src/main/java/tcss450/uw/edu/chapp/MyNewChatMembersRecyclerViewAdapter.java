@@ -7,7 +7,7 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import tcss450.uw.edu.chapp.NewChatMembersFragment.OnListFragmentInteractionListener;
-import tcss450.uw.edu.chapp.chat.NewChatMember;
+import tcss450.uw.edu.chapp.chat.User;
 
 import java.util.List;
 
@@ -18,10 +18,10 @@ import java.util.List;
  */
 public class MyNewChatMembersRecyclerViewAdapter extends RecyclerView.Adapter<MyNewChatMembersRecyclerViewAdapter.ViewHolder> {
 
-    private final List<NewChatMember> mValues;
+    private final List<User> mValues;
     private final OnListFragmentInteractionListener mListener;
 
-    public MyNewChatMembersRecyclerViewAdapter(List<NewChatMember> items, OnListFragmentInteractionListener listener) {
+    public MyNewChatMembersRecyclerViewAdapter(List<User> items, OnListFragmentInteractionListener listener) {
         mValues = items;
         mListener = listener;
     }
@@ -58,7 +58,7 @@ public class MyNewChatMembersRecyclerViewAdapter extends RecyclerView.Adapter<My
     public class ViewHolder extends RecyclerView.ViewHolder {
         public final View mView;
         public final TextView mNameView;
-        public NewChatMember mItem;
+        public User mItem;
 
         public ViewHolder(View view) {
             super(view);

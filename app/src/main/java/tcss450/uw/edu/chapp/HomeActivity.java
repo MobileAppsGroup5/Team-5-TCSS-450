@@ -40,7 +40,7 @@ import tcss450.uw.edu.chapp.blog.BlogPost;
 import tcss450.uw.edu.chapp.chat.Chat;
 import tcss450.uw.edu.chapp.chat.Message;
 import tcss450.uw.edu.chapp.connections.Connection;
-import tcss450.uw.edu.chapp.chat.NewChatMember;
+import tcss450.uw.edu.chapp.chat.User;
 import tcss450.uw.edu.chapp.model.Credentials;
 import tcss450.uw.edu.chapp.setlist.SetList;
 import tcss450.uw.edu.chapp.utils.PushReceiver;
@@ -583,7 +583,7 @@ public class HomeActivity extends AppCompatActivity
 //    }
 
     @Override
-    public void onListFragmentInteraction(NewChatMember item) {
+    public void onListFragmentInteraction(User item) {
 
     }
 

@@ -194,7 +194,7 @@ public class ChatFragment extends Fragment {
                 for(int i = 0; i < data.length(); i++) {
                     JSONObject jsonMessage = data.getJSONObject(i);
                     messages.add(new Message.Builder(
-                            jsonMessage.getString(getString(R.string.keys_json_chats_username)),
+                            jsonMessage.getString(getString(R.string.keys_json_username)),
                             jsonMessage.getString(getString(R.string.keys_json_chats_message)),
                             jsonMessage.getString(getString(R.string.keys_json_chats_time)))
                             .build());

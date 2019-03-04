@@ -2,7 +2,7 @@ package tcss450.uw.edu.chapp.chat;
 
 import java.io.Serializable;
 
-public class NewChatMember implements Serializable {
+public class User implements Serializable {
 
     private final String mName;
 
@@ -14,13 +14,13 @@ public class NewChatMember implements Serializable {
             mName = name;
         }
 
-        public NewChatMember build() {
-            return new NewChatMember(this);
+        public User build() {
+            return new User(this);
         }
 
     }
 
-    private NewChatMember(final Builder builder) {
+    private User(final Builder builder) {
         mName = builder.mName;
     }
 

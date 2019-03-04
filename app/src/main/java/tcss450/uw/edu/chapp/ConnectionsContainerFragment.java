@@ -22,7 +22,6 @@ import java.beans.PropertyChangeListener;
 import java.util.ArrayList;
 import java.util.List;
 
-import tcss450.uw.edu.chapp.chat.Message;
 import tcss450.uw.edu.chapp.connections.Connection;
 import tcss450.uw.edu.chapp.model.Credentials;
 import tcss450.uw.edu.chapp.utils.SendPostAsyncTask;
@@ -32,6 +31,8 @@ import tcss450.uw.edu.chapp.utils.SendPostAsyncTask;
  * A simple {@link Fragment} subclass.
  */
 public class ConnectionsContainerFragment extends Fragment implements PropertyChangeListener {
+    public static final String REFRESH_CONNECTIONS = "refresh the connections please";
+
     private List<Connection> mConnections;
     private Credentials mCreds;
     private String mJwToken;
@@ -68,18 +69,71 @@ public class ConnectionsContainerFragment extends Fragment implements PropertyCh
     }
 
     private boolean newConnectionMenuItemListener(MenuItem menuItem) {
-        Fragment frag = new NewConnectionFragment();
-        Bundle args = new Bundle();
-        args.putSerializable(getString(R.string.key_credentials), mCreds);
-        args.putSerializable(getString(R.string.keys_intent_jwt), mJwToken);
-        frag.setArguments(args);
-        getActivity().getSupportFragmentManager()
-                .beginTransaction()
-                .replace(R.id.fragment_container, frag)
-                .addToBackStack(null)
-                .commit();
+        // fetch usernames from database here
+        mListener.onWaitFragmentInteractionShow();
+        Uri uri = new Uri.Builder()
+                .scheme("https")
+                .appendPath(getString(R.string.ep_base_url))
+                .appendPath(getString(R.string.ep_connections_base))
+                .appendPath(getString(R.string.ep_connections_get_all_member_info))
+                .build();
+        // Pass the credentials
+        JSONObject msg = mCreds.asJSONObject();
+        new SendPostAsyncTask.Builder(uri.toString(), msg)
+                .onPostExecute(this::handleMemberInformationOnPostExecute)
+                .onCancelled(error -> Log.e("ConnectionsContainerFragment", error))
+                .addHeaderField("authorization", mJwToken) //add the JWT as a header
+                .build().execute();
 
         return true;
+    }
+
+    private void handleMemberInformationOnPostExecute(String result) {
+        // parse JSON
+        try {
+            JSONObject root = new JSONObject(result);
+            if (root.has(getString(R.string.keys_json_users))) {
+
+                JSONArray data = root.getJSONArray(
+                        getString(R.string.keys_json_users));
+                List<Credentials> users = new ArrayList<>();
+                for(int i = 0; i < data.length(); i++) {
+                    JSONObject jsonCred = data.getJSONObject(i);
+                    users.add(new Credentials.Builder(
+                            jsonCred.getString(getString(R.string.keys_json_email)),
+                            "")
+                            .addFirstName(jsonCred.getString(getString(R.string.keys_json_first_name)))
+                            .addLastName(jsonCred.getString(getString(R.string.keys_json_last_name)))
+                            .addUsername(jsonCred.getString(getString(R.string.keys_json_username)))
+                            .build());
+                }
+                Bundle args = new Bundle();
+
+                // Do this swapping so we can send in an array of Messages not Objects
+                Credentials[] credsAsArray = new Credentials[users.size()];
+                credsAsArray = users.toArray(credsAsArray);
+                args.putSerializable(NewConnectionFragment.ARG_CRED_LIST, credsAsArray);
+                args.putSerializable(getString(R.string.key_credentials), mCreds);
+                args.putSerializable(getString(R.string.keys_intent_jwt), mJwToken);
+                NewConnectionFragment newConnectionFrag = new NewConnectionFragment();
+                newConnectionFrag.setArguments(args);
+
+                getActivity().getSupportFragmentManager()
+                        .beginTransaction()
+                        .replace(R.id.new_connection_container, newConnectionFrag)
+                        .commit();
+
+                newConnectionFrag.addPropertyChangeListener(this);
+                mListener.onWaitFragmentInteractionHide();
+            } else {
+                Log.e("ERROR!", "No data array");
+                mListener.onWaitFragmentInteractionHide();
+            }
+        } catch (JSONException e) {
+            e.printStackTrace();
+            Log.e("ERROR!", e.getMessage());
+            mListener.onWaitFragmentInteractionHide();
+        }
     }
 
     /**
@@ -98,7 +152,7 @@ public class ConnectionsContainerFragment extends Fragment implements PropertyCh
         JSONObject msg = mCreds.asJSONObject();
         new SendPostAsyncTask.Builder(uri.toString(), msg)
                 .onPostExecute(this::handleConnectionsOnPostExecute)
-                .onCancelled(error -> Log.e("AllConnectionsFragment", error))
+                .onCancelled(error -> Log.e("ConnectionsContainerFragment", error))
                 .addHeaderField("authorization", mJwToken) //add the JWT as a header
                 .build().execute();
     }
@@ -187,7 +241,7 @@ public class ConnectionsContainerFragment extends Fragment implements PropertyCh
 
     @Override
     public void propertyChange(PropertyChangeEvent evt) {
-        if (evt.getPropertyName().equals(MyAllConnectionsRecyclerViewAdapter.PROPERTY_CONNECTIONS_CHANGED)) {
+        if (evt.getPropertyName().equals(REFRESH_CONNECTIONS)) {
             // refresh everything, something changed.
             callWebServiceforConnections();
         }

@@ -1,23 +1,14 @@
 package tcss450.uw.edu.chapp;
 
 import android.content.Context;
-import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MenuInflater;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
 
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
@@ -28,7 +19,6 @@ import java.util.List;
 
 import tcss450.uw.edu.chapp.connections.Connection;
 import tcss450.uw.edu.chapp.model.Credentials;
-import tcss450.uw.edu.chapp.utils.SendPostAsyncTask;
 
 /**
  * A fragment representing a list of Items.
@@ -131,8 +121,8 @@ public class AllConnectionsFragment extends Fragment implements PropertyChangeLi
     @Override
     public void propertyChange(PropertyChangeEvent evt) {
         // Wrap the adapter's connections changed adapter and put that up.
-        if (evt.getPropertyName() == MyAllConnectionsRecyclerViewAdapter.PROPERTY_CONNECTIONS_CHANGED) {
-            myPcs.firePropertyChange(MyAllConnectionsRecyclerViewAdapter.PROPERTY_CONNECTIONS_CHANGED,
+        if (evt.getPropertyName() == ConnectionsContainerFragment.REFRESH_CONNECTIONS) {
+            myPcs.firePropertyChange(ConnectionsContainerFragment.REFRESH_CONNECTIONS,
                     null, evt.getNewValue());
         }
     }

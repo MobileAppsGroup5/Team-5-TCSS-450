@@ -11,23 +11,17 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import tcss450.uw.edu.chapp.AllConnectionsFragment.OnListFragmentInteractionListener;
-import tcss450.uw.edu.chapp.chat.Message;
 import tcss450.uw.edu.chapp.connections.Connection;
 import tcss450.uw.edu.chapp.model.Credentials;
 import tcss450.uw.edu.chapp.utils.SendPostAsyncTask;
 
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
-import java.util.function.Consumer;
-import java.util.function.Predicate;
 
 /**
  * {@link RecyclerView.Adapter} that can display a {@link Connection} and makes a call to the
@@ -35,8 +29,6 @@ import java.util.function.Predicate;
  * TODO: Replace the implementation with code for your data type.
  */
 public class MyAllConnectionsRecyclerViewAdapter extends RecyclerView.Adapter<MyAllConnectionsRecyclerViewAdapter.ViewHolder> {
-
-    public static final String PROPERTY_CONNECTIONS_CHANGED = "connections changed}{";
 
     // used for the ViewHolder's viewType
     // connections sent to us from another person AND NOT VERIFIED YET
@@ -205,7 +197,7 @@ public class MyAllConnectionsRecyclerViewAdapter extends RecyclerView.Adapter<My
 
     private void handleConnectionsChangePostExecute(String result) {
         // Our list changed, notify listeners that we need to be refreshed
-        myPcs.firePropertyChange(PROPERTY_CONNECTIONS_CHANGED, null, result);
+        myPcs.firePropertyChange(ConnectionsContainerFragment.REFRESH_CONNECTIONS, null, result);
 
         // run the runnable, let someone else handle it
 //        mUpdateRunnable.run();
