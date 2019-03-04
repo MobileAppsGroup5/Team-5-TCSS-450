@@ -56,7 +56,7 @@ public class ChatFragment extends Fragment {
     private Credentials mCreds;
     private String mJwToken;
     private String mSendUrl;
-    private String mChatId;
+    private String mChatId = "";
 
 
     private PushMessageReceiver mPushMessageReciever;
@@ -112,6 +112,10 @@ public class ChatFragment extends Fragment {
 
 
         return rootLayout;
+    }
+
+    public String getChatId(){
+        return mChatId;
     }
 
     /**
@@ -219,13 +223,6 @@ public class ChatFragment extends Fragment {
     }
 
     /**
-     * Calls wait fragment to show in HomeActivity.
-     */
-    private void handleWaitFragmentShow(){
-        mListener.onWaitFragmentInteractionShow();
-    }
-
-    /**
      * Displays the messages in the UI after grabbing the list from the database.
      */
     private void constructMessages(){
@@ -324,7 +321,9 @@ public class ChatFragment extends Fragment {
         return dateFormat.format(date);
     }
 
-    public interface OnChatMessageFragmentInteractionListener extends WaitFragment.OnFragmentInteractionListener {
+    public interface OnChatMessageFragmentInteractionListener {
+        void incrementUnreadChatNotifications(String chatId);
+       // void updateViewedChatroom(String chatId);
     }
 
 //    /**
@@ -333,16 +332,26 @@ public class ChatFragment extends Fragment {
     private class PushMessageReceiver extends BroadcastReceiver {
         @Override
         public void onReceive(Context context, Intent intent) {
-            Log.e("WORLD", intent.getStringExtra("MESSAGE"));
+            Log.e("CHAT FRAGMENT RECEIVER", intent.getStringExtra("MESSAGE"));
             if(intent.hasExtra("SENDER")
                     && intent.hasExtra("MESSAGE")
                     && intent.hasExtra("CHATID")) {
                 String sender = intent.getStringExtra("SENDER");
                 String messageText = intent.getStringExtra("MESSAGE");
+                String chatId = intent.getStringExtra("CHATID");
                 Message message = new Message.Builder(sender, messageText, currentTime()).build();
+
+                //Checks if the current chat that's open matches the one
+                //incoming with the notification
                 if (intent.getStringExtra("CHATID").equals(mChatId)
                     && mMessageFragment != null) {
-                    callWebServiceforMessages();
+                    callWebServiceforMessages(); //get new list of messages instead of show notificaiton inapp
+
+                } else {    //msg was received from a user in a separate chat than one being viewed
+
+                    //update home fragments list of notifications to be viewed.
+                    mListener.incrementUnreadChatNotifications(chatId);
+
                 }
 //                Snackbar snack = Snackbar.make(getActivity().findViewById(R.id.chat_messages_container), "MESSAGE", Snackbar.LENGTH_LONG);
 //                View view = snack.getView();
