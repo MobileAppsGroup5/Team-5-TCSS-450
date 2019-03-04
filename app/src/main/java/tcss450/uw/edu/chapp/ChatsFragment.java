@@ -1,13 +1,11 @@
 package tcss450.uw.edu.chapp;
 
 import android.content.Context;
-import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -15,13 +13,8 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-
 import tcss450.uw.edu.chapp.chat.Chat;
 import tcss450.uw.edu.chapp.model.Credentials;
-import tcss450.uw.edu.chapp.utils.SendPostAsyncTask;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -33,7 +26,7 @@ import java.util.List;
  * Activities containing this fragment MUST implement the {@link OnListFragmentInteractionListener}
  * interface.
  */
-public class AllChatsFragment extends Fragment {
+public class ChatsFragment extends Fragment {
 
     public static final String ARG_CHAT_LIST = "chats lists";
     private static final String ARG_COLUMN_COUNT = "column-count";
@@ -48,11 +41,11 @@ public class AllChatsFragment extends Fragment {
      * Mandatory empty constructor for the fragment manager to instantiate the
      * fragment (e.g. upon screen orientation changes).
      */
-    public AllChatsFragment() {
+    public ChatsFragment() {
     }
 
-    public static AllChatsFragment newInstance(int columnCount) {
-        AllChatsFragment fragment = new AllChatsFragment();
+    public static ChatsFragment newInstance(int columnCount) {
+        ChatsFragment fragment = new ChatsFragment();
         Bundle args = new Bundle();
         args.putInt(ARG_COLUMN_COUNT, columnCount);
         fragment.setArguments(args);

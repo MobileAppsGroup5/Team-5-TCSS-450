@@ -3,7 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
+    android:layout_height="wrap_content"
     tools:context=".NewChatFragment">
 
     <EditText
@@ -14,7 +14,7 @@
         android:layout_marginTop="8dp"
         android:layout_marginEnd="8dp"
         android:ems="10"
-        android:hint="Friend's Username"
+        android:hint="Connection's Username"
         android:inputType="textPersonName"
         app:layout_constraintEnd_toStartOf="@+id/button_create_new_chat"
         app:layout_constraintHorizontal_bias="1.0"
@@ -31,21 +31,6 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/text_view_new_chat_room_name" />
 
-    <FrameLayout
-        android:id="@+id/new_chat_member_container"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
-        android:layout_marginStart="8dp"
-        android:layout_marginTop="8dp"
-        android:layout_marginEnd="8dp"
-        android:layout_marginBottom="8dp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/text_view_create_new_chat_member_name">
-
-    </FrameLayout>
-
     <EditText
         android:id="@+id/text_view_new_chat_room_name"
         android:layout_width="294dp"
@@ -54,7 +39,7 @@
         android:layout_marginTop="8dp"
         android:layout_marginEnd="8dp"
         android:ems="10"
-        android:hint="New chatroom name"
+        android:hint="New Chatroom Name"
         android:inputType="textPersonName"
         app:layout_constraintEnd_toStartOf="@+id/button_add_new_chat_member"
         app:layout_constraintHorizontal_bias="0.0"

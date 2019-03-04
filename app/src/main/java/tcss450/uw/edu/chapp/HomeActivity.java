@@ -22,7 +22,6 @@ import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
-import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.TextView;
@@ -62,12 +61,11 @@ public class HomeActivity extends AppCompatActivity
         BlogPostFragment.OnFragmentInteractionListener,
         WaitFragment.OnFragmentInteractionListener,
         SetListFragment.OnListFragmentInteractionListener,
-        AllChatsFragment.OnListFragmentInteractionListener,
+        ChatsFragment.OnListFragmentInteractionListener,
         ChatFragment.OnChatMessageFragmentInteractionListener,
-        AllConnectionsFragment.OnListFragmentInteractionListener,
+        ConnectionsFragment.OnListFragmentInteractionListener,
         MessageFragment.OnListFragmentInteractionListener,
-        NewChatMembersFragment.OnListFragmentInteractionListener,
-        ConnectionsContainerFragment.OnListFragmentInteractionListener {
+        NewChatMembersFragment.OnListFragmentInteractionListener {
 
     private Credentials mCreds;
 
@@ -217,28 +215,28 @@ public class HomeActivity extends AppCompatActivity
 //        transaction.commit();
     }
 
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.home, menu);
-        return true;
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-//        int id = item.getItemId();
+//    @Override
+//    public boolean onCreateOptionsMenu(Menu menu) {
+//        // Inflate the menu; this adds items to the action bar if it is present.
+//        getMenuInflater().inflate(R.menu.home, menu);
+//        return true;
+//    }
 //
-//        //noinspection SimplifiableIfStatement
-//        if (id == R.id.action_logout) {
-//            logout();
-//            return true;
-//        }
-
-        return super.onOptionsItemSelected(item);
-    }
+//    @Override
+//    public boolean onOptionsItemSelected(MenuItem item) {
+//        // Handle action bar item clicks here. The action bar will
+//        // automatically handle clicks on the Home/Up button, so long
+//        // as you specify a parent activity in AndroidManifest.xml.
+////        int id = item.getItemId();
+////
+////        //noinspection SimplifiableIfStatement
+////        if (id == R.id.action_logout) {
+////            logout();
+////            return true;
+////        }
+//
+//        return super.onOptionsItemSelected(item);
+//    }
 
     @SuppressWarnings("StatementWithEmptyBody")
     @Override
@@ -266,20 +264,26 @@ public class HomeActivity extends AppCompatActivity
                 break;
 
             case R.id.nav_chat:
-                uri = new Uri.Builder()
-                    .scheme("https")
-                    .appendPath(getString(R.string.ep_base_url))
-                    .appendPath(getString(R.string.ep_chats_base))
-                    .appendPath(getString(R.string.ep_chats_get_chats))
-                    .build();
-                // Pass the credentials
-                msg = mCreds.asJSONObject();
-                new SendPostAsyncTask.Builder(uri.toString(), msg)
-                    .onPreExecute(this::onWaitFragmentInteractionShow)
-                    .onPostExecute(this::handleChatsPostOnPostExecute)
-                    .onCancelled(this::handleErrorsInTask)
-                    .addHeaderField("authorization", mJwToken) //add the JWT as a header
-                    .build().execute();
+                frag = new ChatsContainerFragment();
+                args = new Bundle();
+                args.putSerializable(getString(R.string.keys_intent_jwt), mJwToken);
+                args.putSerializable(getString(R.string.key_credentials), mCreds);
+                frag.setArguments(args);
+                loadFragment(frag);
+//                uri = new Uri.Builder()
+//                    .scheme("https")
+//                    .appendPath(getString(R.string.ep_base_url))
+//                    .appendPath(getString(R.string.ep_chats_base))
+//                    .appendPath(getString(R.string.ep_chats_get_chats))
+//                    .build();
+//                // Pass the credentials
+//                msg = mCreds.asJSONObject();
+//                new SendPostAsyncTask.Builder(uri.toString(), msg)
+//                    .onPreExecute(this::onWaitFragmentInteractionShow)
+//                    .onPostExecute(this::handleChatsPostOnPostExecute)
+//                    .onCancelled(this::handleErrorsInTask)
+//                    .addHeaderField("authorization", mJwToken) //add the JWT as a header
+//                    .build().execute();
                 break;
 
             case R.id.nav_weather:
@@ -311,7 +315,7 @@ public class HomeActivity extends AppCompatActivity
         JSONObject msg = mCreds.asJSONObject();
         new SendPostAsyncTask.Builder(uri.toString(), msg)
                 .onPostExecute(this::handleConnectionsOnPostExecute)
-                .onCancelled(error -> Log.e("AllConnectionsFragment", error))
+                .onCancelled(error -> Log.e("ConnectionsFragment", error))
                 .addHeaderField("authorization", mJwToken) //add the JWT as a header
                 .build().execute();
     }
@@ -352,10 +356,10 @@ public class HomeActivity extends AppCompatActivity
         // Do this swapping so we can send in an array of Messages not Objects
         Connection[] connectionsAsArray = new Connection[mConnections.size()];
         connectionsAsArray = mConnections.toArray(connectionsAsArray);
-        args.putSerializable(AllConnectionsFragment.ARG_CONNECTIONS_LIST, connectionsAsArray);
+        args.putSerializable(ConnectionsFragment.ARG_CONNECTIONS_LIST, connectionsAsArray);
         args.putSerializable(getString(R.string.key_credentials), mCreds);
         args.putSerializable(getString(R.string.keys_intent_jwt), mJwToken);
-        AllConnectionsFragment frag = new AllConnectionsFragment();
+        ConnectionsFragment frag = new ConnectionsFragment();
         frag.setArguments(args);
 
         getSupportFragmentManager()
@@ -390,10 +394,10 @@ public class HomeActivity extends AppCompatActivity
                 Connection[] connectionsAsArray = new Connection[connections.size()];
                 connectionsAsArray = connections.toArray(connectionsAsArray);
                 Bundle args = new Bundle();
-                args.putSerializable(AllConnectionsFragment.ARG_CONNECTIONS_LIST, connectionsAsArray);
+                args.putSerializable(ConnectionsFragment.ARG_CONNECTIONS_LIST, connectionsAsArray);
                 args.putSerializable(getString(R.string.key_credentials), mCreds);
                 args.putSerializable(getString(R.string.keys_intent_jwt), mJwToken);
-                Fragment frag = new AllConnectionsFragment();
+                Fragment frag = new ConnectionsFragment();
                 frag.setArguments(args);
                 onWaitFragmentInteractionHide();
                 loadFragment(frag);
@@ -443,10 +447,10 @@ public class HomeActivity extends AppCompatActivity
                     Chat[] chatsAsArray = new Chat[chats.size()];
                     chatsAsArray = chats.toArray(chatsAsArray);
                     Bundle args = new Bundle();
-                    args.putSerializable(AllChatsFragment.ARG_CHAT_LIST, chatsAsArray);
+                    args.putSerializable(ChatsFragment.ARG_CHAT_LIST, chatsAsArray);
                     args.putSerializable(getString(R.string.key_credentials), mCreds);
                     args.putSerializable(getString(R.string.keys_intent_jwt), mJwToken);
-                    Fragment frag = new AllChatsFragment();
+                    Fragment frag = new ChatsFragment();
                     frag.setArguments(args);
                     onWaitFragmentInteractionHide();
                     loadFragment(frag);
@@ -588,7 +592,7 @@ public class HomeActivity extends AppCompatActivity
     }
 
     /**
-     * Called when you click x on a contact in {@link AllConnectionsFragment}
+     * Called when you click x on a contact in {@link ConnectionsFragment}
      * Prompts the user if they want to delete the contact, then deletes it on confirm
      * @param c The connection that was clicked on
      */
@@ -637,7 +641,7 @@ public class HomeActivity extends AppCompatActivity
     }
 
     /**
-     * Called when you click check on a contact in {@link AllConnectionsFragment}
+     * Called when you click check on a contact in {@link ConnectionsFragment}
      * @param c The connection that was clicked on
      */
     @Override

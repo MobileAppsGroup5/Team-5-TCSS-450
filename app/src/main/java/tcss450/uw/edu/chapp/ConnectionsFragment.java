@@ -26,7 +26,7 @@ import tcss450.uw.edu.chapp.model.Credentials;
  * Activities containing this fragment MUST implement the {@link OnListFragmentInteractionListener}
  * interface.
  */
-public class AllConnectionsFragment extends Fragment implements PropertyChangeListener {
+public class ConnectionsFragment extends Fragment implements PropertyChangeListener {
 
     // Misspell this to lower the change of a tag conflict
     public static final String ARG_CONNECTIONS_LIST = "connections lists";
@@ -45,12 +45,12 @@ public class AllConnectionsFragment extends Fragment implements PropertyChangeLi
      * Mandatory empty constructor for the fragment manager to instantiate the
      * fragment (e.g. upon screen orientation changes).
      */
-    public AllConnectionsFragment() {
+    public ConnectionsFragment() {
     }
 
 
-    public static AllConnectionsFragment newInstance(int columnCount) {
-        AllConnectionsFragment fragment = new AllConnectionsFragment();
+    public static ConnectionsFragment newInstance(int columnCount) {
+        ConnectionsFragment fragment = new ConnectionsFragment();
         Bundle args = new Bundle();
         args.putInt(ARG_COLUMN_COUNT, columnCount);
         fragment.setArguments(args);

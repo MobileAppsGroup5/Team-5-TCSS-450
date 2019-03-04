@@ -14,7 +14,7 @@ import android.widget.TextView;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import tcss450.uw.edu.chapp.AllConnectionsFragment.OnListFragmentInteractionListener;
+import tcss450.uw.edu.chapp.ConnectionsFragment.OnListFragmentInteractionListener;
 import tcss450.uw.edu.chapp.connections.Connection;
 import tcss450.uw.edu.chapp.model.Credentials;
 import tcss450.uw.edu.chapp.utils.SendPostAsyncTask;

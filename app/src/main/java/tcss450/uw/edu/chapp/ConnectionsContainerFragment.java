@@ -36,7 +36,7 @@ public class ConnectionsContainerFragment extends Fragment implements PropertyCh
     private List<Connection> mConnections;
     private Credentials mCreds;
     private String mJwToken;
-    private OnListFragmentInteractionListener mListener;
+    private WaitFragment.OnFragmentInteractionListener mListener;
 
 
     public ConnectionsContainerFragment() {
@@ -70,7 +70,6 @@ public class ConnectionsContainerFragment extends Fragment implements PropertyCh
 
     private boolean newConnectionMenuItemListener(MenuItem menuItem) {
         // fetch usernames from database here
-        mListener.onWaitFragmentInteractionShow();
         Uri uri = new Uri.Builder()
                 .scheme("https")
                 .appendPath(getString(R.string.ep_base_url))
@@ -79,6 +78,7 @@ public class ConnectionsContainerFragment extends Fragment implements PropertyCh
                 .build();
         // Pass the credentials
         JSONObject msg = mCreds.asJSONObject();
+        mListener.onWaitFragmentInteractionShow();
         new SendPostAsyncTask.Builder(uri.toString(), msg)
                 .onPostExecute(this::handleMemberInformationOnPostExecute)
                 .onCancelled(error -> Log.e("ConnectionsContainerFragment", error))
@@ -195,10 +195,10 @@ public class ConnectionsContainerFragment extends Fragment implements PropertyCh
         // Do this swapping so we can send in an array of Messages not Objects
         Connection[] connectionsAsArray = new Connection[mConnections.size()];
         connectionsAsArray = mConnections.toArray(connectionsAsArray);
-        args.putSerializable(AllConnectionsFragment.ARG_CONNECTIONS_LIST, connectionsAsArray);
+        args.putSerializable(ConnectionsFragment.ARG_CONNECTIONS_LIST, connectionsAsArray);
         args.putSerializable(getString(R.string.key_credentials), mCreds);
         args.putSerializable(getString(R.string.keys_intent_jwt), mJwToken);
-        AllConnectionsFragment frag = new AllConnectionsFragment();
+        ConnectionsFragment frag = new ConnectionsFragment();
         frag.setArguments(args);
 
         getActivity().getSupportFragmentManager()
@@ -217,20 +217,20 @@ public class ConnectionsContainerFragment extends Fragment implements PropertyCh
     }
 
     @Override
-    public void onAttach(Context context) {
-        super.onAttach(context);
-        if (context instanceof OnListFragmentInteractionListener) {
-            mListener = (OnListFragmentInteractionListener) context;
-        } else {
-            throw new RuntimeException(context.toString()
-                    + " must implement OnListFragmentInteractionListener");
-        }
-    }
-
-    @Override
     public void onResume() {
         super.onResume();
         callWebServiceforConnections();
+    }
+
+    @Override
+    public void onAttach(Context context) {
+        super.onAttach(context);
+        if (context instanceof WaitFragment.OnFragmentInteractionListener) {
+            mListener = (WaitFragment.OnFragmentInteractionListener) context;
+        } else {
+            throw new RuntimeException(context.toString()
+                    + " must implement WaitFragment.OnFragmentInteractionListener");
+        }
     }
 
     @Override
@@ -245,21 +245,6 @@ public class ConnectionsContainerFragment extends Fragment implements PropertyCh
             // refresh everything, something changed.
             callWebServiceforConnections();
         }
-    }
-
-    /**
-     * This interface must be implemented by activities that contain this
-     * fragment to allow an interaction in this fragment to be communicated
-     * to the activity and potentially other fragments contained in that
-     * activity.
-     * <p/>
-     * See the Android Training lesson <a href=
-     * "http://developer.android.com/training/basics/fragments/communicating.html"
-     * >Communicating with Other Fragments</a> for more information.
-     */
-    public interface OnListFragmentInteractionListener {
-        void onWaitFragmentInteractionShow();
-        void onWaitFragmentInteractionHide();
     }
 
 

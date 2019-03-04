@@ -6,7 +6,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
-import tcss450.uw.edu.chapp.AllChatsFragment.OnListFragmentInteractionListener;
+import tcss450.uw.edu.chapp.ChatsFragment.OnListFragmentInteractionListener;
 import tcss450.uw.edu.chapp.chat.Chat;
 import tcss450.uw.edu.chapp.connections.Connection;
 
