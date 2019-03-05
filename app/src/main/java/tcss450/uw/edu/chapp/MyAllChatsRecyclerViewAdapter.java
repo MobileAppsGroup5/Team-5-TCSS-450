@@ -1,19 +1,23 @@
 package tcss450.uw.edu.chapp;
 
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
+import org.w3c.dom.Text;
+
 import tcss450.uw.edu.chapp.AllChatsFragment.OnListFragmentInteractionListener;
 import tcss450.uw.edu.chapp.chat.Chat;
-import tcss450.uw.edu.chapp.dummy.DummyContent.Contact;
+import tcss450.uw.edu.chapp.connections.Connection;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
- * {@link RecyclerView.Adapter} that can display a {@link Contact} and makes a call to the
+ * {@link RecyclerView.Adapter} that can display a {@link Connection} and makes a call to the
  * specified {@link OnListFragmentInteractionListener}.
  */
 public class MyAllChatsRecyclerViewAdapter extends RecyclerView.Adapter<MyAllChatsRecyclerViewAdapter.ViewHolder> {
@@ -37,6 +41,17 @@ public class MyAllChatsRecyclerViewAdapter extends RecyclerView.Adapter<MyAllCha
     public void onBindViewHolder(final ViewHolder holder, int position) {
         holder.mItem = mValues.get(position);
         holder.mNameView.setText(mValues.get(position).getName());
+//        if(null != mListener){
+//            mUnreadChats = mListener.receiveUnreadChats();
+//            Log.e("AllChatsRecyclerView", "Received unread chats list");
+//            //set color or something here for unread chats
+//            if(mUnreadChats.contains(mValues.get(position).getId())){
+//                //if the list of unread chats contains the current chat
+//                //display the unread message
+//                holder.mUnreadView.setText("UNREAD");
+//            }
+//
+//        }
 
         holder.mView.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -58,12 +73,14 @@ public class MyAllChatsRecyclerViewAdapter extends RecyclerView.Adapter<MyAllCha
     public class ViewHolder extends RecyclerView.ViewHolder {
         public final View mView;
         public final TextView mNameView;
+        public final TextView mUnreadView;
         public Chat mItem;
 
         public ViewHolder(View view) {
             super(view);
             mView = view;
             mNameView = (TextView) view.findViewById(R.id.list_item_chat_name);
+            mUnreadView = (TextView) view.findViewById(R.id.allchats_text_unread);
         }
 
         @Override

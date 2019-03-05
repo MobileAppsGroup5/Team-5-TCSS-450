@@ -14,7 +14,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import tcss450.uw.edu.chapp.chat.NewChatMember;
+import tcss450.uw.edu.chapp.chat.User;
 
 /**
  * A fragment representing a list of Items.
@@ -27,7 +27,7 @@ public class NewChatMembersFragment extends Fragment {
     public static final String ARG_NEW_MEMBER_LIST = "new members list";
     private static final String ARG_COLUMN_COUNT = "column-count";
 
-    private List<NewChatMember> mNewChatMembers;
+    private List<User> mUsers;
 
     private int mColumnCount = 1;
     private OnListFragmentInteractionListener mListener;
@@ -53,9 +53,9 @@ public class NewChatMembersFragment extends Fragment {
         super.onCreate(savedInstanceState);
 
         if (getArguments() != null) {
-            mNewChatMembers = new ArrayList<>(Arrays.asList((NewChatMember[])getArguments().getSerializable(ARG_NEW_MEMBER_LIST)));
+            mUsers = new ArrayList<>(Arrays.asList((User[])getArguments().getSerializable(ARG_NEW_MEMBER_LIST)));
         } else {
-            mNewChatMembers = new ArrayList<>();
+            mUsers = new ArrayList<>();
         }
     }
 
@@ -73,7 +73,7 @@ public class NewChatMembersFragment extends Fragment {
             } else {
                 recyclerView.setLayoutManager(new GridLayoutManager(context, mColumnCount));
             }
-            recyclerView.setAdapter(new MyNewChatMembersRecyclerViewAdapter(mNewChatMembers, mListener));
+            recyclerView.setAdapter(new MyNewChatMembersRecyclerViewAdapter(mUsers, mListener));
         }
         return view;
     }
@@ -107,6 +107,6 @@ public class NewChatMembersFragment extends Fragment {
      * >Communicating with Other Fragments</a> for more information.
      */
     public interface OnListFragmentInteractionListener {
-        void onListFragmentInteraction(NewChatMember item);
+        void onListFragmentInteraction(User item);
     }
 }

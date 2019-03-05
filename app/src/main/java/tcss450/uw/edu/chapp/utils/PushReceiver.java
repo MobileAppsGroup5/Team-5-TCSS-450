@@ -36,35 +36,41 @@ public class PushReceiver extends BroadcastReceiver {
         //feel free to change the key or type of values. You could use numbers like HTTP: 404 etc
         String typeOfMessage = intent.getStringExtra("type");
 
-        //The WS sent us the name of the sender
-        String sender = intent.getStringExtra("sender");
-
-        String messageText = intent.getStringExtra("message");
-
-        String chatid = intent.getStringExtra("chatid");
-
         Log.e("INTENTS", intent.getExtras().toString());
 
         ActivityManager.RunningAppProcessInfo appProcessInfo = new ActivityManager.RunningAppProcessInfo();
         ActivityManager.getMyMemoryState(appProcessInfo);
 
         if (appProcessInfo.importance == IMPORTANCE_FOREGROUND || appProcessInfo.importance == IMPORTANCE_VISIBLE) {
-            //app is in the foreground so send the message to the active Activities
-            Log.d("ChappApp", "Message received in foreground: " + messageText);
+            if ("msg".equals(typeOfMessage)) {
+                //app is in the foreground so send the message to the active Activities
+                Log.d("ChappApp", "Message received in foreground: " + intent.getStringExtra("message"));
 
-            //create an Intent to broadcast a message to other parts of the app.
-            Intent i = new Intent(RECEIVED_NEW_MESSAGE);
-            i.putExtra("SENDER", sender);
-            i.putExtra("MESSAGE", messageText);
-            i.putExtra("CHATID", chatid);
-            i.putExtras(intent.getExtras());
+                //create an Intent to broadcast a message to other parts of the app.
+                Intent i = new Intent(RECEIVED_NEW_MESSAGE);
+                i.putExtra("SENDER", intent.getStringExtra("sender"));
+                i.putExtra("MESSAGE", intent.getStringExtra("message"));
+                i.putExtra("CHATID", intent.getStringExtra("chatid"));
+                i.putExtras(intent.getExtras());
 
-            context.sendBroadcast(i);
+                context.sendBroadcast(i);
+            } else if ("conn req".equals(typeOfMessage)) {
+                Log.d("ChappApp", "Conn req recieved in foreground: " + intent.getStringExtra("sender"));
+
+                //create an Intent to broadcast a request to other parts of the app.
+                Intent i = new Intent(RECEIVED_NEW_MESSAGE);
+                i.putExtra("SENDER", intent.getStringExtra("sender"));
+                i.putExtra("TO", intent.getStringExtra("to"));
+                i.putExtra("MESSAGE", intent.getStringExtra("message"));
+                i.putExtras(intent.getExtras());
+
+                context.sendBroadcast(i);
+            }
 
         } else {
             //app is in the background so create and post a notification
-            Log.d("ChappApp", "Message received in background: " + messageText);
 
+            Log.d("ChappApp", "Message received in background: " + intent.getStringExtra("message"));
             Intent i = new Intent(context, MainActivity.class);
             i.putExtras(intent.getExtras());
 
@@ -77,17 +83,14 @@ public class PushReceiver extends BroadcastReceiver {
                     .setSmallIcon(R.mipmap.chapp_logo_trans_foreground)
                     .setContentIntent(pendingIntent);
 
+            // TODO: spice these out of app notifications up, put relevant icons etc
             if (typeOfMessage.equals("msg")) {
-                builder.setContentTitle("Message from: " + sender)
-                        .setContentText(messageText);
+                builder.setContentTitle("Message from: " + intent.getStringExtra("sender"))
+                        .setContentText(intent.getStringExtra("message"));
             }
-            else if (typeOfMessage.equals("topic_msg")) {
-                builder.setContentTitle("Topic Message from: " + sender)
-                        .setContentText(messageText);
-            }
-            //else if connection
-            else {
-
+            else if (typeOfMessage.equals("conn req")) {
+                builder.setContentTitle("Connection request from: " + intent.getStringExtra("sender"))
+                        .setContentText(intent.getStringExtra("message"));
             }
 
             // Automatically configure a Notification Channel for devices running Android O+

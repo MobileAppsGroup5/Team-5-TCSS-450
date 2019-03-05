@@ -36,8 +36,15 @@
     <string name="imagebutton_message">Message Contact ImageButton</string>"
     <string name="imagebutton_request">Request Contact ImageButton</string>"
     <string name="tv_request_contact">Request Contact</string>
+    <string-array name="member_search_values">
+        <item>Username</item>
+        <item>Email</item>
+        <item>First Name</item>
+        <item>Last Name</item>
+    </string-array>
 
     <!-- current weather strings -->
     <string name="current_weather_no_location_permission_error">Can\'t display weather without location permission</string>
     <string name="weather_dialog_postal_code_hint">Enter a zipcode</string>
+
 </resources>
