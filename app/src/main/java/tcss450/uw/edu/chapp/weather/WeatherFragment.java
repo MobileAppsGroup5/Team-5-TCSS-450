@@ -108,12 +108,6 @@ public class WeatherFragment extends Fragment {
             startLocationUpdates();
         }
 
-        getChildFragmentManager()
-                .beginTransaction()
-                .replace(R.id.weather_day_frame_layout, new WeatherDayFragment())
-                .commit();
-
-
         return v;
     }
 
@@ -319,6 +313,8 @@ public class WeatherFragment extends Fragment {
             Log.e("WEATHER_ERROR", "location is null");
         }
     }
+    
+
     private void setCurrentWeather(Location location) {
         Uri uri = new Uri.Builder()
                 .scheme("https")
@@ -370,8 +366,6 @@ public class WeatherFragment extends Fragment {
                 .onPostExecute(this::handleGetDayWeatherOnPost)
                 .build().execute();
     }
-
-
 
 
     private void handleGetWeatherOnPre() {
