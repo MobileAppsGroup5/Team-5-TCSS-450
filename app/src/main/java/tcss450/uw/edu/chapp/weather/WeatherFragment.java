@@ -2,12 +2,14 @@ package tcss450.uw.edu.chapp.weather;
 
 import android.Manifest;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
+import android.support.v7.app.AlertDialog;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -15,6 +17,8 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -43,10 +47,13 @@ import tcss450.uw.edu.chapp.weather.WeatherDayContent.WeatherDayItem;
 
 
 /**
- * A simple {@link Fragment} subclass.
- * Activities that contain this fragment must implement the
- * {@link WeatherFragment.OnFragmentInteractionListener} interface
- * to handle interaction events.
+ * Class that holds the functionality for the weather of the app.
+ * will set the weather to the current device location on create and
+ * then the user will be able to select different modes of weather selection,
+ * such as entering a zipcode, choosing a place on the map, and saving and loading a
+ * previous location
+ *
+ * @author Mike Osborne, Trung Thai, Michael Josten, Jessica Medrzycki
  */
 public class WeatherFragment extends Fragment {
 
@@ -111,6 +118,10 @@ public class WeatherFragment extends Fragment {
         return v;
     }
 
+    /**
+     * method that will create a fragment that will display the weather hour item list
+     * @param weatherItemList
+     */
     private void setWeatherHourFragment(ArrayList<WeatherHourItem> weatherItemList) {
         Bundle args = new Bundle();
         args.putSerializable(getString(R.string.keys_weather_hour_list_arg), weatherItemList);
@@ -126,6 +137,11 @@ public class WeatherFragment extends Fragment {
 
     }
 
+    /**
+     * method that will set the weather day fragment with the list of weather items passed.
+     * @param weatherItemList list of weather items passed which each weather item
+     *                        represents a day.
+     */
     private void setWeatherDayFragment(ArrayList<WeatherDayItem> weatherItemList) {
         Bundle args = new Bundle();
         args.putSerializable(getString(R.string.keys_weather_day_list_arg), weatherItemList);
@@ -172,6 +188,38 @@ public class WeatherFragment extends Fragment {
      */
     private boolean setWeatherByZipcode(MenuItem menuItem) {
         Log.i("WEATHER_OPTIONS_SELECT", "zipcode selected");
+
+        //make a dialog with a edittext
+        final EditText editText = new EditText(getActivity());
+
+        //make alert for the user to enter a zipcode
+        AlertDialog dialog = new AlertDialog.Builder(getActivity())
+                .setTitle("Enter a Zipcode")
+                .setView(editText)
+                .setPositiveButton("Enter", null) //override later
+                .setNegativeButton("Cancel", null)
+                .create();
+
+        dialog.setOnShowListener(new DialogInterface.OnShowListener() {
+            @Override
+            public void onShow(DialogInterface dialog) {
+                Button pButton = ((AlertDialog)dialog).getButton(AlertDialog.BUTTON_POSITIVE);
+                pButton.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        String zipcode = editText.getText().toString();
+                        //check if zipcode is valid.
+                        if (zipcode.isEmpty()) {
+                            editText.setError(getString(R.string.weather_dialog_postal_code_error));
+                        } else {
+                            setWeather(zipcode);
+                            dialog.dismiss();
+                        }
+                    }
+                });
+            }
+        });
+        dialog.show();
         return true;
     }
 
@@ -189,6 +237,7 @@ public class WeatherFragment extends Fragment {
      */
     private boolean setWeatherByCurrent(MenuItem menuItem) {
         Log.i("WEATHER_OPTIONS_SELECT", "current selected");
+        startLocationUpdates();
         return true;
     }
 
@@ -212,7 +261,11 @@ public class WeatherFragment extends Fragment {
     }
 
 
-
+    /**
+     * method that will set the fragment interaction listener to the
+     * the activity that this fragment is being attached to.
+     * @param context
+     */
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
@@ -224,6 +277,9 @@ public class WeatherFragment extends Fragment {
         }
     }
 
+    /**
+     * method that will set the interface listener to null
+     */
     @Override
     public void onDetach() {
         super.onDetach();
@@ -231,6 +287,9 @@ public class WeatherFragment extends Fragment {
     }
 
 
+    /**
+     * method that will specify the locationRequest
+     */
     private void createLocationRequest() {
         mLocationRequest = LocationRequest.create();
         mLocationRequest.setInterval(UPDATE_INTERVAL_IN_MILLISECONDS);
@@ -238,6 +297,10 @@ public class WeatherFragment extends Fragment {
         mLocationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
     }
 
+    /**
+     * method that sets the location callback,
+     * call back will stop the updates and set the weather based on the current device location
+     */
     private void setLocationCallback() {
         mLocationCallback = new LocationCallback() {
             @Override
@@ -256,6 +319,9 @@ public class WeatherFragment extends Fragment {
         };
     }
 
+    /**
+     * method that will start location updates.
+     */
     private void startLocationUpdates() {
         if (ActivityCompat.checkSelfPermission(getActivity(), Manifest.permission.ACCESS_FINE_LOCATION)
                 == PackageManager.PERMISSION_GRANTED
@@ -303,6 +369,10 @@ public class WeatherFragment extends Fragment {
         }
     }
 
+    /**
+     * method that will call other set weather methods with a location
+     * @param location of the weather
+     */
     private void setWeather(Location location) {
         if (location != null) {
             setCurrentWeather(location);
@@ -313,8 +383,26 @@ public class WeatherFragment extends Fragment {
             Log.e("WEATHER_ERROR", "location is null");
         }
     }
-    
 
+    /**
+     * Method that will call the other set weather methods with the zipcode
+     * @param zipcode of the weather location
+     */
+    private void setWeather(String zipcode) {
+        if (!zipcode.isEmpty()) {
+            setCurrentWeather(zipcode);
+            setHourWeather(zipcode);
+            setDayWeather(zipcode);
+        } else {
+            Log.e("WEATHER_ERROR", "zipcode is empty");
+        }
+    }
+
+    /**
+     * Method that will build a uri to the backend that will take the
+     * lat and lon of a location and create a async task to handle the results
+     * @param location location of the weather
+     */
     private void setCurrentWeather(Location location) {
         Uri uri = new Uri.Builder()
                 .scheme("https")
@@ -333,6 +421,32 @@ public class WeatherFragment extends Fragment {
                 .build().execute();
     }
 
+    /**
+     * Method that will create a uri using a zipcode to get weather from the webservice.
+     * then will build async task to handle weather.
+     * @param zipcode of the weather
+     */
+    private void setCurrentWeather(String zipcode) {
+        Uri uri = new Uri.Builder()
+                .scheme("https")
+                .appendPath(getString(R.string.ep_base_url))
+                .appendPath(getString(R.string.ep_weather_base))
+                .appendPath(getString(R.string.ep_weather_current))
+                .appendQueryParameter("postal_code", zipcode)
+                .build();
+
+        new GetAsyncTask.Builder(uri.toString())
+                .onPreExecute(this::handleGetWeatherOnPre)
+                .onCancelled(this::handleGetWeatherError)
+                .onPostExecute(this::handleGetCurrentWeatherOnPost)
+                .build().execute();
+    }
+
+    /**
+     * Method that will set the hourWeather based on the location
+     * by calling the webservice and making a get request using the location
+     * @param location is the location of the weather
+     */
     private void setHourWeather(Location location) {
         Uri uri = new Uri.Builder()
                 .scheme("https")
@@ -350,6 +464,31 @@ public class WeatherFragment extends Fragment {
                 .build().execute();
     }
 
+    /**
+     * method that will set the hour weather based on the zipcode
+     * @param zipcode of the weather
+     */
+    private void setHourWeather(String zipcode) {
+        Uri uri = new Uri.Builder()
+                .scheme("https")
+                .appendPath(getString(R.string.ep_base_url))
+                .appendPath(getString(R.string.ep_weather_base))
+                .appendPath(getString(R.string.ep_weather_24h))
+                .appendQueryParameter("postal_code", zipcode)
+                .build();
+
+
+        new GetAsyncTask.Builder(uri.toString())
+                .onCancelled(this::handleGetWeatherError)
+                .onPostExecute(this::handleGetHourWeatherOnPost)
+                .build().execute();
+    }
+
+    /**
+     * set the day weather based on the location passed
+     * by calling a webservice and making a get request with the location
+     * @param location is the location of the weather
+     */
     private void setDayWeather(Location location) {
         Uri uri = new Uri.Builder()
                 .scheme("https")
@@ -367,15 +506,47 @@ public class WeatherFragment extends Fragment {
                 .build().execute();
     }
 
+    /**
+     * Method that will set the day weather based on the zipcode
+     * @param zipcode of the weather
+     */
+    private void setDayWeather(String zipcode) {
+        Uri uri = new Uri.Builder()
+                .scheme("https")
+                .appendPath(getString(R.string.ep_base_url))
+                .appendPath(getString(R.string.ep_weather_base))
+                .appendPath(getString(R.string.ep_weather_10d))
+                .appendQueryParameter("postal_code", zipcode)
+                .build();
 
+
+        new GetAsyncTask.Builder(uri.toString())
+                .onCancelled(this::handleGetWeatherError)
+                .onPostExecute(this::handleGetDayWeatherOnPost)
+                .build().execute();
+    }
+
+
+    /**
+     * method that will show the wait fragment
+     */
     private void handleGetWeatherOnPre() {
         mListener.onWaitFragmentInteractionShow();
     }
 
+    /**
+     * method that logs an error in the async tasks
+     * @param result error message
+     */
     private void handleGetWeatherError(String result) {
         Log.e("WEATHER_ASYNC_ERROR", result);
     }
 
+    /**
+     * Method that will set the views of the fragment to the result of the
+     * get request of the current weather.
+     * @param result is a JSON result from the webservice
+     */
     private void handleGetCurrentWeatherOnPost(String result) {
         try {
             JSONObject weatherResultJSON = new JSONObject(result);
@@ -417,11 +588,24 @@ public class WeatherFragment extends Fragment {
 
         } catch (JSONException e) {
             e.printStackTrace();
+            Log.e("WEATHER_GET_ERROR", "error with get current on post");
+            //display dialog which informs user
+            new AlertDialog.Builder(getActivity())
+                    .setTitle("Error with Getting Weather")
+                    .setPositiveButton("Ok", null)
+                    .create()
+                    .show();
         }
+
 
     }
 
 
+    /**
+     * Method that will set the views of the fragment to the result from the get hour weather
+     * request
+     * @param result is a JSON result from the webservice
+     */
     private void handleGetHourWeatherOnPost(String result) {
         try {
             JSONObject weatherResultJSON = new JSONObject(result);
@@ -461,6 +645,10 @@ public class WeatherFragment extends Fragment {
         }
     }
 
+    /**
+     * Method that set the views of the fragment to the result of the get day weather request
+     * @param result JSON result of the get request from the webservice.
+     */
     private void handleGetDayWeatherOnPost(String result) {
         try {
             JSONObject weatherResultJSON = new JSONObject(result);

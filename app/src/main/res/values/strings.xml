@@ -46,5 +46,6 @@
     <!-- current weather strings -->
     <string name="current_weather_no_location_permission_error">Can\'t display weather without location permission</string>
     <string name="weather_dialog_postal_code_hint">Enter a zipcode</string>
+    <string name="weather_dialog_postal_code_error">Need to enter a zipcode</string>
 
 </resources>

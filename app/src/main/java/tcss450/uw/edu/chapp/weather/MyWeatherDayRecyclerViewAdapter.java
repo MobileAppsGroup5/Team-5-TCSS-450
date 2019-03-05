@@ -14,7 +14,9 @@ import tcss450.uw.edu.chapp.weather.WeatherDayContent.WeatherDayItem;
 import java.util.List;
 
 /**
- * {@link RecyclerView.Adapter} that can display a {@link WeatherDayItem} and makes a call to the
+ * class which will take a list of weather day items and display them in a list view.
+ *
+ * @author Mike Osborne, Trung Thai, Michael Josten, Jessica Medrzycki
  */
 public class MyWeatherDayRecyclerViewAdapter extends RecyclerView.Adapter<MyWeatherDayRecyclerViewAdapter.ViewHolder> {
 
@@ -57,6 +59,9 @@ public class MyWeatherDayRecyclerViewAdapter extends RecyclerView.Adapter<MyWeat
         return mValues.size();
     }
 
+    /**
+     * class that holds the text view of the recycler view.
+     */
     public class ViewHolder extends RecyclerView.ViewHolder {
         public final View mView;
         public final TextView mDayView;
