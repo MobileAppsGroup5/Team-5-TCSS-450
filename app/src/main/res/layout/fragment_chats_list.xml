@@ -12,4 +12,4 @@
     android:layout_marginRight="16dp"
     app:layoutManager="android.support.v7.widget.LinearLayoutManager"
     tools:context=".ChatsFragment"
-    tools:listitem="@layout/fragment_allchats" />
+    tools:listitem="@layout/fragment_chats" />

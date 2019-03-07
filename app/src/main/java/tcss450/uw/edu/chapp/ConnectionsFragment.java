@@ -74,7 +74,7 @@ public class ConnectionsFragment extends Fragment implements PropertyChangeListe
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.fragment_all_connections_list, container, false);
+        View view = inflater.inflate(R.layout.fragment_connections_list, container, false);
 
         // Set the adapter
         if (view instanceof RecyclerView) {

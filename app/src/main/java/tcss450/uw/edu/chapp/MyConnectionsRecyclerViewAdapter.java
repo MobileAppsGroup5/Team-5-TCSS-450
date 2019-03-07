@@ -93,11 +93,11 @@ public class MyConnectionsRecyclerViewAdapter extends RecyclerView.Adapter<MyCon
         if (viewType == SENT || viewType == RECIEVED_VERIFIED) {
             // sent from us
             view = LayoutInflater.from(parent.getContext())
-                    .inflate(R.layout.fragment_all_connections_outgoing, parent, false);
+                    .inflate(R.layout.fragment_connections_outgoing, parent, false);
         } else {
             // sent to us
             view = LayoutInflater.from(parent.getContext())
-                    .inflate(R.layout.fragment_all_connections_incoming, parent, false);
+                    .inflate(R.layout.fragment_connections_incoming, parent, false);
         }
         return new ViewHolder(view);
     }

@@ -203,7 +203,7 @@ public class ChatsContainerFragment extends Fragment implements PropertyChangeLi
                 args.putSerializable(NewChatFragment.ARG_CONN_LIST, connsAsArray);
                 args.putSerializable(getString(R.string.key_credentials), mCreds);
                 args.putSerializable(getString(R.string.keys_intent_jwt), mJwToken);
-                NewConnectionFragment newChatFrag = new NewConnectionFragment();
+                NewChatFragment newChatFrag = new NewChatFragment();
                 newChatFrag.setArguments(args);
 
                 getActivity().getSupportFragmentManager()

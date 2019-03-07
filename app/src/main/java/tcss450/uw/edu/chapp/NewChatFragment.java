@@ -3,6 +3,7 @@ package tcss450.uw.edu.chapp;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -14,7 +15,11 @@ import org.json.JSONObject;
 
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
+import tcss450.uw.edu.chapp.connections.Connection;
 import tcss450.uw.edu.chapp.model.Credentials;
 import tcss450.uw.edu.chapp.utils.SendPostAsyncTask;
 
@@ -24,10 +29,13 @@ import tcss450.uw.edu.chapp.utils.SendPostAsyncTask;
  */
 public class NewChatFragment extends Fragment {
 
-    public static final String ARG_CREDS_LIST = "credlist<>{}";
+    public static final String ARG_CONN_LIST = "connnnlist<>{}";
 
+    private List<Connection> mConnectionList;
     private Credentials mCreds;
     private String mJwToken;
+
+    private List<String> userNameList;
 
     private PropertyChangeSupport myPcs = new PropertyChangeSupport(this);
 
@@ -42,9 +50,18 @@ public class NewChatFragment extends Fragment {
         super.onCreate(savedInstanceState);
 
         if (getArguments() != null) {
+            mConnectionList = new ArrayList<>(Arrays.asList((Connection[])getArguments().getSerializable(ARG_CONN_LIST)));
             mCreds = (Credentials) getArguments().getSerializable(getString(R.string.key_credentials));
             mJwToken = getArguments().getString(getString(R.string.keys_intent_jwt));
+
+            setUpConnectionSearchArray();
         }
+    }
+
+    private void setUpConnectionSearchArray() {
+        userNameList = new ArrayList<>();
+
+
     }
 
     @Override
