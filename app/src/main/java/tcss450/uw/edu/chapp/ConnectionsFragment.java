@@ -34,7 +34,7 @@ public class ConnectionsFragment extends Fragment implements PropertyChangeListe
     private List<Connection> mConnections;
     private Credentials mCreds;
     private String mJwToken;
-    private MyAllConnectionsRecyclerViewAdapter mAdapter;
+    private MyConnectionsRecyclerViewAdapter mAdapter;
 
     private int mColumnCount = 1;
     private OnListFragmentInteractionListener mListener;
@@ -85,7 +85,7 @@ public class ConnectionsFragment extends Fragment implements PropertyChangeListe
             } else {
                 recyclerView.setLayoutManager(new GridLayoutManager(context, mColumnCount));
             }
-            mAdapter = new MyAllConnectionsRecyclerViewAdapter(mConnections, mListener, mCreds, mJwToken, getContext());
+            mAdapter = new MyConnectionsRecyclerViewAdapter(mConnections, mListener, mCreds, mJwToken, getContext());
             mAdapter.addPropertyChangeListener(this);
             recyclerView.setAdapter(mAdapter);
         }

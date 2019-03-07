@@ -7,9 +7,6 @@ import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MenuInflater;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 
@@ -55,7 +52,6 @@ public class ChatsFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setHasOptionsMenu(true);
         if (getArguments() != null) {
             mChats = new ArrayList<>(Arrays.asList((Chat[])getArguments().getSerializable(ARG_CHAT_LIST)));
             mCreds = (Credentials)getArguments().getSerializable(getString(R.string.key_credentials));
@@ -145,43 +141,10 @@ public class ChatsFragment extends Fragment {
             } else {
                 recyclerView.setLayoutManager(new GridLayoutManager(context, mColumnCount));
             }
-            recyclerView.setAdapter(new MyAllChatsRecyclerViewAdapter(mChats, mListener));
+            recyclerView.setAdapter(new MyChatsRecyclerViewAdapter(mChats, mListener));
         }
         return view;
     }
-
-    /**
-     * Override onCreateOptionsMenu to populate the options menu
-     */
-    @Override
-    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-        // Add menu entries
-        MenuItem newChatMenuItem = menu.add("Create new chat");
-        newChatMenuItem.setOnMenuItemClickListener(this::newChatMenuItemListener);
-
-        // NOTE: this super call adds the logout button so we don't have to worry about that
-        super.onCreateOptionsMenu(menu, inflater);
-    }
-
-    private boolean newChatMenuItemListener(MenuItem menuItem) {
-        // do a sendAsyncTask to getallcontacts
-        // which in the postExecute call the addNewContact fragment
-
-        // for now just call the fragment
-        Fragment frag = new NewChatFragment();
-        Bundle args = new Bundle();
-        args.putSerializable(getString(R.string.key_credentials), mCreds);
-        args.putSerializable(getString(R.string.keys_intent_jwt), mJwToken);
-        frag.setArguments(args);
-        getActivity().getSupportFragmentManager()
-                .beginTransaction()
-                .replace(R.id.fragment_container, frag)
-                .addToBackStack(null)
-                .commit();
-
-        return true;
-    }
-
 
     @Override
     public void onAttach(Context context) {

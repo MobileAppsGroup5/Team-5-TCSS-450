@@ -28,7 +28,7 @@ import java.util.List;
  * specified {@link OnListFragmentInteractionListener}.
  * TODO: Replace the implementation with code for your data type.
  */
-public class MyAllConnectionsRecyclerViewAdapter extends RecyclerView.Adapter<MyAllConnectionsRecyclerViewAdapter.ViewHolder> {
+public class MyConnectionsRecyclerViewAdapter extends RecyclerView.Adapter<MyConnectionsRecyclerViewAdapter.ViewHolder> {
 
     // used for the ViewHolder's viewType
     // connections sent to us from another person AND NOT VERIFIED YET
@@ -53,8 +53,8 @@ public class MyAllConnectionsRecyclerViewAdapter extends RecyclerView.Adapter<My
     private Context mContext;
     private String mJwToken;
 
-    public MyAllConnectionsRecyclerViewAdapter(List<Connection> items, OnListFragmentInteractionListener listener,
-                                               Credentials credentials, String jwToken, Context context) {
+    public MyConnectionsRecyclerViewAdapter(List<Connection> items, OnListFragmentInteractionListener listener,
+                                            Credentials credentials, String jwToken, Context context) {
         mValues = items;
         mListener = listener;
         mCredentials = credentials;
@@ -83,7 +83,7 @@ public class MyAllConnectionsRecyclerViewAdapter extends RecyclerView.Adapter<My
         }
 
         // shouldn't happen, this means db is messed up and there are bigger problems!
-        Log.e("MyAllConnectionsRecyclerViewAdapter", "INVALID VIEW TYPE");
+        Log.e("MyConnectionsRecyclerViewAdapter", "INVALID VIEW TYPE");
         return SENT;
     }
 
@@ -163,7 +163,7 @@ public class MyAllConnectionsRecyclerViewAdapter extends RecyclerView.Adapter<My
                 .build();
         new SendPostAsyncTask.Builder(uri.toString(), messageJson)
                 .onPostExecute(this::handleConnectionsChangePostExecute)
-                .onCancelled(error -> Log.e("MyAllConnectionsRecyclerViewAdapter", error))
+                .onCancelled(error -> Log.e("MyConnectionsRecyclerViewAdapter", error))
                 .addHeaderField("authorization", mJwToken)
                 .build().execute();
     }
@@ -187,7 +187,7 @@ public class MyAllConnectionsRecyclerViewAdapter extends RecyclerView.Adapter<My
                 .build();
         new SendPostAsyncTask.Builder(uri.toString(), messageJson)
                 .onPostExecute(this::handleConnectionsChangePostExecute)
-                .onCancelled(error -> Log.e("MyAllConnectionsRecyclerViewAdapter", error))
+                .onCancelled(error -> Log.e("MyConnectionsRecyclerViewAdapter", error))
                 .addHeaderField("authorization", mJwToken)
                 .build().execute();
 

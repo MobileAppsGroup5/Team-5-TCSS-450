@@ -635,7 +635,7 @@ public class HomeActivity extends AppCompatActivity
                 .build();
         new SendPostAsyncTask.Builder(uri.toString(), messageJson)
                 .onPostExecute(this::handleConnectionsChangePostExecute)
-                .onCancelled(error -> Log.e("MyAllConnectionsRecyclerViewAdapter", error))
+                .onCancelled(error -> Log.e("MyConnectionsRecyclerViewAdapter", error))
                 .addHeaderField("authorization", mJwToken)
                 .build().execute();
     }

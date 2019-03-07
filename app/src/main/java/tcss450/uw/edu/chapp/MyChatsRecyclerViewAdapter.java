@@ -16,12 +16,12 @@ import java.util.List;
  * {@link RecyclerView.Adapter} that can display a {@link Connection} and makes a call to the
  * specified {@link OnListFragmentInteractionListener}.
  */
-public class MyAllChatsRecyclerViewAdapter extends RecyclerView.Adapter<MyAllChatsRecyclerViewAdapter.ViewHolder> {
+public class MyChatsRecyclerViewAdapter extends RecyclerView.Adapter<MyChatsRecyclerViewAdapter.ViewHolder> {
 
     private final List<Chat> mValues;
     private final OnListFragmentInteractionListener mListener;
 
-    public MyAllChatsRecyclerViewAdapter(List<Chat> items, OnListFragmentInteractionListener listener) {
+    public MyChatsRecyclerViewAdapter(List<Chat> items, OnListFragmentInteractionListener listener) {
         mValues = items;
         mListener = listener;
     }

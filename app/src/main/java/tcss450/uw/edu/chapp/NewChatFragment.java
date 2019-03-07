@@ -12,6 +12,9 @@ import android.widget.TextView;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.beans.PropertyChangeListener;
+import java.beans.PropertyChangeSupport;
+
 import tcss450.uw.edu.chapp.model.Credentials;
 import tcss450.uw.edu.chapp.utils.SendPostAsyncTask;
 
@@ -23,6 +26,8 @@ public class NewChatFragment extends Fragment {
     private Credentials mCreds;
     private String mJwToken;
 
+    private PropertyChangeSupport myPcs = new PropertyChangeSupport(this);
+
 //    private OnFragmentInteractionListener mListener;
 
     public NewChatFragment() {
@@ -32,6 +37,7 @@ public class NewChatFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
         if (getArguments() != null) {
             mCreds = (Credentials) getArguments().getSerializable(getString(R.string.key_credentials));
             mJwToken = getArguments().getString(getString(R.string.keys_intent_jwt));
@@ -83,6 +89,10 @@ public class NewChatFragment extends Fragment {
                 //set the output text to show the sent message
                 tv.setText("New chat room created!");
 
+                // refresh chats
+                myPcs.firePropertyChange(ChatsContainerFragment.PROPERTY_REFRESH_CHATS,
+                        null, "refreshpls");
+
             } else {
                 // error
                 tv.setText("Error, that user does not exist.");
@@ -90,6 +100,14 @@ public class NewChatFragment extends Fragment {
         } catch (JSONException e) {
             e.printStackTrace();
         }
+    }
+
+    public void addPropertyChangeListener(PropertyChangeListener listener) {
+        myPcs.addPropertyChangeListener(listener);
+    }
+
+    public void removePropertyChangeListener(PropertyChangeListener listener) {
+        myPcs.removePropertyChangeListener(listener);
     }
 
 

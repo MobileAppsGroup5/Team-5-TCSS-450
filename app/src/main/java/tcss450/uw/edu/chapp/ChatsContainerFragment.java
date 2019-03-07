@@ -17,6 +17,8 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -29,7 +31,9 @@ import tcss450.uw.edu.chapp.utils.SendPostAsyncTask;
  * A container for all things chats/messaging. Handles switching out messaging/chats and auto updates
  * chats/messages each time it does so.
  */
-public class ChatsContainerFragment extends Fragment {
+public class ChatsContainerFragment extends Fragment implements PropertyChangeListener {
+
+    public static final String PROPERTY_REFRESH_CHATS = "refresh chats pls";
 
     private List<Chat> mChats;
     private Credentials mCreds;
@@ -139,7 +143,8 @@ public class ChatsContainerFragment extends Fragment {
         // which in the postExecute call the addNewContact fragment
 
         // for now just call the fragment
-        Fragment frag = new NewChatFragment();
+        NewChatFragment frag = new NewChatFragment();
+
         Bundle args = new Bundle();
         args.putSerializable(getString(R.string.key_credentials), mCreds);
         args.putSerializable(getString(R.string.keys_intent_jwt), mJwToken);
@@ -149,6 +154,8 @@ public class ChatsContainerFragment extends Fragment {
                 .replace(R.id.new_chat_container, frag)
                 .commit();
 
+        // listen for when it needs to be refreshed
+        frag.addPropertyChangeListener(this);
         return true;
     }
 
@@ -171,9 +178,21 @@ public class ChatsContainerFragment extends Fragment {
     }
 
     @Override
+    public void onResume() {
+        super.onResume();
+        callWebServiceforChats();
+    }
+
+    @Override
     public void onDetach() {
         super.onDetach();
         mListener = null;
     }
 
+    @Override
+    public void propertyChange(PropertyChangeEvent evt) {
+        if (PROPERTY_REFRESH_CHATS.equals(evt.getPropertyName())) {
+            callWebServiceforChats();
+        }
+    }
 }
