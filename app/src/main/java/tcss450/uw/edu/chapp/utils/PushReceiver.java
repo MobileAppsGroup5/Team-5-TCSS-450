@@ -69,8 +69,8 @@ public class PushReceiver extends BroadcastReceiver {
 
         } else {
             //app is in the background so create and post a notification
-            Log.d("ChappApp", "Message received in background: " + intent.getStringExtra("message"));
 
+            Log.d("ChappApp", "Message received in background: " + intent.getStringExtra("message"));
             Intent i = new Intent(context, MainActivity.class);
             i.putExtras(intent.getExtras());
 

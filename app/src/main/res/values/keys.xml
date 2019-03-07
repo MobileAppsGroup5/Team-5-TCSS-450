@@ -39,6 +39,7 @@
     <string name="keys_prefs_email">traffic_light_wont_let_me_through</string>
     <string name="keys_prefs_password">see_the_city_see_the_zoo</string>
     <string name="keys_intent_notification_msg">was app started from message notification?</string>
+    <string name="keys_intent_in_app_notification_msg">was in app msg notification clicked?</string>
 
     <!-- register keys -->
     <string name="keys_json_register_error">error</string>
@@ -62,7 +63,8 @@
     <string name="keys_json_last_name">lastname</string>
     <string name="keys_json_email">email</string>
 
-
-
+    <!-- weather keys -->
+    <string name="keys_weather_hour_list_arg">WeatherHourFragmentBundleArgListWeatherItem</string>
+    <string name="keys_weather_day_list_arg">WeatherDayFragmentBundleArgListWeatherItem</string>
 
 </resources>
