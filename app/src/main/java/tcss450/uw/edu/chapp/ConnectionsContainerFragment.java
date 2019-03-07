@@ -146,7 +146,7 @@ public class ConnectionsContainerFragment extends Fragment implements PropertyCh
                 .scheme("https")
                 .appendPath(getString(R.string.ep_base_url))
                 .appendPath(getString(R.string.ep_connections_base))
-                .appendPath(getString(R.string.ep_connections_get_contacts))
+                .appendPath(getString(R.string.ep_connections_get_connections_and_requests))
                 .build();
         // Pass the credentials
         JSONObject msg = mCreds.asJSONObject();

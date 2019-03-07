@@ -11,7 +11,6 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
-import android.support.v4.app.FragmentTransaction;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.view.MenuItemCompat;
@@ -22,7 +21,6 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Gravity;
-import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.TextView;
@@ -35,7 +33,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import me.pushy.sdk.Pushy;
-import tcss450.uw.edu.chapp.weather.CurrentWeatherFragment;
 import tcss450.uw.edu.chapp.chat.Chat;
 import tcss450.uw.edu.chapp.chat.Message;
 import tcss450.uw.edu.chapp.connections.Connection;
@@ -59,12 +56,11 @@ import tcss450.uw.edu.chapp.weather.WeatherFragment;
 public class HomeActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener,
         WaitFragment.OnFragmentInteractionListener,
-        AllChatsFragment.OnListFragmentInteractionListener,
-        ChatFragment.OnChatMessageFragmentInteractionListener,
+        ChatsFragment.OnListFragmentInteractionListener,
+        MessagingContainerFragment.OnChatMessageFragmentInteractionListener,
         ConnectionsFragment.OnListFragmentInteractionListener,
-        MessageFragment.OnListFragmentInteractionListener,
+        MessagingFragment.OnListFragmentInteractionListener,
         NewChatMembersFragment.OnListFragmentInteractionListener,
-        ConnectionsContainerFragment.OnListFragmentInteractionListener,
         WeatherFragment.OnFragmentInteractionListener {
 
     private Credentials mCreds;
@@ -156,7 +152,7 @@ public class HomeActivity extends AppCompatActivity
                             , mJwToken);
                     args.putSerializable(getString(R.string.key_chatid),
                             chatid);
-                    mChatfragment = new ChatFragment();
+                    mChatfragment = new MessagingContainerFragment();
 
                     mChatfragment.setArguments(args);
 
@@ -276,9 +272,6 @@ public class HomeActivity extends AppCompatActivity
 //        return super.onOptionsItemSelected(item);
 //    }
 
-        return super.onOptionsItemSelected(item);
-    }
-
     /**
      * Navigation drawer item listener.
      * When action item has been clicked, the counter for notifications gets set to not show.
@@ -366,7 +359,7 @@ public class HomeActivity extends AppCompatActivity
                 .scheme("https")
                 .appendPath(getString(R.string.ep_base_url))
                 .appendPath(getString(R.string.ep_connections_base))
-                .appendPath(getString(R.string.ep_connections_get_contacts))
+                .appendPath(getString(R.string.ep_connections_get_connections_and_requests))
                 .build();
         // Pass the credentials
         JSONObject msg = mCreds.asJSONObject();
@@ -547,7 +540,7 @@ public class HomeActivity extends AppCompatActivity
      */
     @Override
     public void onListFragmentInteraction(Chat item) {
-        mChatfragment = new ChatFragment();             //ChatFragment chatfrag
+        mChatfragment = new MessagingContainerFragment();             //MessagingContainerFragment chatfrag
         Bundle args = new Bundle();
         args.putSerializable(getString(R.string.keys_intent_jwt), mJwToken);
         args.putSerializable(getString(R.string.key_credentials), mCreds);
@@ -590,7 +583,7 @@ public class HomeActivity extends AppCompatActivity
 
 //    @Override
 //    public void onListFragmentInteraction(DummyContent.Contact contact) {
-//        ChatFragment chatFrag = new ChatFragment();
+//        MessagingContainerFragment chatFrag = new MessagingContainerFragment();
 //        Bundle args = new Bundle();
 //        args.putSerializable(getString(R.string.keys_intent_jwt), mJwToken);
 //        args.putSerializable(getString(R.string.key_credentials), mCreds);
@@ -695,7 +688,7 @@ public class HomeActivity extends AppCompatActivity
     }
 
     /**
-     * From the ChatFragment interface that updates the count of unread
+     * From the MessagingContainerFragment interface that updates the count of unread
      * chat Ids from notifications.
      * @param chatId    chatId to add to the list
      */
@@ -714,7 +707,7 @@ public class HomeActivity extends AppCompatActivity
     }
 
 //    /**
-//     * From the ChatFragment interface that removes a viewed chatid from the counter
+//     * From the MessagingContainerFragment interface that removes a viewed chatid from the counter
 //     * of unread chat ids
 //     * @param chatId    the chatId already viewed.
 //     */

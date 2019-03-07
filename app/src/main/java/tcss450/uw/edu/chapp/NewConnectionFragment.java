@@ -83,6 +83,7 @@ public class NewConnectionFragment extends Fragment implements AdapterView.OnIte
 
         // Handle collisions in non-unique fields.
         // This is SLOW but it WORKS.
+        // CURRENTLY WE ARE NOT CHECKING FOR COLLISIONS, EVERYTHING IS CONSIDERED A COLLISION
         List<String> noCollisionFirstNames = new ArrayList<>();
         List<String> noCollisionLastNames = new ArrayList<>();
 

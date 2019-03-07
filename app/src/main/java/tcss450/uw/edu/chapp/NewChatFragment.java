@@ -23,6 +23,9 @@ import tcss450.uw.edu.chapp.utils.SendPostAsyncTask;
  * A fragment for creating a new chat.
  */
 public class NewChatFragment extends Fragment {
+
+    public static final String ARG_CREDS_LIST = "credlist<>{}";
+
     private Credentials mCreds;
     private String mJwToken;
 

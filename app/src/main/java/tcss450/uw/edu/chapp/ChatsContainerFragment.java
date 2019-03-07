@@ -23,6 +23,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import tcss450.uw.edu.chapp.chat.Chat;
+import tcss450.uw.edu.chapp.connections.Connection;
 import tcss450.uw.edu.chapp.model.Credentials;
 import tcss450.uw.edu.chapp.utils.SendPostAsyncTask;
 
@@ -131,7 +132,7 @@ public class ChatsContainerFragment extends Fragment implements PropertyChangeLi
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         // Add menu entries
-        MenuItem newChatMenuItem = menu.add("Create new chat");
+        MenuItem newChatMenuItem = menu.add("New chat");
         newChatMenuItem.setOnMenuItemClickListener(this::newChatMenuItemListener);
 
         // NOTE: this super call adds any previous buttons so we don't have to worry about that
@@ -142,21 +143,85 @@ public class ChatsContainerFragment extends Fragment implements PropertyChangeLi
         // do a sendAsyncTask to getallcontacts
         // which in the postExecute call the addNewContact fragment
 
-        // for now just call the fragment
-        NewChatFragment frag = new NewChatFragment();
+        // fetch usernames from database here
+        Uri uri = new Uri.Builder()
+                .scheme("https")
+                .appendPath(getString(R.string.ep_base_url))
+                .appendPath(getString(R.string.ep_connections_base))
+                .appendPath(getString(R.string.ep_connections_get_connections_and_requests))
+                .build();
+        // Pass the credentials
+        JSONObject msg = mCreds.asJSONObject();
+        mListener.onWaitFragmentInteractionShow();
+        new SendPostAsyncTask.Builder(uri.toString(), msg)
+                .onPostExecute(this::handleConnectionInformationOnPostExecute)
+                .onCancelled(error -> Log.e("ChatsContainerFragment", error))
+                .addHeaderField("authorization", mJwToken) //add the JWT as a header
+                .build().execute();
 
-        Bundle args = new Bundle();
-        args.putSerializable(getString(R.string.key_credentials), mCreds);
-        args.putSerializable(getString(R.string.keys_intent_jwt), mJwToken);
-        frag.setArguments(args);
-        getActivity().getSupportFragmentManager()
-                .beginTransaction()
-                .replace(R.id.new_chat_container, frag)
-                .commit();
-
-        // listen for when it needs to be refreshed
-        frag.addPropertyChangeListener(this);
         return true;
+
+//        // for now just call the fragment
+//        NewChatFragment frag = new NewChatFragment();
+//
+//        Bundle args = new Bundle();
+//        args.putSerializable(getString(R.string.key_credentials), mCreds);
+//        args.putSerializable(getString(R.string.keys_intent_jwt), mJwToken);
+//        frag.setArguments(args);
+//        getActivity().getSupportFragmentManager()
+//                .beginTransaction()
+//                .replace(R.id.new_chat_container, frag)
+//                .commit();
+//
+//        // listen for when it needs to be refreshed
+//        frag.addPropertyChangeListener(this);
+//        return true;
+    }
+
+    private void handleConnectionInformationOnPostExecute(String result) {
+        // parse JSON
+        try {
+            JSONObject root = new JSONObject(result);
+            if (root.has(getString(R.string.keys_json_connections))) {
+
+                JSONArray data = root.getJSONArray(
+                        getString(R.string.keys_json_connections));
+                List<Connection> connections = new ArrayList<>();
+                for(int i = 0; i < data.length(); i++) {
+                    JSONObject jsonChat = data.getJSONObject(i);
+                    connections.add(new Connection.Builder(
+                            jsonChat.getString(getString(R.string.keys_json_connections_from)),
+                            jsonChat.getString(getString(R.string.keys_json_connections_to)),
+                            Integer.parseInt(jsonChat.getString(getString(R.string.keys_json_connections_verified))))
+                            .build());
+                }
+
+                // Do this swapping so we can send in an array of Messages not Objects
+                Bundle args = new Bundle();
+                Connection[] connsAsArray = new Connection[connections.size()];
+                connsAsArray = connections.toArray(connsAsArray);
+                args.putSerializable(NewChatFragment.ARG_CONN_LIST, connsAsArray);
+                args.putSerializable(getString(R.string.key_credentials), mCreds);
+                args.putSerializable(getString(R.string.keys_intent_jwt), mJwToken);
+                NewConnectionFragment newChatFrag = new NewConnectionFragment();
+                newChatFrag.setArguments(args);
+
+                getActivity().getSupportFragmentManager()
+                        .beginTransaction()
+                        .replace(R.id.new_chat_container, newChatFrag)
+                        .commit();
+
+                newChatFrag.addPropertyChangeListener(this);
+                mListener.onWaitFragmentInteractionHide();
+            } else {
+                Log.e("ERROR!", "No data array");
+                mListener.onWaitFragmentInteractionHide();
+            }
+        } catch (JSONException e) {
+            e.printStackTrace();
+            Log.e("ERROR!", e.getMessage());
+            mListener.onWaitFragmentInteractionHide();
+        }
     }
 
     @Override

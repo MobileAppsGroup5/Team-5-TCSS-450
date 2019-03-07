@@ -6,7 +6,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/divider"
-    tools:context=".ChatFragment">
+    tools:context=".MessagingContainerFragment">
 
     <!--<TextView-->
     <!--android:id="@+id/text_chat_message_display"-->

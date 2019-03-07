@@ -42,12 +42,12 @@ import tcss450.uw.edu.chapp.utils.SendPostAsyncTask;
  * @author Mike Osborne, Jessica Medrzycki
  * @version 02/25/19
  */
-public class ChatFragment extends Fragment {
+public class MessagingContainerFragment extends Fragment {
 
     private static final String TAG = "CHAT_FRAG";
     public static final String ARG_MESSAGE_LIST = "message list";
 
-    private MessageFragment mMessageFragment;
+    private MessagingFragment mMessageFragment;
     private EditText mMessageInputEditText;
     private List<Message> mMessages;
     private OnChatMessageFragmentInteractionListener mListener;
@@ -62,7 +62,7 @@ public class ChatFragment extends Fragment {
     private PushMessageReceiver mPushMessageReciever;
 
 
-    public ChatFragment() {
+    public MessagingContainerFragment() {
         // Required empty public constructor
     }
 
@@ -231,9 +231,9 @@ public class ChatFragment extends Fragment {
         // Do this swapping so we can send in an array of Messages not Objects
         Message[] messagesAsArray = new Message[mMessages.size()];
         messagesAsArray = mMessages.toArray(messagesAsArray);
-        args.putSerializable(MessageFragment.ARG_MESSAGE_LIST, messagesAsArray);
+        args.putSerializable(MessagingFragment.ARG_MESSAGE_LIST, messagesAsArray);
         args.putSerializable(getString(R.string.key_credentials), mCreds);
-        mMessageFragment = new MessageFragment();
+        mMessageFragment = new MessagingFragment();
         mMessageFragment.setArguments(args);
 
         getActivity().getSupportFragmentManager()
