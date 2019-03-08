@@ -65,7 +65,8 @@ public class HomeActivity extends AppCompatActivity
         MessageFragment.OnListFragmentInteractionListener,
         NewChatMembersFragment.OnListFragmentInteractionListener,
         ConnectionsContainerFragment.OnListFragmentInteractionListener,
-        WeatherFragment.OnFragmentInteractionListener {
+        WeatherFragment.OnFragmentInteractionListener,
+        CurrentWeatherFragment.OnCurrentWeatherFragmentInteractionListener {
 
     private Credentials mCreds;
     private String mJwToken;
@@ -232,36 +233,29 @@ public class HomeActivity extends AppCompatActivity
      */
     private void loadHomeLandingPage(){
         Fragment frag = new LandingPage();
-        SuccessFragment successFragment = new SuccessFragment();
+        CurrentWeatherFragment cwf = new CurrentWeatherFragment();
         Bundle args = new Bundle();
         args.putSerializable(getString(R.string.key_credentials)
                 , mCreds);
         args.putSerializable(getString(R.string.keys_intent_jwt)
                 , mJwToken);
 
-        //set the email to show in the top fragment
-        successFragment.setArguments(args);
+
         frag.setArguments(args);
 
 //        loadFragment(successFragment);
         getSupportFragmentManager().popBackStack(null, FragmentManager.POP_BACK_STACK_INCLUSIVE);
 
-        getSupportFragmentManager()
+        //TODO: use transaction to populate the dynamic home landing page
+        FragmentTransaction transaction = getSupportFragmentManager()
                 .beginTransaction()
-                .replace(R.id.fragment_container, successFragment)
-                .commit();
+                .replace(R.id.fragment_container, frag);
+        transaction.replace(R.id.framelayout_homelanding_weather, cwf);
 
+        //transaction.replace(R.id.framelayout_homelanding_email, successFragment);
+        //transaction.add(R.id.framelayout_homelanding_chatlist, chats);
 
-        //ORIGINAL SCROLL VIEW WITH BLOG POST SCROLLING
-//        FragmentTransaction transaction = getSupportFragmentManager()
-//                .beginTransaction()
-//                .replace(R.id.fragment_container, frag)
-//                .addToBackStack(null);
-//         //Commit the transaction (obviously)
-//        transaction.replace(R.id.framelayout_homelanding_email, successFragment);
-//        //transaction.add(R.id.framelayout_homelanding_chatlist, chats);
-//
-//        transaction.commit();
+        transaction.commit();
     }
 
     @Override

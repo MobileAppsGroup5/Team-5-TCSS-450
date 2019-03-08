@@ -22,9 +22,9 @@
             android:orientation="vertical">
 
             <FrameLayout
+                android:id="@+id/framelayout_homelanding_weather"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:id="@+id/framelayout_homelanding_email">
+                android:layout_height="match_parent">
 
 
             </FrameLayout>
@@ -54,12 +54,7 @@
                     android:layout_weight="1"
                     android:id="@+id/framelayout_homelanding_blog">
 
-                    <fragment
-                        android:id="@+id/fragment_blog"
-                        android:name="tcss450.uw.edu.chapp.BlogFragment"
-                        android:layout_width="match_parent"
-                        android:layout_height="match_parent"
-                        tools:layout="@layout/fragment_blog_post" />
+
                 </FrameLayout>
             </LinearLayout>
 

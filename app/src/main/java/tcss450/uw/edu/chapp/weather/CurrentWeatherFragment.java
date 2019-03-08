@@ -43,7 +43,7 @@ public class CurrentWeatherFragment extends Fragment {
     /*
      * desired interval for location updates, inexact. updates may be more or less frequent
      */
-    public static final long UPDATE_INTERVAL_IN_MILLISECONDS = 100;
+    public static final long UPDATE_INTERVAL_IN_MILLISECONDS = 1;
 
     /*
      * fastest rate for active location updates. exact. updates will never be more frequent than
