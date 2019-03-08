@@ -165,6 +165,17 @@ public class HomeActivity extends AppCompatActivity
                             .replace(R.id.fragment_container, mChatfragment)
                             .commit();
 
+                    //If the HomeActivity was loaded from the WeatherMapActivity
+                } else if (getIntent().getBooleanExtra(getString(R.string.keys_weather_from_map_activity), false)) {
+                    WeatherFragment wf = new WeatherFragment();
+                    //add location from MapActivity as fragment argument
+                    Bundle args = new Bundle();
+                    args.putParcelable(getString(R.string.keys_weather_location_from_map),
+                            getIntent().getParcelableExtra(getString(R.string.keys_weather_location_from_map)));
+                    wf.setArguments(args);
+                    //load the weather fragment
+                    loadFragment(wf);
+
                 } else {
                     loadHomeLandingPage();
                 }
@@ -339,6 +350,10 @@ public class HomeActivity extends AppCompatActivity
 //                CurrentWeatherFragment cwf = new CurrentWeatherFragment();
 //                loadFragment(cwf);
                 WeatherFragment wf = new WeatherFragment();
+                Bundle wArgs = new Bundle();
+                wArgs.putSerializable(getString(R.string.keys_intent_jwt), mJwToken);
+                wArgs.putSerializable(getString(R.string.key_credentials), mCreds);
+                wf.setArguments(wArgs);
                 loadFragment(wf);
                 break;
 

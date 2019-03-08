@@ -47,5 +47,9 @@
     <string name="current_weather_no_location_permission_error">Can\'t display weather without location permission</string>
     <string name="weather_dialog_postal_code_hint">Enter a zipcode</string>
     <string name="weather_dialog_postal_code_error">Need to enter a zipcode</string>
+    <string name="weather_hour_fragment_tag">HOUR TAG</string>
+    <string name="weather_day_fragment_tag">DAY TAG</string>
+    <string name="weather_current_fragment_tag">CURRENT TAG</string>
+    <string name="title_activity_maps">Map</string>
 
 </resources>

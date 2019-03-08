@@ -3,6 +3,7 @@ package tcss450.uw.edu.chapp.weather;
 import android.Manifest;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.net.Uri;
@@ -39,6 +40,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
+import tcss450.uw.edu.chapp.MapsActivity;
 import tcss450.uw.edu.chapp.R;
 import tcss450.uw.edu.chapp.WaitFragment;
 import tcss450.uw.edu.chapp.utils.GetAsyncTask;
@@ -76,6 +78,9 @@ public class WeatherFragment extends Fragment {
 
     private OnFragmentInteractionListener mListener;
 
+    private Location mCurrentLocation = null;
+    private Location mMapLocation = null;
+
     public WeatherFragment() {
         // Required empty public constructor
     }
@@ -98,6 +103,10 @@ public class WeatherFragment extends Fragment {
         //ask for permission for location
         mFusedLocationClient = LocationServices.getFusedLocationProviderClient(getActivity());
 
+        //get location from map
+        Bundle args = getArguments();
+        mMapLocation = args.getParcelable(getString(R.string.keys_weather_location_from_map));
+
         if (ActivityCompat.checkSelfPermission(getActivity(), Manifest.permission.ACCESS_FINE_LOCATION)
                 != PackageManager.PERMISSION_GRANTED
                 && ActivityCompat.checkSelfPermission(getActivity(), Manifest.permission.ACCESS_COARSE_LOCATION)
@@ -112,10 +121,38 @@ public class WeatherFragment extends Fragment {
             //requestLocation();
             createLocationRequest();
             setLocationCallback();
-            startLocationUpdates();
+            //startLocationUpdates();
         }
 
         return v;
+    }
+
+    /**
+     * onStart call back method in the fragment lifecycle,
+     * if map location exists then set the weather to that location,
+     * otherwise wait a cycle and set the weather to the current device location
+     * In onstart because back pressing on map would mess things up, should work now.
+     */
+    @Override
+    public void onStart() {
+        super.onStart();
+        Log.e("WEATHER DEBUG", "On Start");
+        if (mMapLocation != null) {
+            //map location exists
+            setWeather(mMapLocation);
+        } else {
+            //map location does not exist
+            if (ActivityCompat.checkSelfPermission(getActivity(), Manifest.permission.ACCESS_FINE_LOCATION)
+                    == PackageManager.PERMISSION_GRANTED
+                    && ActivityCompat.checkSelfPermission(getActivity(), Manifest.permission.ACCESS_COARSE_LOCATION)
+                    == PackageManager.PERMISSION_GRANTED) {
+
+                //have permission to use location services
+                startLocationUpdates();
+            }
+        }
+
+
     }
 
     /**
@@ -132,7 +169,7 @@ public class WeatherFragment extends Fragment {
         //put the weatherHourRecyclerView in the weatherHourFrameLayout
         getChildFragmentManager()
                 .beginTransaction()
-                .replace(R.id.weather_hour_frame_layout, wf)
+                .replace(R.id.weather_hour_frame_layout, wf, getString(R.string.weather_hour_fragment_tag))
                 .commit();
 
     }
@@ -152,9 +189,35 @@ public class WeatherFragment extends Fragment {
         //put the weatherDayRecylcerView in the weatherDayFrameLayout
         getChildFragmentManager()
                 .beginTransaction()
-                .replace(R.id.weather_day_frame_layout, wf)
+                .replace(R.id.weather_day_frame_layout, wf, getString(R.string.weather_day_fragment_tag))
                 .commit();
     }
+
+    /**
+     * helper method that will set the current weather fragment visible or invisible
+     * based on the boolean passed.
+     * @param visible boolean if current weather fragment is visible
+     */
+    private void setWeatherCurrentVisible(boolean visible) {
+        TextView cityText = (TextView) getActivity().findViewById(R.id.weather_city_text);
+        TextView condText = (TextView) getActivity().findViewById(R.id.weather_condition_text);
+        TextView tempText = (TextView) getActivity().findViewById(R.id.weather_temp_text);
+        ImageView iconView = (ImageView) getActivity().findViewById(R.id.weather_current_icon);
+
+        if (visible) {
+            cityText.setVisibility(View.VISIBLE);
+            condText.setVisibility(View.VISIBLE);
+            tempText.setVisibility(View.VISIBLE);
+            iconView.setVisibility(View.VISIBLE);
+        } else {
+            cityText.setVisibility(View.INVISIBLE);
+            condText.setVisibility(View.INVISIBLE);
+            tempText.setVisibility(View.INVISIBLE);
+            iconView.setVisibility(View.INVISIBLE);
+        }
+    }
+
+
 
     /**
      * Method that will create the top left menu, which seems to be the apps standard for
@@ -228,6 +291,41 @@ public class WeatherFragment extends Fragment {
      */
     private boolean setWeatherByMap(MenuItem menuItem) {
         Log.i("WEATHER_OPTIONS_SELECT", "map selected");
+        new AlertDialog.Builder(getActivity())
+                .setTitle("Open Map?")
+                .setNegativeButton("Cancel", null)
+                .setPositiveButton("Ok", (i, d) -> {
+                    setWeatherCurrentVisible(false);
+                    Fragment hourFrag = getChildFragmentManager().findFragmentByTag(getString(R.string.weather_hour_fragment_tag));
+                    Fragment dayFrag = getChildFragmentManager().findFragmentByTag(getString(R.string.weather_day_fragment_tag));
+                    if (hourFrag != null) {
+                        getChildFragmentManager()
+                                .beginTransaction()
+                                .remove(hourFrag)
+                                .commit();
+                    }
+                    if (dayFrag != null) {
+                        getChildFragmentManager()
+                                .beginTransaction()
+                                .remove(dayFrag)
+                                .commit();
+                    }
+
+
+                    Intent intent = new Intent(getActivity(), MapsActivity.class);
+                    //pass current location to the map activity
+                    //Log.e("WEATHER_DEBUG", mCurrentLocation.toString());
+                    intent.putExtra(getString(R.string.keys_weather_map_intent_location), mCurrentLocation);
+                    Bundle args = getArguments();
+                    if (args != null) {
+                        intent.putExtras(args);
+                    }
+                    startActivity(intent);
+                })
+                .show();
+
+
+
         return true;
     }
 
@@ -357,7 +455,7 @@ public class WeatherFragment extends Fragment {
                     //requestLocation();
                     createLocationRequest();
                     setLocationCallback();
-                    startLocationUpdates();
+                    //startLocationUpdates();
 
                 } else {
                     //permission denied
@@ -375,6 +473,8 @@ public class WeatherFragment extends Fragment {
      */
     private void setWeather(Location location) {
         if (location != null) {
+            mCurrentLocation = location;
+            setWeatherCurrentVisible(true);
             setCurrentWeather(location);
             setHourWeather(location);
             setDayWeather(location);
@@ -390,6 +490,7 @@ public class WeatherFragment extends Fragment {
      */
     private void setWeather(String zipcode) {
         if (!zipcode.isEmpty()) {
+            setWeatherCurrentVisible(true);
             setCurrentWeather(zipcode);
             setHourWeather(zipcode);
             setDayWeather(zipcode);
