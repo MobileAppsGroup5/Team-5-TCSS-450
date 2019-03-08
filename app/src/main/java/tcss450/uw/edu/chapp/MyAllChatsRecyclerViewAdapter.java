@@ -24,10 +24,12 @@ public class MyAllChatsRecyclerViewAdapter extends RecyclerView.Adapter<MyAllCha
 
     private final List<Chat> mValues;
     private final OnListFragmentInteractionListener mListener;
+    private final ArrayList<String> mUnreadChats;
 
-    public MyAllChatsRecyclerViewAdapter(List<Chat> items, OnListFragmentInteractionListener listener) {
+    public MyAllChatsRecyclerViewAdapter(List<Chat> items, OnListFragmentInteractionListener listener, ArrayList<String> chatIds) {
         mValues = items;
         mListener = listener;
+        mUnreadChats = chatIds;
     }
 
     @Override
@@ -41,17 +43,15 @@ public class MyAllChatsRecyclerViewAdapter extends RecyclerView.Adapter<MyAllCha
     public void onBindViewHolder(final ViewHolder holder, int position) {
         holder.mItem = mValues.get(position);
         holder.mNameView.setText(mValues.get(position).getName());
-//        if(null != mListener){
-//            mUnreadChats = mListener.receiveUnreadChats();
-//            Log.e("AllChatsRecyclerView", "Received unread chats list");
-//            //set color or something here for unread chats
-//            if(mUnreadChats.contains(mValues.get(position).getId())){
-//                //if the list of unread chats contains the current chat
-//                //display the unread message
-//                holder.mUnreadView.setText("UNREAD");
-//            }
-//
-//        }
+        if(mUnreadChats != null){ //while there is a list
+            if(mUnreadChats.contains(mValues.get(position).getId())){
+                //if the list of unread chats contains the current chat
+                //display the unread message
+                Log.e("AllChatsRecyclerView", "Received unread chats list item: displaying");
+                holder.mUnreadView.setText("UNREAD");
+            }
+        }
+
 
         holder.mView.setOnClickListener(new View.OnClickListener() {
             @Override

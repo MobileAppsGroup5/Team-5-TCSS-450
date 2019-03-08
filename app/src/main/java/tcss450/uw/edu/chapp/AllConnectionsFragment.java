@@ -21,8 +21,8 @@ import tcss450.uw.edu.chapp.connections.Connection;
 import tcss450.uw.edu.chapp.model.Credentials;
 
 /**
- * A fragment representing a list of Items.
- * <p/>
+ * A fragment representing a list of Connections.
+ *
  * Activities containing this fragment MUST implement the {@link OnListFragmentInteractionListener}
  * interface.
  */
@@ -43,7 +43,7 @@ public class AllConnectionsFragment extends Fragment implements PropertyChangeLi
 
     /**
      * Mandatory empty constructor for the fragment manager to instantiate the
-     * fragment (e.g. upon screen orientation changes).
+     * fragment
      */
     public AllConnectionsFragment() {
     }

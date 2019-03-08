@@ -40,6 +40,7 @@ public class AllChatsFragment extends Fragment {
     private List<Chat> mChats;
     private Credentials mCreds;
     private String mJwToken;
+    private ArrayList<String> mUnreadChats;
 
     private int mColumnCount = 1;
     private OnListFragmentInteractionListener mListener;
@@ -67,10 +68,15 @@ public class AllChatsFragment extends Fragment {
             mChats = new ArrayList<>(Arrays.asList((Chat[])getArguments().getSerializable(ARG_CHAT_LIST)));
             mCreds = (Credentials)getArguments().getSerializable(getString(R.string.key_credentials));
             mJwToken = (String)getArguments().getSerializable(getString(R.string.keys_intent_jwt));
+            //get from Bundle from Home Activity
+            //list of chatIds with unread messages in them
+            //send to recycler view
+            mUnreadChats = getArguments().getStringArrayList(getString(R.string.keys_intent_chatId));
 
 //            callWebServiceforChats();
         } else {
             mChats = new ArrayList<>();
+            mUnreadChats = new ArrayList<>();
         }
     }
 
@@ -143,6 +149,8 @@ public class AllChatsFragment extends Fragment {
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_allchats_list, container, false);
 
+
+
         // Set the adapter
         if (view instanceof RecyclerView) {
             Context context = view.getContext();
@@ -152,7 +160,7 @@ public class AllChatsFragment extends Fragment {
             } else {
                 recyclerView.setLayoutManager(new GridLayoutManager(context, mColumnCount));
             }
-            recyclerView.setAdapter(new MyAllChatsRecyclerViewAdapter(mChats, mListener));
+            recyclerView.setAdapter(new MyAllChatsRecyclerViewAdapter(mChats, mListener, mUnreadChats));
         }
         return view;
     }

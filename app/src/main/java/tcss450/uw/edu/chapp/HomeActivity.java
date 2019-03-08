@@ -11,7 +11,6 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
-import android.support.v4.app.FragmentTransaction;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.view.MenuItemCompat;
@@ -35,7 +34,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import me.pushy.sdk.Pushy;
-import tcss450.uw.edu.chapp.weather.CurrentWeatherFragment;
 import tcss450.uw.edu.chapp.chat.Chat;
 import tcss450.uw.edu.chapp.chat.Message;
 import tcss450.uw.edu.chapp.connections.Connection;
@@ -53,7 +51,7 @@ import tcss450.uw.edu.chapp.weather.WeatherFragment;
  * Fragment.
  *
  * @author Mike Osborne, Trung Thai, Michael Josten, Jessica Medrzycki
- * @version 02/25/19
+ * @version 03/08/19
  *
  */
 public class HomeActivity extends AppCompatActivity
@@ -67,28 +65,17 @@ public class HomeActivity extends AppCompatActivity
         ConnectionsContainerFragment.OnListFragmentInteractionListener,
         WeatherFragment.OnFragmentInteractionListener {
 
+    /** CREDENTIAL CONSTANTS */
     private Credentials mCreds;
     private String mJwToken;
-
     private PushMessageReceiver mPushMessageReciever;
 
-    //NavDrawer Icon constants
+    /** NAVIGATION CONSTANTS */
     private BadgeDrawerIconDrawable badgeDrawable;
-    private TextView mChatCounterView;
-    private TextView mContactCounterView;
-    //tells if the user unread notifications
+    private TextView mNavDrawerChatNotifView;
+    private TextView mNavDrawerConnectionNotifView;
     private boolean mHasNotifications = false;
-
-    private ArrayList<String> unreadChatList; //holds the chatIDs received from notifications
-    private int mChatCounter;
-    private int mContactCounter;
-
-    private static final String CHANNEL_ID = "1";
-
-    //currently open fragment
-    private Fragment mChatfragment;
-
-    // The list of connections for the current user.
+    private ArrayList<String> mUnreadChatList;
     private List<Connection> mConnections;
 
     @Override
@@ -111,14 +98,12 @@ public class HomeActivity extends AppCompatActivity
         badgeDrawable.setEnabled(false);
 
         //initialize the navigation drawer counter badges
-        mChatCounterView = (TextView) MenuItemCompat.getActionView(navigationView.getMenu().
-                findItem(R.id.nav_chat));
-        mContactCounterView = (TextView) MenuItemCompat.getActionView(navigationView.getMenu().
-                findItem(R.id.nav_connections));
-        initializeCountDrawer(mChatCounterView);
-        initializeCountDrawer(mContactCounterView);
-        unreadChatList = new ArrayList<String>();
-
+        mNavDrawerChatNotifView = (TextView) MenuItemCompat.getActionView(navigationView.getMenu().findItem(R.id.nav_chat));
+        mNavDrawerConnectionNotifView = (TextView) MenuItemCompat.getActionView(navigationView.getMenu().findItem(R.id.nav_connections));
+        initializeCountDrawer(mNavDrawerChatNotifView);
+        initializeCountDrawer(mNavDrawerConnectionNotifView);
+        mUnreadChatList = new ArrayList<String>();
+        mUnreadChatList.add("55");
 
         // Set the logout listener for the navigation drawer
         TextView logoutText = (TextView) findViewById(R.id.nav_logout);
@@ -133,40 +118,41 @@ public class HomeActivity extends AppCompatActivity
         // Get values from the intent
         mCreds = (Credentials) getIntent().getSerializableExtra(getString(R.string.key_credentials));
         mJwToken = getIntent().getStringExtra(getString(R.string.keys_intent_jwt));
-
+        Fragment fragment = new Fragment();
 
         // Load SuccessFragment into content_home (aka fragment_container)
         if (savedInstanceState == null) {
-
-
             if (findViewById(R.id.fragment_container) != null) {
-                //getIntent().getBooleanExtra(getString(R.string.keys_intent_notification_msg), false) OLD IF STATEMENT
 
-                //getIntent().getExtras().getString("type").equals("msg") ||
-                //                        getIntent().getExtras().getString("type").equals("topic_msg")
-
-                //getIntent().getExtras().containsKey("type")
+                //Was the Bundle received from Main Activity spurred by a message notification?
                 if (getIntent().getBooleanExtra(getString(R.string.keys_intent_notification_msg), false)) {
                     Bundle args = new Bundle();
                     // Get value from intent and put it in fragment args
                     String chatid = getIntent().getStringExtra(getString(R.string.keys_intent_chatId));
-                    args.putSerializable(getString(R.string.key_credentials)
-                            , mCreds);
-                    args.putSerializable(getString(R.string.keys_intent_jwt)
-                            , mJwToken);
-                    args.putSerializable(getString(R.string.key_chatid),
-                            chatid);
-                    mChatfragment = new ChatFragment();
-
-                    mChatfragment.setArguments(args);
+                    args.putSerializable(getString(R.string.key_credentials), mCreds);
+                    args.putSerializable(getString(R.string.keys_intent_jwt), mJwToken);
+                    args.putSerializable(getString(R.string.key_chatid), chatid);
+                    fragment = new ChatFragment();
+                    fragment.setArguments(args);
 
                     getSupportFragmentManager()
                             .beginTransaction()
-                            .replace(R.id.fragment_container, mChatfragment)
+                            .replace(R.id.fragment_container, fragment)
                             .commit();
 
+                    //Was the Bundle received from Main Activity spurred by a connection notification?
+                } else if (getIntent().getBooleanExtra(getString(R.string.keys_intent_notification_connection), false)){
+                    //load the connections fragment
+                    fragment = new ConnectionsContainerFragment();
+                    Bundle args = new Bundle();
+                    args.putSerializable(getString(R.string.keys_intent_jwt), mJwToken);
+                    args.putSerializable(getString(R.string.key_credentials), mCreds);
+                    args.putStringArrayList(getString(R.string.keys_intent_chatId), mUnreadChatList);
+                    fragment.setArguments(args);
+                    loadFragment(fragment);
+
                 } else {
-                    loadHomeLandingPage();
+                    loadHomeLandingPage(fragment);
                 }
             }
         }
@@ -219,8 +205,8 @@ public class HomeActivity extends AppCompatActivity
      * and *later* load the contacts fragment.
      *
      */
-    private void loadHomeLandingPage(){
-        Fragment frag = new LandingPage();
+    private void loadHomeLandingPage(Fragment fragment){
+        fragment = new LandingPage();
         SuccessFragment successFragment = new SuccessFragment();
         Bundle args = new Bundle();
         args.putSerializable(getString(R.string.key_credentials)
@@ -230,7 +216,7 @@ public class HomeActivity extends AppCompatActivity
 
         //set the email to show in the top fragment
         successFragment.setArguments(args);
-        frag.setArguments(args);
+        fragment.setArguments(args);
 
 //        loadFragment(successFragment);
         getSupportFragmentManager().popBackStack(null, FragmentManager.POP_BACK_STACK_INCLUSIVE);
@@ -293,12 +279,13 @@ public class HomeActivity extends AppCompatActivity
 
         switch(id) {
             case R.id.nav_home:
-                loadHomeLandingPage();
+                Fragment fragment = new Fragment();
+                loadHomeLandingPage(fragment);
                 break;
 
             case R.id.nav_connections:
 
-                mContactCounterView.setText("");
+                mNavDrawerConnectionNotifView.setText("");
                 badgeDrawable.setEnabled(false);
 //                if (!mHasNotifications) {
 //                    badgeDrawable.setEnabled(false);
@@ -307,13 +294,14 @@ public class HomeActivity extends AppCompatActivity
                 Bundle args = new Bundle();
                 args.putSerializable(getString(R.string.keys_intent_jwt), mJwToken);
                 args.putSerializable(getString(R.string.key_credentials), mCreds);
+                args.putStringArrayList(getString(R.string.keys_intent_chatId), mUnreadChatList);
                 frag.setArguments(args);
                 loadFragment(frag);
                 break;
 
             case R.id.nav_chat:
 
-                  mChatCounterView.setText("");
+                mNavDrawerChatNotifView.setText("");
                 badgeDrawable.setEnabled(false);
 //                if (!mHasNotifications) {
 //                    badgeDrawable.setEnabled(false);
@@ -543,13 +531,13 @@ public class HomeActivity extends AppCompatActivity
      */
     @Override
     public void onListFragmentInteraction(Chat item) {
-        mChatfragment = new ChatFragment();             //ChatFragment chatfrag
+        Fragment fragment = new ChatFragment();
         Bundle args = new Bundle();
         args.putSerializable(getString(R.string.keys_intent_jwt), mJwToken);
         args.putSerializable(getString(R.string.key_credentials), mCreds);
         args.putSerializable(getString(R.string.key_chatid), item.getId());
-        mChatfragment.setArguments(args);
-        loadFragment(mChatfragment);
+        fragment.setArguments(args);
+        loadFragment(fragment);
     }
 
 
@@ -692,32 +680,23 @@ public class HomeActivity extends AppCompatActivity
 
     /**
      * From the ChatFragment interface that updates the count of unread
-     * chat Ids from notifications.
+     * chat Ids from notifications. Specifically for when the chatFragment
+     * is open but it is not the same one that relates to the given notification
      * @param chatId    chatId to add to the list
      */
     @Override
-    public void incrementUnreadChatNotifications(String chatId) {
+    public void unreadMessageReceivedinOtherChatNotifications(String chatId) {
 
         //adds the chatId to list of unread chats
         //show badge on home button.
         //show number on nav menu chat button
 
         mHasNotifications = true;
-        unreadChatList.add(chatId);
+        mUnreadChatList.add(chatId);
         badgeDrawable.setEnabled(true);
-        mChatCounterView.setText(unreadChatList.size());
+        mNavDrawerChatNotifView.setText("NEW");
         //show badge on recycler view item in all chats.
     }
-
-//    /**
-//     * From the ChatFragment interface that removes a viewed chatid from the counter
-//     * of unread chat ids
-//     * @param chatId    the chatId already viewed.
-//     */
-//    @Override
-//    public void updateViewedChatroom(String chatId) {
-//        unreadChatList.remove(chatId);
-//    }
 
 
     // Deleting the Pushy device token must be done asynchronously. Good thing
@@ -767,31 +746,16 @@ public class HomeActivity extends AppCompatActivity
 
             String typeOfMessage = intent.getStringExtra("type");
             String sender = intent.getStringExtra("sender");
-            String messageText = intent.getStringExtra("message");
-            String chatid = intent.getStringExtra("chatid");
-
-            /*
-             * CASES: For viewing notifications in app
-             *
-             * MSG NOTIFICATIONS
-             * 1. User is viewing OTHER Fragment and msg notification is received.
-             * 2. User is viewing chat room fragment and msg inside of chat is received.
-             * 3. User is viewing chat room fragment and msg from another chat is received.
-             *
-             *
-             *
-            */
-
 
 
             if(typeOfMessage.equals("msg")){ //if received broadcast from message notification.
                 if (findViewById(R.id.fragment_chat) == null){ //case where user is NOT in chat fragment
-                    //update global boolean for badge icon to show
-                    mHasNotifications = true;
-                    unreadChatList.add(chatid);
+                    String id = intent.getStringExtra("chatid");
+                    mUnreadChatList.add(id);
                     //update home icon and the counter
+                    mUnreadChatList.add(id);
                     badgeDrawable.setEnabled(true);
-                    mChatCounterView.setText("1"); //TO BE CHANGE TO the chat list size
+                    mNavDrawerChatNotifView.setText("NEW");
 
                     //how to add in red dot alongside specific chat room?
                     //call backend to get all chatIds with unread messages
@@ -800,8 +764,15 @@ public class HomeActivity extends AppCompatActivity
                 }
 
 
-            } else {
-                //add in logic for new connection request, new chat room request
+            } else if(typeOfMessage.equals("conn req")){ //if received broadcast from connection request.
+                if (findViewById(R.id.allconnections_container) == null){ //case where user is NOT in connection fragment
+
+                    //update home icon and the counter
+                    badgeDrawable.setEnabled(true);
+                    mNavDrawerConnectionNotifView.setText("NEW");
+
+                    Log.e("Notification Receiver", "Received message type: conn req");
+                }
             }
 
 

@@ -27,13 +27,14 @@
             android:textColor="@color/divider"
             android:textSize="24sp" />
 
-        <TextView
-            android:id="@+id/allchats_text_unread"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:textColor="@color/colorAccent"
-            android:textStyle="bold" />
+       <TextView
+           android:id="@+id/allchats_text_unread"
+           android:layout_width="0dp"
+           android:layout_height="47dp"
+           android:layout_weight="1"
+           android:textAlignment="viewStart"
+           android:textColor="@color/colorAccent"
+           android:textStyle="bold" />
 
     </LinearLayout>
 
