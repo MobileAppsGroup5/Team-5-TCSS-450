@@ -106,7 +106,7 @@ public class ForgotPasswordFragment extends Fragment implements View.OnClickList
                 if(res.has("success") && res.getBoolean("success")) {
 
                     // set the output text saying that email is sent
-                    tv.setText("Email was sent for password reset! Check email " + res);
+                    tv.setText("Email was sent for password reset! Check email!");
                 } else {
                     // log the error
                     tv.setText("Error, something went wrong.");
