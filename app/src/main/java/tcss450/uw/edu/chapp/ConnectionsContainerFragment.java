@@ -52,7 +52,6 @@ public class ConnectionsContainerFragment extends Fragment implements PropertyCh
             mCreds = (Credentials)getArguments().getSerializable(getString(R.string.key_credentials));
             mJwToken = (String)getArguments().getSerializable(getString(R.string.keys_intent_jwt));
 
-            callWebServiceforConnections();
         } else {
             mConnections = new ArrayList<>();
         }

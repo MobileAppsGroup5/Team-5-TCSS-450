@@ -53,8 +53,6 @@ public class ChatsContainerFragment extends Fragment implements PropertyChangeLi
         if (getArguments() != null) {
             mCreds = (Credentials)getArguments().getSerializable(getString(R.string.key_credentials));
             mJwToken = (String)getArguments().getSerializable(getString(R.string.keys_intent_jwt));
-
-            callWebServiceforChats();
         } else {
             mChats = new ArrayList<>();
         }
