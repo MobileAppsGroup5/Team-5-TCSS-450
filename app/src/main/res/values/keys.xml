@@ -21,12 +21,6 @@
     <string name="keys_json_setlists_set_list_data">setlistdata</string>
     <string name="keys_json_setlists_set_list_notes">setlistnotes</string>
     <string name="keys_json_setlists_url">url</string>
-    <string name="keys_json_chats_chatlist">chats</string>
-    <string name="keys_json_chats_chatid">chatid</string>
-    <string name="keys_json_chats_name">name</string>
-    <string name="keys_json_chats_message">message</string>
-    <string name="keys_json_chats_messages">messages</string>
-    <string name="keys_json_chats_time">timestamp</string>
     <string name="key_credentials">chapp_credentials_information</string>
     <string name="key_blog_post">chapp_blog_post_information</string>
     <string name="key_set_list">chapp_set_list_information</string>
@@ -55,6 +49,18 @@
     <string name="keys_json_connections_decline_cancel_username">decliningUsername</string>
     <string name="keys_json_connections_request_username">requestUsername</string>
     <string name="keys_json_connections_accept_username">acceptingUsername</string>
+
+    <!-- chats keys-->
+    <string name="keys_chats_arg">here are chats in the args</string>
+    <string name="keys_json_chats_chatlist">chats</string>
+    <string name="keys_json_chats_chatid">chatid</string>
+    <string name="keys_json_chats_name">name</string>
+    <string name="keys_json_chats_message">message</string>
+    <string name="keys_json_chats_messages">messages</string>
+    <string name="keys_json_chats_time">timestamp</string>
+    <string name="keys_json_chats_users">usernames</string>
+    <string name="keys_json_chats_senders_and_receivers">senderreceiverpairs</string>
+    <string name="keys_json_chats_has_been_read">hasbeenread</string>
 
     <!-- things relating to credentials/users-->
     <string name="keys_json_users">users</string>

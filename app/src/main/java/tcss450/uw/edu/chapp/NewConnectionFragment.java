@@ -10,7 +10,6 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
-import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.TextView;
 
@@ -21,7 +20,6 @@ import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 
 import tcss450.uw.edu.chapp.model.Credentials;
@@ -154,7 +152,7 @@ public class NewConnectionFragment extends Fragment implements AdapterView.OnIte
         return v;
     }
 
-    private void submitRequest(String otherUsername) {
+    private void submitConnectionRequest(String otherUsername) {
         Uri uri = new Uri.Builder()
                 .scheme("https")
                 .appendPath(getString(R.string.ep_base_url))
@@ -235,11 +233,11 @@ public class NewConnectionFragment extends Fragment implements AdapterView.OnIte
 
         if ("First Name".equals(currentSpinnerSelection) || "Last Name".equals(currentSpinnerSelection)) {
             otherUsername = otherUsername.substring(0, otherUsername.length()-1);
-            submitRequest(otherUsername);
+            submitConnectionRequest(otherUsername);
         } else if ("Email".equals(currentSpinnerSelection)) {
-            submitRequest(userNameList.get(emailList.indexOf(otherUsername)));
+            submitConnectionRequest(userNameList.get(emailList.indexOf(otherUsername)));
         } else if ("Username".equals(currentSpinnerSelection)) {
-            submitRequest(otherUsername);
+            submitConnectionRequest(otherUsername);
         }
 
         // Refresh contacts view regardless (can't hurt)

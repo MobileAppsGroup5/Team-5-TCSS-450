@@ -473,49 +473,49 @@ public class HomeActivity extends AppCompatActivity
                 .commit();
     }
 
-    /**
-     * Post call for retrieving the list of Chats from the Database.
-     * Calls chat fragment to load and sends in the chatId to load into.
-     * @param result the chatId and name of the chats from the result to display in UI
-     */
-    private void handleChatsPostOnPostExecute(final String result) {
-        // parse JSON
-        try {
-            JSONObject root = new JSONObject(result);
-            if (root.has(getString(R.string.keys_json_chats_chatlist))) {
-
-                    JSONArray data = root.getJSONArray(
-                            getString(R.string.keys_json_chats_chatlist));
-                    List<Chat> chats = new ArrayList<>();
-                    for(int i = 0; i < data.length(); i++) {
-                        JSONObject jsonChat = data.getJSONObject(i);
-                        chats.add(new Chat.Builder(
-                                jsonChat.getString(getString(R.string.keys_json_chats_chatid)),
-                                jsonChat.getString(getString(R.string.keys_json_chats_name)))
-                                .build());
-                    }
-                    Chat[] chatsAsArray = new Chat[chats.size()];
-                    chatsAsArray = chats.toArray(chatsAsArray);
-                    Bundle args = new Bundle();
-                    args.putSerializable(ChatsFragment.ARG_CHAT_LIST, chatsAsArray);
-                    args.putSerializable(getString(R.string.key_credentials), mCreds);
-                    args.putSerializable(getString(R.string.keys_intent_jwt), mJwToken);
-                    Fragment frag = new ChatsFragment();
-                    frag.setArguments(args);
-                    onWaitFragmentInteractionHide();
-                    loadFragment(frag);
-                } else {
-                    Log.e("ERROR!", "No data array");
-                    //notify user
-                    onWaitFragmentInteractionHide();
-                }
-        } catch (JSONException e) {
-            e.printStackTrace();
-            Log.e("ERROR!", e.getMessage());
-            //notify user
-            onWaitFragmentInteractionHide();
-        }
-    }
+//    /**
+//     * Post call for retrieving the list of Chats from the Database.
+//     * Calls chat fragment to load and sends in the chatId to load into.
+//     * @param result the chatId and name of the chats from the result to display in UI
+//     */
+//    private void handleChatsPostOnPostExecute(final String result) {
+//        // parse JSON
+//        try {
+//            JSONObject root = new JSONObject(result);
+//            if (root.has(getString(R.string.keys_json_chats_chatlist))) {
+//
+//                    JSONArray data = root.getJSONArray(
+//                            getString(R.string.keys_json_chats_chatlist));
+//                    List<Chat> chats = new ArrayList<>();
+//                    for(int i = 0; i < data.length(); i++) {
+//                        JSONObject jsonChat = data.getJSONObject(i);
+//                        chats.add(new Chat.Builder(
+//                                jsonChat.getString(getString(R.string.keys_json_chats_chatid)),
+//                                jsonChat.getString(getString(R.string.keys_json_chats_name)))
+//                                .build());
+//                    }
+//                    Chat[] chatsAsArray = new Chat[chats.size()];
+//                    chatsAsArray = chats.toArray(chatsAsArray);
+//                    Bundle args = new Bundle();
+//                    args.putSerializable(ChatsFragment.ARG_CHAT_LIST, chatsAsArray);
+//                    args.putSerializable(getString(R.string.key_credentials), mCreds);
+//                    args.putSerializable(getString(R.string.keys_intent_jwt), mJwToken);
+//                    Fragment frag = new ChatsFragment();
+//                    frag.setArguments(args);
+//                    onWaitFragmentInteractionHide();
+//                    loadFragment(frag);
+//                } else {
+//                    Log.e("ERROR!", "No data array");
+//                    //notify user
+//                    onWaitFragmentInteractionHide();
+//                }
+//        } catch (JSONException e) {
+//            e.printStackTrace();
+//            Log.e("ERROR!", e.getMessage());
+//            //notify user
+//            onWaitFragmentInteractionHide();
+//        }
+//    }
 
     /**
      * Post call for Async Task when returning from getting all messages from

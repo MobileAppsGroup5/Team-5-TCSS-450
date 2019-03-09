@@ -9,8 +9,10 @@ import android.widget.TextView;
 import tcss450.uw.edu.chapp.ChatsFragment.OnListFragmentInteractionListener;
 import tcss450.uw.edu.chapp.chat.Chat;
 import tcss450.uw.edu.chapp.connections.Connection;
+import tcss450.uw.edu.chapp.model.Credentials;
 
 import java.util.List;
+import java.util.StringJoiner;
 
 /**
  * {@link RecyclerView.Adapter} that can display a {@link Connection} and makes a call to the
@@ -20,10 +22,12 @@ public class MyChatsRecyclerViewAdapter extends RecyclerView.Adapter<MyChatsRecy
 
     private final List<Chat> mValues;
     private final OnListFragmentInteractionListener mListener;
+    private final Credentials mCreds;
 
-    public MyChatsRecyclerViewAdapter(List<Chat> items, OnListFragmentInteractionListener listener) {
+    public MyChatsRecyclerViewAdapter(List<Chat> items, OnListFragmentInteractionListener listener, Credentials credentials) {
         mValues = items;
         mListener = listener;
+        mCreds = credentials;
     }
 
     @Override
@@ -37,6 +41,18 @@ public class MyChatsRecyclerViewAdapter extends RecyclerView.Adapter<MyChatsRecy
     public void onBindViewHolder(final ViewHolder holder, int position) {
         holder.mItem = mValues.get(position);
         holder.mNameView.setText(mValues.get(position).getName());
+
+        // populate chatroom member text view
+        StringJoiner joiner = new StringJoiner(", ");
+        holder.mItem.getUsersInChat().forEach(username -> {
+            // don't add our own username
+            if (!username.equals(mCreds.getUsername())) {
+                joiner.add(username);
+            }
+        });
+
+        holder.mMembersView.setText("Members: " + joiner.toString());
+
 
         holder.mView.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -58,12 +74,14 @@ public class MyChatsRecyclerViewAdapter extends RecyclerView.Adapter<MyChatsRecy
     public class ViewHolder extends RecyclerView.ViewHolder {
         public final View mView;
         public final TextView mNameView;
+        public final TextView mMembersView;
         public Chat mItem;
 
         public ViewHolder(View view) {
             super(view);
             mView = view;
             mNameView = (TextView) view.findViewById(R.id.list_item_chat_name);
+            mMembersView = (TextView) view.findViewById(R.id.list_item_chat_members);
         }
 
         @Override

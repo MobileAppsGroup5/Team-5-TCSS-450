@@ -57,7 +57,6 @@ public class ChatsFragment extends Fragment {
             mCreds = (Credentials)getArguments().getSerializable(getString(R.string.key_credentials));
             mJwToken = (String)getArguments().getSerializable(getString(R.string.keys_intent_jwt));
 
-//            callWebServiceforChats();
         } else {
             mChats = new ArrayList<>();
         }
@@ -141,7 +140,7 @@ public class ChatsFragment extends Fragment {
             } else {
                 recyclerView.setLayoutManager(new GridLayoutManager(context, mColumnCount));
             }
-            recyclerView.setAdapter(new MyChatsRecyclerViewAdapter(mChats, mListener));
+            recyclerView.setAdapter(new MyChatsRecyclerViewAdapter(mChats, mListener, mCreds));
         }
         return view;
     }

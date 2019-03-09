@@ -6,42 +6,32 @@
     android:layout_height="wrap_content"
     tools:context=".NewChatFragment">
 
-    <EditText
-        android:id="@+id/text_view_create_new_chat_member_name"
-        android:layout_width="291dp"
+    <AutoCompleteTextView
+        android:id="@+id/auto_complete_new_chat_search"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
         android:layout_marginTop="8dp"
         android:layout_marginEnd="8dp"
         android:ems="10"
-        android:hint="Connection's Username"
+        android:hint="Connection's Username (Start Typing)"
         android:inputType="textPersonName"
-        app:layout_constraintEnd_toStartOf="@+id/button_create_new_chat"
-        app:layout_constraintHorizontal_bias="1.0"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/text_view_new_chat_room_name" />
-
-    <Button
-        android:id="@+id/button_create_new_chat"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
-        android:layout_marginEnd="16dp"
-        android:text="Create"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/text_view_new_chat_room_name" />
 
     <EditText
         android:id="@+id/text_view_new_chat_room_name"
-        android:layout_width="294dp"
-        android:layout_height="42dp"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
         android:layout_marginTop="8dp"
         android:layout_marginEnd="8dp"
         android:ems="10"
         android:hint="New Chatroom Name"
         android:inputType="textPersonName"
-        app:layout_constraintEnd_toStartOf="@+id/button_add_new_chat_member"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/text_view_add_chat_result" />

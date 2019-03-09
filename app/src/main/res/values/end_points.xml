@@ -13,7 +13,7 @@
     <string name="ep_messaging_base">messaging</string>
     <string name="ep_messaging_send">send</string>
     <string name="ep_chats_base">chats</string>
-    <string name="ep_chats_new">new</string>
+    <string name="ep_chats_submit_request">submitRequest</string>
     <string name="ep_chats_get_chats">getChats</string>
     <string name="ep_chats_get_messages">getAll</string>
     <string name="ep_chats_add_member">addUserToChat</string>
