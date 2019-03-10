@@ -9,4 +9,6 @@
     <color name="divider">#444444</color>
     <color name="darkBackground">#212121</color>
     <color name="colorLogoText">#c9f3e9</color>
+    <color name="colorlightgray">#d0d0d0</color>
+
 </resources>
