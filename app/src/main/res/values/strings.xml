@@ -36,6 +36,7 @@
     <string name="imagebutton_message">Message Contact ImageButton</string>"
     <string name="imagebutton_request">Request Contact ImageButton</string>"
     <string name="tv_request_contact">Request Contact</string>
+
     <string-array name="member_search_values">
         <item>Username</item>
         <item>Email</item>
@@ -52,4 +53,9 @@
     <string name="weather_current_fragment_tag">CURRENT TAG</string>
     <string name="title_activity_maps">Map</string>
 
+
+    <!-- Forgot Password Strings -->
+    <string name="tv_forgot_password">Forgot Password?</string>
+    <string name="btn_reset_password">Reset Password</string>
+    <string name="tv_sent_password_result">Results From Email Database</string>
 </resources>

@@ -10,6 +10,9 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import tcss450.uw.edu.chapp.chat.Chat;
+import tcss450.uw.edu.chapp.model.Credentials;
+
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
@@ -17,24 +20,19 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import tcss450.uw.edu.chapp.connections.Connection;
-import tcss450.uw.edu.chapp.model.Credentials;
-
 /**
  * A fragment representing a list of Items.
  * <p/>
  * Activities containing this fragment MUST implement the {@link OnListFragmentInteractionListener}
  * interface.
  */
-public class AllConnectionsFragment extends Fragment implements PropertyChangeListener {
+public class ChatsFragment extends Fragment implements PropertyChangeListener {
 
-    // Misspell this to lower the change of a tag conflict
-    public static final String ARG_CONNECTIONS_LIST = "connections lists";
+    public static final String ARG_CHAT_LIST = "chats lists";
     private static final String ARG_COLUMN_COUNT = "column-count";
-    private List<Connection> mConnections;
+    private List<Chat> mChats;
     private Credentials mCreds;
     private String mJwToken;
-    private MyAllConnectionsRecyclerViewAdapter mAdapter;
 
     private int mColumnCount = 1;
     private OnListFragmentInteractionListener mListener;
@@ -45,12 +43,11 @@ public class AllConnectionsFragment extends Fragment implements PropertyChangeLi
      * Mandatory empty constructor for the fragment manager to instantiate the
      * fragment (e.g. upon screen orientation changes).
      */
-    public AllConnectionsFragment() {
+    public ChatsFragment() {
     }
 
-
-    public static AllConnectionsFragment newInstance(int columnCount) {
-        AllConnectionsFragment fragment = new AllConnectionsFragment();
+    public static ChatsFragment newInstance(int columnCount) {
+        ChatsFragment fragment = new ChatsFragment();
         Bundle args = new Bundle();
         args.putInt(ARG_COLUMN_COUNT, columnCount);
         fragment.setArguments(args);
@@ -60,21 +57,84 @@ public class AllConnectionsFragment extends Fragment implements PropertyChangeLi
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
         if (getArguments() != null) {
-            mConnections = new ArrayList<>(Arrays.asList((Connection[])getArguments().getSerializable(ARG_CONNECTIONS_LIST)));
+            mChats = new ArrayList<>(Arrays.asList((Chat[])getArguments().getSerializable(ARG_CHAT_LIST)));
             mCreds = (Credentials)getArguments().getSerializable(getString(R.string.key_credentials));
             mJwToken = (String)getArguments().getSerializable(getString(R.string.keys_intent_jwt));
 
         } else {
-            mConnections = new ArrayList<>();
+            mChats = new ArrayList<>();
         }
     }
+
+//    /**
+//     * Begins the async task for grabbing the chats from the database that the user is in
+//     */
+//    private void callWebServiceforChats(){
+//        //Create the url for getting all chats
+//        Uri uri = new Uri.Builder()
+//                .scheme("https")
+//                .appendPath(getString(R.string.ep_base_url))
+//                .appendPath(getString(R.string.ep_chats_base))
+//                .appendPath(getString(R.string.ep_chats_get_chats))
+//                .build();
+//
+//        // Create the JSON object with given chatID
+//        JSONObject msg = new JSONObject();
+//        try {
+//            msg.put("username", mCreds.getUsername());
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//        }
+//
+//        new SendPostAsyncTask.Builder(uri.toString(), msg)
+////                .onPreExecute(this::handleWaitFragmentShow)
+//                .onPostExecute(this::handleChatsPostOnPostExecute)
+////                .onCancelled(this::handleErrorsInTask)
+//                .addHeaderField("authorization", mJwToken) //add the JWT as a header
+//                .build().execute();
+//    }
+//
+//    private void handleChatsPostOnPostExecute(String result) {
+//        // parse JSON
+//        try {
+//            JSONObject root = new JSONObject(result);
+//            if (root.has(getString(R.string.keys_json_chats_chatlist))) {
+//
+//                JSONArray data = root.getJSONArray(
+//                        getString(R.string.keys_json_chats_chatlist));
+//                List<Chat> chats = new ArrayList<>();
+//                for(int i = 0; i < data.length(); i++) {
+//                    JSONObject jsonChat = data.getJSONObject(i);
+//                    chats.add(new Chat.Builder(
+//                            jsonChat.getString(getString(R.string.keys_json_chats_chatid)),
+//                            jsonChat.getString(getString(R.string.keys_json_chats_name)))
+//                            .build());
+//                }
+//
+//                mChats = chats;
+//                inflateView();
+//            } else {
+//                Log.e("ERROR!", "No data array");
+//                // notify user in the future
+//            }
+//        } catch (JSONException e) {
+//            e.printStackTrace();
+//            Log.e("ERROR!", e.getMessage());
+//            // notify user in the future
+//        }
+//    }
+//
+//    @Override
+//    public void onResume() {
+//        super.onResume();
+//        callWebServiceforChats();
+//    }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.fragment_all_connections_list, container, false);
+        View view = inflater.inflate(R.layout.fragment_chats_list, container, false);
 
         // Set the adapter
         if (view instanceof RecyclerView) {
@@ -85,11 +145,10 @@ public class AllConnectionsFragment extends Fragment implements PropertyChangeLi
             } else {
                 recyclerView.setLayoutManager(new GridLayoutManager(context, mColumnCount));
             }
-            mAdapter = new MyAllConnectionsRecyclerViewAdapter(mConnections, mListener, mCreds, mJwToken, getContext());
-            mAdapter.addPropertyChangeListener(this);
-            recyclerView.setAdapter(mAdapter);
+            MyChatsRecyclerViewAdapter adapter = new MyChatsRecyclerViewAdapter(mChats, mListener, mCreds, getContext(), mJwToken);
+            adapter.addPropertyChangeListener(this);
+            recyclerView.setAdapter(adapter);
         }
-
         return view;
     }
 
@@ -120,10 +179,9 @@ public class AllConnectionsFragment extends Fragment implements PropertyChangeLi
 
     @Override
     public void propertyChange(PropertyChangeEvent evt) {
-        // Wrap the adapter's connections changed adapter and put that up.
-        if (evt.getPropertyName() == ConnectionsContainerFragment.REFRESH_CONNECTIONS) {
-            myPcs.firePropertyChange(ConnectionsContainerFragment.REFRESH_CONNECTIONS,
-                    null, evt.getNewValue());
+        if (ChatsContainerFragment.PROPERTY_REFRESH_CHATS.equals(evt.getPropertyName())) {
+            // pass the refresh request along
+            myPcs.firePropertyChange(ChatsContainerFragment.PROPERTY_REFRESH_CHATS, null, "thanku");
         }
     }
 
@@ -138,8 +196,6 @@ public class AllConnectionsFragment extends Fragment implements PropertyChangeLi
      * >Communicating with Other Fragments</a> for more information.
      */
     public interface OnListFragmentInteractionListener {
-        void onXClicked(Connection c);
-        void onCheckClicked(Connection c);
-        void callWebServiceforConnections();
+        void onListFragmentInteraction(Chat item);
     }
 }

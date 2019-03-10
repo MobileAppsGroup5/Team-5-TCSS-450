@@ -4,9 +4,9 @@ import java.io.Serializable;
 
 public class Connection implements Serializable {
 
-    public final String usernameA;
-    public final String usernameB;
-    public final int verified;
+    private final String usernameA;
+    private final String usernameB;
+    private final int verified;
 
     public static class Builder {
         private final String usernameA;

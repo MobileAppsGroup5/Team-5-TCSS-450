@@ -6,7 +6,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
-import tcss450.uw.edu.chapp.MessageFragment.OnListFragmentInteractionListener;
+import tcss450.uw.edu.chapp.MessagingFragment.OnListFragmentInteractionListener;
 import tcss450.uw.edu.chapp.chat.Message;
 
 import java.util.List;
@@ -14,13 +14,13 @@ import java.util.List;
 /**
  * {@link RecyclerView.Adapter} that can display a {@link Message}.
  */
-public class MyMessageRecyclerViewAdapter extends RecyclerView.Adapter<MyMessageRecyclerViewAdapter.ViewHolder> {
+public class MyMessagingRecyclerViewAdapter extends RecyclerView.Adapter<MyMessagingRecyclerViewAdapter.ViewHolder> {
 
     private final List<Message> mValues;
     private final OnListFragmentInteractionListener mListener;
     private String mUsername;
 
-    public MyMessageRecyclerViewAdapter(List<Message> items, OnListFragmentInteractionListener listener, String username) {
+    public MyMessagingRecyclerViewAdapter(List<Message> items, OnListFragmentInteractionListener listener, String username) {
         mValues = items;
         mListener = listener;
         mUsername = username;

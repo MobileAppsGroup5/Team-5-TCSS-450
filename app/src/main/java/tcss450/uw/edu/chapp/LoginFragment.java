@@ -92,6 +92,11 @@ public class LoginFragment extends Fragment {
         mListener.onRegisterClicked();
     }
 
+    public void forgotPasswordClicked(View v) {
+        mListener.onForgotPasswordClicked();
+    }
+
+
     public void fillFields(Credentials theCredentials) {
         EditText emailEditText = getActivity().findViewById(R.id.edit_login_email);
         EditText passwordEditText = getActivity().findViewById(R.id.edit_login_password);
@@ -163,6 +168,9 @@ public class LoginFragment extends Fragment {
 
         b = v.findViewById(R.id.button_register);
         b.setOnClickListener(this::registerClicked);
+
+        b = v.findViewById(R.id.tv_forgot_password);
+        b.setOnClickListener(this::forgotPasswordClicked);
 
         return v;
     }
@@ -241,6 +249,7 @@ public class LoginFragment extends Fragment {
     public interface OnLoginFragmentInteractionListener extends WaitFragment.OnFragmentInteractionListener {
         void onLoginSuccess(Credentials theCredentials, String jwt);
         void onRegisterClicked();
+        void onForgotPasswordClicked();
     }
     /**
      * Added this functionality in Lab 5

@@ -33,10 +33,10 @@ import tcss450.uw.edu.chapp.utils.SendPostAsyncTask;
 public class ConnectionsContainerFragment extends Fragment implements PropertyChangeListener {
     public static final String REFRESH_CONNECTIONS = "refresh the connections please";
 
-    private List<Connection> mConnections;
+    private ArrayList<Connection> mConnections;
     private Credentials mCreds;
     private String mJwToken;
-    private OnListFragmentInteractionListener mListener;
+    private OnConnectionInformationFetchListener mListener;
 
 
     public ConnectionsContainerFragment() {
@@ -52,7 +52,6 @@ public class ConnectionsContainerFragment extends Fragment implements PropertyCh
             mCreds = (Credentials)getArguments().getSerializable(getString(R.string.key_credentials));
             mJwToken = (String)getArguments().getSerializable(getString(R.string.keys_intent_jwt));
 
-            callWebServiceforConnections();
         } else {
             mConnections = new ArrayList<>();
         }
@@ -70,7 +69,6 @@ public class ConnectionsContainerFragment extends Fragment implements PropertyCh
 
     private boolean newConnectionMenuItemListener(MenuItem menuItem) {
         // fetch usernames from database here
-        mListener.onWaitFragmentInteractionShow();
         Uri uri = new Uri.Builder()
                 .scheme("https")
                 .appendPath(getString(R.string.ep_base_url))
@@ -79,6 +77,7 @@ public class ConnectionsContainerFragment extends Fragment implements PropertyCh
                 .build();
         // Pass the credentials
         JSONObject msg = mCreds.asJSONObject();
+        mListener.onWaitFragmentInteractionShow();
         new SendPostAsyncTask.Builder(uri.toString(), msg)
                 .onPostExecute(this::handleMemberInformationOnPostExecute)
                 .onCancelled(error -> Log.e("ConnectionsContainerFragment", error))
@@ -146,7 +145,7 @@ public class ConnectionsContainerFragment extends Fragment implements PropertyCh
                 .scheme("https")
                 .appendPath(getString(R.string.ep_base_url))
                 .appendPath(getString(R.string.ep_connections_base))
-                .appendPath(getString(R.string.ep_connections_get_contacts))
+                .appendPath(getString(R.string.ep_connections_get_connections_and_requests))
                 .build();
         // Pass the credentials
         JSONObject msg = mCreds.asJSONObject();
@@ -175,6 +174,8 @@ public class ConnectionsContainerFragment extends Fragment implements PropertyCh
                             .build());
                 }
                 mConnections = new ArrayList<>(connections);
+                // update the reference in home activity
+                mListener.updateConnections(mConnections);
 
                 constructConnections();
                 mListener.onWaitFragmentInteractionHide();
@@ -195,10 +196,10 @@ public class ConnectionsContainerFragment extends Fragment implements PropertyCh
         // Do this swapping so we can send in an array of Messages not Objects
         Connection[] connectionsAsArray = new Connection[mConnections.size()];
         connectionsAsArray = mConnections.toArray(connectionsAsArray);
-        args.putSerializable(AllConnectionsFragment.ARG_CONNECTIONS_LIST, connectionsAsArray);
+        args.putSerializable(ConnectionsFragment.ARG_CONNECTIONS_LIST, connectionsAsArray);
         args.putSerializable(getString(R.string.key_credentials), mCreds);
         args.putSerializable(getString(R.string.keys_intent_jwt), mJwToken);
-        AllConnectionsFragment frag = new AllConnectionsFragment();
+        ConnectionsFragment frag = new ConnectionsFragment();
         frag.setArguments(args);
 
         getActivity().getSupportFragmentManager()
@@ -217,20 +218,20 @@ public class ConnectionsContainerFragment extends Fragment implements PropertyCh
     }
 
     @Override
-    public void onAttach(Context context) {
-        super.onAttach(context);
-        if (context instanceof OnListFragmentInteractionListener) {
-            mListener = (OnListFragmentInteractionListener) context;
-        } else {
-            throw new RuntimeException(context.toString()
-                    + " must implement OnListFragmentInteractionListener");
-        }
-    }
-
-    @Override
     public void onResume() {
         super.onResume();
         callWebServiceforConnections();
+    }
+
+    @Override
+    public void onAttach(Context context) {
+        super.onAttach(context);
+        if (context instanceof WaitFragment.OnFragmentInteractionListener) {
+            mListener = (OnConnectionInformationFetchListener) context;
+        } else {
+            throw new RuntimeException(context.toString()
+                    + " must implement WaitFragment.OnFragmentInteractionListener");
+        }
     }
 
     @Override
@@ -247,19 +248,10 @@ public class ConnectionsContainerFragment extends Fragment implements PropertyCh
         }
     }
 
-    /**
-     * This interface must be implemented by activities that contain this
-     * fragment to allow an interaction in this fragment to be communicated
-     * to the activity and potentially other fragments contained in that
-     * activity.
-     * <p/>
-     * See the Android Training lesson <a href=
-     * "http://developer.android.com/training/basics/fragments/communicating.html"
-     * >Communicating with Other Fragments</a> for more information.
-     */
-    public interface OnListFragmentInteractionListener {
-        void onWaitFragmentInteractionShow();
+    interface OnConnectionInformationFetchListener {
+        void updateConnections(ArrayList<Connection> connections);
         void onWaitFragmentInteractionHide();
+        void onWaitFragmentInteractionShow();
     }
 
 
