@@ -8,12 +8,20 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
+import android.widget.AutoCompleteTextView;
 import android.widget.EditText;
 import android.widget.TextView;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import tcss450.uw.edu.chapp.chat.Chat;
+import tcss450.uw.edu.chapp.connections.Connection;
 import tcss450.uw.edu.chapp.model.Credentials;
 import tcss450.uw.edu.chapp.utils.SendPostAsyncTask;
 
@@ -21,10 +29,14 @@ import tcss450.uw.edu.chapp.utils.SendPostAsyncTask;
 /**
  * A simple {@link Fragment} subclass.
  */
-public class AddChatMemberFragment extends Fragment {
+public class AddChatMemberFragment extends Fragment implements AdapterView.OnItemClickListener {
     private Credentials mCreds;
     private String mJwToken;
-    private String mChatId;
+    private Chat mChat;
+    private List<String> mUsernameList;
+    private List<Connection> mConnections;
+
+    private AutoCompleteTextView mAutoCompleteSearchBox;
 
 //    private OnFragmentInteractionListener mListener;
 
@@ -38,8 +50,36 @@ public class AddChatMemberFragment extends Fragment {
         if (getArguments() != null) {
             mCreds = (Credentials) getArguments().getSerializable(getString(R.string.key_credentials));
             mJwToken = getArguments().getString(getString(R.string.keys_intent_jwt));
-            mChatId = getArguments().getString(getString(R.string.key_chatid));
+            mChat = (Chat) getArguments().get(getString(R.string.key_chat));
+            mConnections = (ArrayList<Connection>) getArguments().get(getString(R.string.key_intent_connections));
+
         }
+    }
+
+    private void setUpSearchArray() {
+        mUsernameList = new ArrayList<>();
+
+        // first load with all possible connections
+        mConnections.forEach(connection -> {
+            if (connection.getVerified() == 1) {
+                mUsernameList.add(connection.getUsernameA());
+                mUsernameList.add(connection.getUsernameB());
+            }
+        });
+
+        // remove us
+        while (mUsernameList.remove(mCreds.getUsername()));
+
+        // remove people already in the chat
+        mChat.getUsersInChat().forEach(username -> {
+            while (mUsernameList.remove(username));
+        });
+
+        ArrayAdapter<String> adapter = new ArrayAdapter<>(getActivity(),
+                android.R.layout.simple_dropdown_item_1line,
+                mUsernameList);
+
+        mAutoCompleteSearchBox.setAdapter(adapter);
     }
 
     @Override
@@ -47,13 +87,16 @@ public class AddChatMemberFragment extends Fragment {
                              Bundle savedInstanceState) {
         View v = inflater.inflate(R.layout.fragment_add_chat_member, container, false);
 
-        // Add action listener to button
-        v.findViewById(R.id.button_add_new_chat_member).setOnClickListener(this::addNewMemberToChat);
+        mAutoCompleteSearchBox = v.findViewById(R.id.autocomplete_text_add_new_chat_member_name);
+
+        mAutoCompleteSearchBox.setOnItemClickListener(this);
+
+        setUpSearchArray();
 
         return v;
     }
 
-    private void addNewMemberToChat(View view) {
+    private void addUserToChat(String username) {
         Uri uri = new Uri.Builder()
                 .scheme("https")
                 .appendPath(getString(R.string.ep_base_url))
@@ -64,8 +107,8 @@ public class AddChatMemberFragment extends Fragment {
         JSONObject msg = new JSONObject();
         try {
 //            Log.e("STUFF", )
-            msg.put("username", ((EditText) getActivity().findViewById(R.id.text_view_add_new_chat_member_name)).getText().toString());
-            msg.put("chatId", mChatId);
+            msg.put("username", username);
+            msg.put("chatid", mChat.getId());
         } catch (JSONException e) {
             e.printStackTrace();
         }
@@ -85,7 +128,7 @@ public class AddChatMemberFragment extends Fragment {
             if(res.has("success") && res.getBoolean("success")) {
 
                 //set the output text to show the sent message
-                tv.setText("Member added!");
+                tv.setText("Member add request sent!");
 
             } else {
                 // error
@@ -97,4 +140,9 @@ public class AddChatMemberFragment extends Fragment {
         }
     }
 
+    @Override
+    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+        String clickedUsername = ((TextView)view).getText().toString();
+        addUserToChat(clickedUsername);
+    }
 }

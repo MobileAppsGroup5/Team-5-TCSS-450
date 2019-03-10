@@ -6,12 +6,23 @@ import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
+import android.widget.AutoCompleteTextView;
 import android.widget.EditText;
 import android.widget.TextView;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.beans.PropertyChangeListener;
+import java.beans.PropertyChangeSupport;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
+import tcss450.uw.edu.chapp.chat.Chat;
+import tcss450.uw.edu.chapp.connections.Connection;
 import tcss450.uw.edu.chapp.model.Credentials;
 import tcss450.uw.edu.chapp.utils.SendPostAsyncTask;
 
@@ -19,9 +30,19 @@ import tcss450.uw.edu.chapp.utils.SendPostAsyncTask;
 /**
  * A fragment for creating a new chat.
  */
-public class NewChatFragment extends Fragment {
+public class NewChatFragment extends Fragment implements AdapterView.OnItemClickListener {
+
+    public static final String ARG_CONN_LIST = "connnnlist<>{}";
+
+    private List<Connection> mConnectionList;
+    private List<Chat> mChatList;
     private Credentials mCreds;
     private String mJwToken;
+    private AutoCompleteTextView mAutoCompleteSearchBox;
+
+    private List<String> mUserNameList;
+
+    private PropertyChangeSupport myPcs = new PropertyChangeSupport(this);
 
 //    private OnFragmentInteractionListener mListener;
 
@@ -32,10 +53,41 @@ public class NewChatFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
         if (getArguments() != null) {
+            mConnectionList = new ArrayList<>(Arrays.asList((Connection[])getArguments().getSerializable(ARG_CONN_LIST)));
+            mChatList = (ArrayList<Chat>)getArguments().getSerializable(getString(R.string.keys_chats_arg));
             mCreds = (Credentials) getArguments().getSerializable(getString(R.string.key_credentials));
             mJwToken = getArguments().getString(getString(R.string.keys_intent_jwt));
+
         }
+    }
+
+    /**
+     * This sets up the array that will be used for searching for people to add to the chatroom
+     */
+    private void setUpConnectionSearchArray() {
+        mUserNameList = new ArrayList<>();
+
+        // first, add all possible connection usernames
+        //
+        // this also adds our own username a lot because we are either A or B in all of these,
+        // and we add both
+        mConnectionList.forEach(connection -> {
+            if (connection.getVerified() == 1) {
+                mUserNameList.add(connection.getUsernameA());
+                mUserNameList.add(connection.getUsernameB());
+            }
+        });
+
+        // remove all occurrences of our username
+        while (mUserNameList.remove(mCreds.getUsername()));
+
+        ArrayAdapter<String> adapter = new ArrayAdapter<>(getActivity(),
+                android.R.layout.simple_dropdown_item_1line,
+                mUserNameList);
+
+        mAutoCompleteSearchBox.setAdapter(adapter);
     }
 
     @Override
@@ -43,33 +95,12 @@ public class NewChatFragment extends Fragment {
                              Bundle savedInstanceState) {
         View v = inflater.inflate(R.layout.fragment_new_chat, container, false);
 
-        // Add action listener to button
-        v.findViewById(R.id.button_create_new_chat).setOnClickListener(this::createNewChat);
+        mAutoCompleteSearchBox = v.findViewById(R.id.auto_complete_new_chat_search);
 
+        mAutoCompleteSearchBox.setOnItemClickListener(this);
+
+        setUpConnectionSearchArray();
         return v;
-    }
-
-    private void createNewChat(View view) {
-        Uri uri = new Uri.Builder()
-                .scheme("https")
-                .appendPath(getString(R.string.ep_base_url))
-                .appendPath(getString(R.string.ep_chats_base))
-                .appendPath(getString(R.string.ep_chats_new))
-                .build();
-
-        JSONObject msg = new JSONObject();
-        try {
-            msg.put("username1", mCreds.getUsername());
-            msg.put("username2", ((EditText)getActivity().findViewById(R.id.text_view_create_new_chat_member_name)).getText().toString());
-            msg.put("chatName", ((EditText)getActivity().findViewById(R.id.text_view_new_chat_room_name)).getText().toString());
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
-
-        new SendPostAsyncTask.Builder(uri.toString(), msg)
-                .onPostExecute(this::handleRoomCreationOnPostExecute)
-                .addHeaderField("authorization", mJwToken) // add the JWT as a header
-                .build().execute();
     }
 
     private void handleRoomCreationOnPostExecute(String result) {
@@ -83,6 +114,10 @@ public class NewChatFragment extends Fragment {
                 //set the output text to show the sent message
                 tv.setText("New chat room created!");
 
+                // refresh chats
+                myPcs.firePropertyChange(ChatsContainerFragment.PROPERTY_REFRESH_CHATS,
+                        null, "refreshpls");
+
             } else {
                 // error
                 tv.setText("Error, that user does not exist.");
@@ -90,6 +125,45 @@ public class NewChatFragment extends Fragment {
         } catch (JSONException e) {
             e.printStackTrace();
         }
+    }
+
+    public void addPropertyChangeListener(PropertyChangeListener listener) {
+        myPcs.addPropertyChangeListener(listener);
+    }
+
+    public void removePropertyChangeListener(PropertyChangeListener listener) {
+        myPcs.removePropertyChangeListener(listener);
+    }
+
+    @Override
+    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+        String clickedUsername = ((TextView)view).getText().toString();
+        submitChatRequest(clickedUsername);
+
+        // Refresh chats view regardless (can't hurt)
+    }
+
+    private void submitChatRequest(String clickedUsername) {
+        Uri uri = new Uri.Builder()
+                .scheme("https")
+                .appendPath(getString(R.string.ep_base_url))
+                .appendPath(getString(R.string.ep_chats_base))
+                .appendPath(getString(R.string.ep_chats_submit_request))
+                .build();
+
+        JSONObject msg = new JSONObject();
+        try {
+            msg.put(getString(R.string.keys_json_username_from), mCreds.getUsername());
+            msg.put(getString(R.string.keys_json_username_to), clickedUsername);
+            msg.put(getString(R.string.keys_json_chats_chat_name), ((EditText)getActivity().findViewById(R.id.text_view_new_chat_room_name)).getText().toString());
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+        new SendPostAsyncTask.Builder(uri.toString(), msg)
+                .onPostExecute(this::handleRoomCreationOnPostExecute)
+                .addHeaderField("authorization", mJwToken) // add the JWT as a header
+                .build().execute();
     }
 
 

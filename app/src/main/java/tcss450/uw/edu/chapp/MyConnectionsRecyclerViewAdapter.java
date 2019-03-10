@@ -14,7 +14,6 @@ import android.widget.TextView;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import tcss450.uw.edu.chapp.AllConnectionsFragment.OnListFragmentInteractionListener;
 import tcss450.uw.edu.chapp.connections.Connection;
 import tcss450.uw.edu.chapp.model.Credentials;
 import tcss450.uw.edu.chapp.utils.SendPostAsyncTask;
@@ -24,11 +23,9 @@ import java.beans.PropertyChangeSupport;
 import java.util.List;
 
 /**
- * {@link RecyclerView.Adapter} that can display a {@link Connection} and makes a call to the
- * specified {@link OnListFragmentInteractionListener}.
- * TODO: Replace the implementation with code for your data type.
+ * {@link RecyclerView.Adapter} that can display a {@link Connection}
  */
-public class MyAllConnectionsRecyclerViewAdapter extends RecyclerView.Adapter<MyAllConnectionsRecyclerViewAdapter.ViewHolder> {
+public class MyConnectionsRecyclerViewAdapter extends RecyclerView.Adapter<MyConnectionsRecyclerViewAdapter.ViewHolder> {
 
     // used for the ViewHolder's viewType
     // connections sent to us from another person AND NOT VERIFIED YET
@@ -48,15 +45,13 @@ public class MyAllConnectionsRecyclerViewAdapter extends RecyclerView.Adapter<My
     private PropertyChangeSupport myPcs;
 
     private List<Connection> mValues;
-    private final OnListFragmentInteractionListener mListener;
     private Credentials mCredentials;
     private Context mContext;
     private String mJwToken;
 
-    public MyAllConnectionsRecyclerViewAdapter(List<Connection> items, OnListFragmentInteractionListener listener,
-                                               Credentials credentials, String jwToken, Context context) {
+    public MyConnectionsRecyclerViewAdapter(List<Connection> items,
+                                            Credentials credentials, String jwToken, Context context) {
         mValues = items;
-        mListener = listener;
         mCredentials = credentials;
         mContext = context;
         mJwToken = jwToken;
@@ -83,7 +78,7 @@ public class MyAllConnectionsRecyclerViewAdapter extends RecyclerView.Adapter<My
         }
 
         // shouldn't happen, this means db is messed up and there are bigger problems!
-        Log.e("MyAllConnectionsRecyclerViewAdapter", "INVALID VIEW TYPE");
+        Log.e("MyConnectionsRecyclerViewAdapter", "INVALID VIEW TYPE");
         return SENT;
     }
 
@@ -93,11 +88,11 @@ public class MyAllConnectionsRecyclerViewAdapter extends RecyclerView.Adapter<My
         if (viewType == SENT || viewType == RECIEVED_VERIFIED) {
             // sent from us
             view = LayoutInflater.from(parent.getContext())
-                    .inflate(R.layout.fragment_all_connections_outgoing, parent, false);
+                    .inflate(R.layout.fragment_connections_outgoing, parent, false);
         } else {
             // sent to us
             view = LayoutInflater.from(parent.getContext())
-                    .inflate(R.layout.fragment_all_connections_incoming, parent, false);
+                    .inflate(R.layout.fragment_connections_incoming, parent, false);
         }
         return new ViewHolder(view);
     }
@@ -163,7 +158,7 @@ public class MyAllConnectionsRecyclerViewAdapter extends RecyclerView.Adapter<My
                 .build();
         new SendPostAsyncTask.Builder(uri.toString(), messageJson)
                 .onPostExecute(this::handleConnectionsChangePostExecute)
-                .onCancelled(error -> Log.e("MyAllConnectionsRecyclerViewAdapter", error))
+                .onCancelled(error -> Log.e("MyConnectionsRecyclerViewAdapter", error))
                 .addHeaderField("authorization", mJwToken)
                 .build().execute();
     }
@@ -187,7 +182,7 @@ public class MyAllConnectionsRecyclerViewAdapter extends RecyclerView.Adapter<My
                 .build();
         new SendPostAsyncTask.Builder(uri.toString(), messageJson)
                 .onPostExecute(this::handleConnectionsChangePostExecute)
-                .onCancelled(error -> Log.e("MyAllConnectionsRecyclerViewAdapter", error))
+                .onCancelled(error -> Log.e("MyConnectionsRecyclerViewAdapter", error))
                 .addHeaderField("authorization", mJwToken)
                 .build().execute();
 
@@ -198,51 +193,6 @@ public class MyAllConnectionsRecyclerViewAdapter extends RecyclerView.Adapter<My
     private void handleConnectionsChangePostExecute(String result) {
         // Our list changed, notify listeners that we need to be refreshed
         myPcs.firePropertyChange(ConnectionsContainerFragment.REFRESH_CONNECTIONS, null, result);
-
-        // run the runnable, let someone else handle it
-//        mUpdateRunnable.run();
-
-
-        // We successfully accepted/rejected/something. Update the list
-//        String requestUsername = "";
-//        String declineCancelUsername = null;
-//        String acceptUsername = null;
-//
-//        try {
-//            JSONObject root = new JSONObject(result);
-//            // We only get request username back if successful, so check for this
-//            if (root.has(mContext.getString(R.string.keys_json_connections_request_username))) {
-//
-//                requestUsername = root.getString(mContext.getString(R.string.keys_json_connections_request_username));
-//                if (root.has(mContext.getString(R.string.keys_json_connections_decline_cancel_username))) {
-//                    declineCancelUsername = root.getString(mContext.getString(R.string.keys_json_connections_decline_cancel_username));
-//                }
-//                if (root.has(mContext.getString(R.string.keys_json_connections_accept_username))) {
-//                    acceptUsername = root.getString(mContext.getString(R.string.keys_json_connections_accept_username));
-//                }
-//
-//            } else {
-//                Log.e("ERROR!", "invalid response");
-//            }
-//        } catch (JSONException e) {
-//            e.printStackTrace();
-//            Log.e("ERROR!", e.getMessage());
-//        }
-//
-//        int clickedIndex = 0;
-//        // find the element that matches the request
-//        for (int i = 0; i < mValues.size(); i++) {
-//            if (mValues.get(i).getUsernameA().equals(requestUsername)) {
-//                clickedIndex = i;
-//            }
-//        }
-//
-//        if (Objects.nonNull(declineCancelUsername)) {
-//            mValues.remove(clickedIndex);
-//        } else if (Objects.nonNull(acceptUsername)) {
-//
-//        }
-//        notifyDataSetChanged();
     }
 
     @Override
