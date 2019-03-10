@@ -41,7 +41,7 @@ public class ChatsContainerFragment extends Fragment implements PropertyChangeLi
     private ArrayList<Chat> mChats;
     private Credentials mCreds;
     private String mJwToken;
-    private WaitFragment.OnFragmentInteractionListener mListener;
+    private OnChatInformationFetchListener mListener;
 
     public ChatsContainerFragment() {
         // Required empty public constructor
@@ -90,49 +90,13 @@ public class ChatsContainerFragment extends Fragment implements PropertyChangeLi
 
                 JSONArray data = root.getJSONArray(
                         getString(R.string.keys_json_chats_chatlist));
-                List<Chat> chats = new ArrayList<>();
+                ArrayList<Chat> chats = new ArrayList<>();
                 for(int i = 0; i < data.length(); i++) {
                     JSONObject jsonChat = data.getJSONObject(i);
-                    // figure out last sender (the response needs smoothing)
-                    String lastSender;
-                    boolean hasBeenRead = true;
-                    Integer hasBeenReadInteger;
-                    // grab hasbeenread
-                    if (!jsonChat.isNull(getString(R.string.keys_json_chats_has_been_read))) {
-                        hasBeenReadInteger = (Integer) jsonChat.get(getString(R.string.keys_json_chats_has_been_read));
-                    } else {
-                        hasBeenReadInteger = null;
-                    }
-                    // if hasbeenread is null then no messages have been sent/received yet in this chat,
-                    if (hasBeenReadInteger == null) {
-                        // so lets set the sender to null as a sign that no messages have been sent
-                        hasBeenRead = true;
-                        lastSender = null;
-                    } else {
-                        // set hasbeenread appropriately
-                        hasBeenRead = hasBeenReadInteger == 1;
-                        /*
-                        we have to find out who the last sender of a message was
 
-                        what we receive is:
-                        [
-                        sender username,
-                        receiver username,
-                        sender username,
-                        receiver username,
-                        ...
-                        ]
-                        corresponding to the sender/receiver of each individual message in the chat
+                    String chatid = jsonChat.getString(getString(R.string.keys_json_chats_chatid));
 
-                        we want the sender of the LAST pair, because that is who has sent the last message.
-                        */
-
-                        // get the array of the ordered sender/receiver pairs
-                        JSONArray chatArray = jsonChat.getJSONArray(getString(R.string.keys_json_chats_senders_and_receivers));
-                        // the sender in the last sender/receiver pair is who we're looking for
-                        lastSender = chatArray.getString(chatArray.length() - 2);
-                    }
-                    // we also need to build an ArrayList from the users JSONArray
+                    // First, build the list of users in the chat
                     ArrayList<String> usersInChat = new ArrayList<String>();
                     JSONArray jArray = (JSONArray) jsonChat.get(getString(R.string.keys_json_chats_users));
                     if (jArray != null) {
@@ -141,14 +105,73 @@ public class ChatsContainerFragment extends Fragment implements PropertyChangeLi
                         }
                     }
 
+                    // Now inspect last senders to find out the last sender
+                    String lastSender = "";
+                    boolean hasMessages = false;
+                    JSONArray lastSenders = jsonChat.getJSONArray(getString(R.string.keys_json_chats_last_senders));
+                    // iterate to find the greatest primary key
+                    int maxPrimaryKey = 0;
+                    if (!lastSenders.getJSONObject(lastSenders.length()-1).isNull("f2")) {
+                        hasMessages = true;
+                        // iterate once to get the max
+                        for (int j = 0; j < lastSenders.length(); j++) {
+                            int tempKey = Integer.parseInt(lastSenders.getJSONObject(j).getString("f2"));
+                            if (tempKey > maxPrimaryKey) {
+                                maxPrimaryKey = tempKey;
+                            }
+                        }
+                        // iterate again to find the associated username
+                        for (int j = 0; j < lastSenders.length(); j++) {
+                            int tempKey = Integer.parseInt(lastSenders.getJSONObject(j).getString("f2"));
+                            if (tempKey == maxPrimaryKey) {
+                                lastSender = lastSenders.getJSONObject(j).getString("f1");
+                            }
+                        }
+                    }
+
+                    Boolean hasBeenRead = null;
+                    if (!hasMessages) {
+                        // No messages have been sent in this chat, set last sender to null so we know
+                        // this fact in other parts of the app
+                        lastSender = null;
+                    } else {
+                        // if it's not null, capture if it's has been read or not.
+                        if (!jsonChat.isNull(getString(R.string.keys_json_chats_has_been_read))) {
+                            hasBeenRead = ((Integer) jsonChat.get(getString(R.string.keys_json_chats_has_been_read))) == 1;
+                        }
+                    }
+
+                    // Retrieve accepted flags to know who has/hasn't accepted the chat room invite.
+                    ArrayList<Boolean> acceptedFlags = new ArrayList<>();
+                    JSONArray jsonFlags = jsonChat.getJSONArray(getString(R.string.keys_json_chats_accepted_list));
+                    for (int j = 0; j < usersInChat.size(); j++) {
+                        String currentUsername = usersInChat.get(j);
+                        for (int x = 0; x < jsonFlags.length(); x++) {
+                            if (currentUsername.equals(jsonFlags.getJSONObject(x).getString("f2"))) {
+                                acceptedFlags.add("1".equals(jsonFlags.getJSONObject(x).getString("f1")));
+                            }
+                        }
+                    }
+
+//                    Log.e("users?", usersInChat.toString());
+//                    Log.e("NAME", jsonChat.getString(getString(R.string.keys_json_chats_name)));
+//                    Log.e("LAST SENDER", lastSender == null ? "NULL" : lastSender);
+//                    Log.e("READ?", hasBeenRead == null ? "NULL" : Boolean.toString(hasBeenRead));
+//                    Log.e("flags?", acceptedFlags.toString());
+
+
                     chats.add(new Chat.Builder(
-                            jsonChat.getString(getString(R.string.keys_json_chats_chatid)),
+                            chatid,
                             jsonChat.getString(getString(R.string.keys_json_chats_name)),
                             usersInChat,
+                            acceptedFlags,
                             hasBeenRead,
                             lastSender)
                             .build());
                 }
+                mChats = chats;
+                // update the reference in HomeActivity
+                mListener.updateChats(mChats);
                 Chat[] chatsAsArray = new Chat[chats.size()];
                 chatsAsArray = chats.toArray(chatsAsArray);
                 Bundle args = new Bundle();
@@ -164,8 +187,9 @@ public class ChatsContainerFragment extends Fragment implements PropertyChangeLi
                         .commit();
 
                 mListener.onWaitFragmentInteractionHide();
+                frag.addPropertyChangeListener(this);
             } else {
-                Log.e("ERROR!", "No data array");
+                Log.e("ERROR!", "No data array" + root.toString());
                 //notify user
                 mListener.onWaitFragmentInteractionHide();
             }
@@ -257,6 +281,7 @@ public class ChatsContainerFragment extends Fragment implements PropertyChangeLi
                 args.putSerializable(getString(R.string.keys_chats_arg), mChats);
                 NewChatFragment newChatFrag = new NewChatFragment();
                 newChatFrag.setArguments(args);
+                Log.e("CHaTSS", mChats.toString());
 
                 getActivity().getSupportFragmentManager()
                         .beginTransaction()
@@ -287,7 +312,7 @@ public class ChatsContainerFragment extends Fragment implements PropertyChangeLi
     public void onAttach(Context context) {
         super.onAttach(context);
         if (context instanceof WaitFragment.OnFragmentInteractionListener) {
-            mListener = (WaitFragment.OnFragmentInteractionListener) context;
+            mListener = (OnChatInformationFetchListener) context;
         } else {
             throw new RuntimeException(context.toString()
                     + " must implement WaitFragment.OnFragmentInteractionListener");
@@ -311,5 +336,11 @@ public class ChatsContainerFragment extends Fragment implements PropertyChangeLi
         if (PROPERTY_REFRESH_CHATS.equals(evt.getPropertyName())) {
             callWebServiceforChats();
         }
+    }
+
+    interface OnChatInformationFetchListener {
+        void updateChats(ArrayList<Chat> chats);
+        void onWaitFragmentInteractionHide();
+        void onWaitFragmentInteractionShow();
     }
 }

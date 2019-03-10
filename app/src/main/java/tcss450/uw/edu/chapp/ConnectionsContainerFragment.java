@@ -33,10 +33,10 @@ import tcss450.uw.edu.chapp.utils.SendPostAsyncTask;
 public class ConnectionsContainerFragment extends Fragment implements PropertyChangeListener {
     public static final String REFRESH_CONNECTIONS = "refresh the connections please";
 
-    private List<Connection> mConnections;
+    private ArrayList<Connection> mConnections;
     private Credentials mCreds;
     private String mJwToken;
-    private WaitFragment.OnFragmentInteractionListener mListener;
+    private OnConnectionInformationFetchListener mListener;
 
 
     public ConnectionsContainerFragment() {
@@ -174,6 +174,8 @@ public class ConnectionsContainerFragment extends Fragment implements PropertyCh
                             .build());
                 }
                 mConnections = new ArrayList<>(connections);
+                // update the reference in home activity
+                mListener.updateConnections(mConnections);
 
                 constructConnections();
                 mListener.onWaitFragmentInteractionHide();
@@ -225,7 +227,7 @@ public class ConnectionsContainerFragment extends Fragment implements PropertyCh
     public void onAttach(Context context) {
         super.onAttach(context);
         if (context instanceof WaitFragment.OnFragmentInteractionListener) {
-            mListener = (WaitFragment.OnFragmentInteractionListener) context;
+            mListener = (OnConnectionInformationFetchListener) context;
         } else {
             throw new RuntimeException(context.toString()
                     + " must implement WaitFragment.OnFragmentInteractionListener");
@@ -244,6 +246,12 @@ public class ConnectionsContainerFragment extends Fragment implements PropertyCh
             // refresh everything, something changed.
             callWebServiceforConnections();
         }
+    }
+
+    interface OnConnectionInformationFetchListener {
+        void updateConnections(ArrayList<Connection> connections);
+        void onWaitFragmentInteractionHide();
+        void onWaitFragmentInteractionShow();
     }
 
 

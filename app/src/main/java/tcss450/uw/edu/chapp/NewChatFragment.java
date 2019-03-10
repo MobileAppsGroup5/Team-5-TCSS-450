@@ -3,18 +3,17 @@ package tcss450.uw.edu.chapp;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 import android.widget.EditText;
 import android.widget.TextView;
 
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.w3c.dom.Text;
 
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
@@ -41,7 +40,7 @@ public class NewChatFragment extends Fragment implements AdapterView.OnItemClick
     private String mJwToken;
     private AutoCompleteTextView mAutoCompleteSearchBox;
 
-    private List<String> userNameList;
+    private List<String> mUserNameList;
 
     private PropertyChangeSupport myPcs = new PropertyChangeSupport(this);
 
@@ -57,11 +56,10 @@ public class NewChatFragment extends Fragment implements AdapterView.OnItemClick
 
         if (getArguments() != null) {
             mConnectionList = new ArrayList<>(Arrays.asList((Connection[])getArguments().getSerializable(ARG_CONN_LIST)));
-            mChatList = new ArrayList<>(Arrays.asList((Chat[])getArguments().getSerializable(getString(R.string.keys_chats_arg))));
+            mChatList = (ArrayList<Chat>)getArguments().getSerializable(getString(R.string.keys_chats_arg));
             mCreds = (Credentials) getArguments().getSerializable(getString(R.string.key_credentials));
             mJwToken = getArguments().getString(getString(R.string.keys_intent_jwt));
 
-            setUpConnectionSearchArray();
         }
     }
 
@@ -69,19 +67,27 @@ public class NewChatFragment extends Fragment implements AdapterView.OnItemClick
      * This sets up the array that will be used for searching for people to add to the chatroom
      */
     private void setUpConnectionSearchArray() {
-        userNameList = new ArrayList<>();
+        mUserNameList = new ArrayList<>();
 
         // first, add all possible connection usernames
         //
         // this also adds our own username a lot because we are either A or B in all of these,
         // and we add both
         mConnectionList.forEach(connection -> {
-            userNameList.add(connection.getUsernameA());
-            userNameList.add(connection.getUsernameB());
+            if (connection.getVerified() == 1) {
+                mUserNameList.add(connection.getUsernameA());
+                mUserNameList.add(connection.getUsernameB());
+            }
         });
 
-        // remove all occurances of our username
-        while (mConnectionList.remove(mCreds.getUsername()));
+        // remove all occurrences of our username
+        while (mUserNameList.remove(mCreds.getUsername()));
+
+        ArrayAdapter<String> adapter = new ArrayAdapter<>(getActivity(),
+                android.R.layout.simple_dropdown_item_1line,
+                mUserNameList);
+
+        mAutoCompleteSearchBox.setAdapter(adapter);
     }
 
     @Override
@@ -93,6 +99,7 @@ public class NewChatFragment extends Fragment implements AdapterView.OnItemClick
 
         mAutoCompleteSearchBox.setOnItemClickListener(this);
 
+        setUpConnectionSearchArray();
         return v;
     }
 
@@ -146,9 +153,9 @@ public class NewChatFragment extends Fragment implements AdapterView.OnItemClick
 
         JSONObject msg = new JSONObject();
         try {
-            msg.put("username1", mCreds.getUsername());
-            msg.put("username2", clickedUsername);
-            msg.put("chatName", ((EditText)getActivity().findViewById(R.id.text_view_new_chat_room_name)).getText().toString());
+            msg.put(getString(R.string.keys_json_username_from), mCreds.getUsername());
+            msg.put(getString(R.string.keys_json_username_to), clickedUsername);
+            msg.put(getString(R.string.keys_json_chats_chat_name), ((EditText)getActivity().findViewById(R.id.text_view_new_chat_room_name)).getText().toString());
         } catch (JSONException e) {
             e.printStackTrace();
         }

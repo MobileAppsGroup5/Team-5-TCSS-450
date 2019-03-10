@@ -13,6 +13,9 @@ import android.view.ViewGroup;
 import tcss450.uw.edu.chapp.chat.Chat;
 import tcss450.uw.edu.chapp.model.Credentials;
 
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
+import java.beans.PropertyChangeSupport;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -23,7 +26,7 @@ import java.util.List;
  * Activities containing this fragment MUST implement the {@link OnListFragmentInteractionListener}
  * interface.
  */
-public class ChatsFragment extends Fragment {
+public class ChatsFragment extends Fragment implements PropertyChangeListener {
 
     public static final String ARG_CHAT_LIST = "chats lists";
     private static final String ARG_COLUMN_COUNT = "column-count";
@@ -33,6 +36,8 @@ public class ChatsFragment extends Fragment {
 
     private int mColumnCount = 1;
     private OnListFragmentInteractionListener mListener;
+
+    private PropertyChangeSupport myPcs = new PropertyChangeSupport(this);
 
     /**
      * Mandatory empty constructor for the fragment manager to instantiate the
@@ -140,7 +145,9 @@ public class ChatsFragment extends Fragment {
             } else {
                 recyclerView.setLayoutManager(new GridLayoutManager(context, mColumnCount));
             }
-            recyclerView.setAdapter(new MyChatsRecyclerViewAdapter(mChats, mListener, mCreds));
+            MyChatsRecyclerViewAdapter adapter = new MyChatsRecyclerViewAdapter(mChats, mListener, mCreds, getContext(), mJwToken);
+            adapter.addPropertyChangeListener(this);
+            recyclerView.setAdapter(adapter);
         }
         return view;
     }
@@ -160,6 +167,22 @@ public class ChatsFragment extends Fragment {
     public void onDetach() {
         super.onDetach();
         mListener = null;
+    }
+
+    public void addPropertyChangeListener(PropertyChangeListener listener) {
+        myPcs.addPropertyChangeListener(listener);
+    }
+
+    public void removePropertyChangeListener(PropertyChangeListener listener) {
+        myPcs.removePropertyChangeListener(listener);
+    }
+
+    @Override
+    public void propertyChange(PropertyChangeEvent evt) {
+        if (ChatsContainerFragment.PROPERTY_REFRESH_CHATS.equals(evt.getPropertyName())) {
+            // pass the refresh request along
+            myPcs.firePropertyChange(ChatsContainerFragment.PROPERTY_REFRESH_CHATS, null, "thanku");
+        }
     }
 
     /**

@@ -16,7 +16,9 @@
     <string name="ep_chats_submit_request">submitRequest</string>
     <string name="ep_chats_get_chats">getChats</string>
     <string name="ep_chats_get_messages">getAll</string>
-    <string name="ep_chats_add_member">addUserToChat</string>
+    <string name="ep_chats_add_member">addUser</string>
+    <string name="ep_chats_leave">leaveChat</string>
+    <string name="ep_chats_accept_request">acceptRequest</string>
     <!-- weather end points -->
     <string name="ep_weather_base">weather</string>
     <string name="ep_weather_current">current</string>

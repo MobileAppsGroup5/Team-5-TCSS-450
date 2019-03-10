@@ -22,9 +22,6 @@ import tcss450.uw.edu.chapp.model.Credentials;
 
 /**
  * A fragment representing a list of Items.
- * <p/>
- * Activities containing this fragment MUST implement the {@link OnListFragmentInteractionListener}
- * interface.
  */
 public class ConnectionsFragment extends Fragment implements PropertyChangeListener {
 
@@ -37,7 +34,6 @@ public class ConnectionsFragment extends Fragment implements PropertyChangeListe
     private MyConnectionsRecyclerViewAdapter mAdapter;
 
     private int mColumnCount = 1;
-    private OnListFragmentInteractionListener mListener;
 
     private PropertyChangeSupport myPcs = new PropertyChangeSupport(this);
 
@@ -85,29 +81,12 @@ public class ConnectionsFragment extends Fragment implements PropertyChangeListe
             } else {
                 recyclerView.setLayoutManager(new GridLayoutManager(context, mColumnCount));
             }
-            mAdapter = new MyConnectionsRecyclerViewAdapter(mConnections, mListener, mCreds, mJwToken, getContext());
+            mAdapter = new MyConnectionsRecyclerViewAdapter(mConnections, mCreds, mJwToken, getContext());
             mAdapter.addPropertyChangeListener(this);
             recyclerView.setAdapter(mAdapter);
         }
 
         return view;
-    }
-
-    @Override
-    public void onAttach(Context context) {
-        super.onAttach(context);
-        if (context instanceof OnListFragmentInteractionListener) {
-            mListener = (OnListFragmentInteractionListener) context;
-        } else {
-            throw new RuntimeException(context.toString()
-                    + " must implement OnListFragmentInteractionListener");
-        }
-    }
-
-    @Override
-    public void onDetach() {
-        super.onDetach();
-        mListener = null;
     }
 
     public void addPropertyChangeListener(PropertyChangeListener listener) {
@@ -125,21 +104,5 @@ public class ConnectionsFragment extends Fragment implements PropertyChangeListe
             myPcs.firePropertyChange(ConnectionsContainerFragment.REFRESH_CONNECTIONS,
                     null, evt.getNewValue());
         }
-    }
-
-    /**
-     * This interface must be implemented by activities that contain this
-     * fragment to allow an interaction in this fragment to be communicated
-     * to the activity and potentially other fragments contained in that
-     * activity.
-     * <p/>
-     * See the Android Training lesson <a href=
-     * "http://developer.android.com/training/basics/fragments/communicating.html"
-     * >Communicating with Other Fragments</a> for more information.
-     */
-    public interface OnListFragmentInteractionListener {
-        void onXClicked(Connection c);
-        void onCheckClicked(Connection c);
-        void callWebServiceforConnections();
     }
 }
