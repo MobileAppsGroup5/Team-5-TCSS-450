@@ -14,7 +14,12 @@ import java.util.List;
 import tcss450.uw.edu.chapp.R;
 import tcss450.uw.edu.chapp.weather.WeatherHourContent.WeatherHourItem;
 
-
+/**
+ * class which can take a list of weather hour items and then display them in the
+ * recycler view.
+ *
+ * @author Mike Osborne, Trung Thai, Michael Josten, Jessica Medrzycki
+ */
 public class WeatherHourFragment extends Fragment {
     /**
      * Mandatory empty constructor for the fragment manager to instantiate the

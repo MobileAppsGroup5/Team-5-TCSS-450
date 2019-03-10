@@ -11,6 +11,7 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentTransaction;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.view.MenuItemCompat;
@@ -41,6 +42,7 @@ import tcss450.uw.edu.chapp.model.Credentials;
 import tcss450.uw.edu.chapp.utils.BadgeDrawerIconDrawable;
 import tcss450.uw.edu.chapp.utils.PushReceiver;
 import tcss450.uw.edu.chapp.utils.SendPostAsyncTask;
+import tcss450.uw.edu.chapp.weather.CurrentWeatherFragment;
 import tcss450.uw.edu.chapp.weather.WeatherFragment;
 
 /**
@@ -59,9 +61,10 @@ public class HomeActivity extends AppCompatActivity
         ChatsFragment.OnListFragmentInteractionListener,
         MessagingContainerFragment.OnChatMessageFragmentInteractionListener,
         MessagingFragment.OnListFragmentInteractionListener,
-        WeatherFragment.OnFragmentInteractionListener,
         ConnectionsContainerFragment.OnConnectionInformationFetchListener,
-        ChatsContainerFragment.OnChatInformationFetchListener {
+        ChatsContainerFragment.OnChatInformationFetchListener,
+        WeatherFragment.OnFragmentInteractionListener,
+        CurrentWeatherFragment.OnCurrentWeatherFragmentInteractionListener {
 
     private Credentials mCreds;
     private String mJwToken;
@@ -164,6 +167,19 @@ public class HomeActivity extends AppCompatActivity
                             .replace(R.id.fragment_container, mChatfragment)
                             .commit();
 
+                    //If the HomeActivity was loaded from the WeatherMapActivity
+                } else if (getIntent().getBooleanExtra(getString(R.string.keys_weather_from_map_activity), false)) {
+                    WeatherFragment wf = new WeatherFragment();
+                    //add location from MapActivity as fragment argument
+                    Bundle args = new Bundle();
+                    args.putParcelable(getString(R.string.keys_weather_location_from_map),
+                            getIntent().getParcelableExtra(getString(R.string.keys_weather_location_from_map)));
+                    args.putSerializable(getString(R.string.key_credentials), mCreds);
+                    args.putSerializable(getString(R.string.keys_intent_jwt), mJwToken);
+                    wf.setArguments(args);
+                    //load the weather fragment
+                    loadFragment(wf);
+
                 } else {
                     loadHomeLandingPage();
                 }
@@ -218,15 +234,14 @@ public class HomeActivity extends AppCompatActivity
      */
     private void loadHomeLandingPage(){
         Fragment frag = new LandingPage();
-        SuccessFragment successFragment = new SuccessFragment();
+        CurrentWeatherFragment cwf = new CurrentWeatherFragment();
         Bundle args = new Bundle();
         args.putSerializable(getString(R.string.key_credentials)
                 , mCreds);
         args.putSerializable(getString(R.string.keys_intent_jwt)
                 , mJwToken);
 
-        //set the email to show in the top fragment
-        successFragment.setArguments(args);
+
         frag.setArguments(args);
 
         // update homeactivity information with the latest
@@ -236,22 +251,16 @@ public class HomeActivity extends AppCompatActivity
 //        loadFragment(successFragment);
         getSupportFragmentManager().popBackStack(null, FragmentManager.POP_BACK_STACK_INCLUSIVE);
 
-        getSupportFragmentManager()
+        //TODO: use transaction to populate the dynamic home landing page
+        FragmentTransaction transaction = getSupportFragmentManager()
                 .beginTransaction()
-                .replace(R.id.fragment_container, successFragment)
-                .commit();
+                .replace(R.id.fragment_container, frag);
+        transaction.replace(R.id.framelayout_homelanding_weather, cwf);
 
+        //transaction.replace(R.id.framelayout_homelanding_email, successFragment);
+        //transaction.add(R.id.framelayout_homelanding_chatlist, chats);
 
-        //ORIGINAL SCROLL VIEW WITH BLOG POST SCROLLING
-//        FragmentTransaction transaction = getSupportFragmentManager()
-//                .beginTransaction()
-//                .replace(R.id.fragment_container, frag)
-//                .addToBackStack(null);
-//         //Commit the transaction (obviously)
-//        transaction.replace(R.id.framelayout_homelanding_email, successFragment);
-//        //transaction.add(R.id.framelayout_homelanding_chatlist, chats);
-//
-//        transaction.commit();
+        transaction.commit();
     }
 
 //    @Override
@@ -327,6 +336,10 @@ public class HomeActivity extends AppCompatActivity
 //                CurrentWeatherFragment cwf = new CurrentWeatherFragment();
 //                loadFragment(cwf);
                 WeatherFragment wf = new WeatherFragment();
+                Bundle wArgs = new Bundle();
+                wArgs.putSerializable(getString(R.string.keys_intent_jwt), mJwToken);
+                wArgs.putSerializable(getString(R.string.key_credentials), mCreds);
+                wf.setArguments(wArgs);
                 loadFragment(wf);
                 break;
 

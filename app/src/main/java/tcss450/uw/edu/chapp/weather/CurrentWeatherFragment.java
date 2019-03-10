@@ -33,16 +33,17 @@ import tcss450.uw.edu.chapp.utils.GetAsyncTask;
 
 
 /**
- * A simple {@link Fragment} subclass.
- * If there is an error, such as locations not being alowed.
- * Then make all text invisible and make the error text field visible.
+ * class that holds the functionality for the dynamic weather home page.
+ * Will display the current weather based on the devices current location
+ *
+ * @author Mike Osborne, Trung Thai, Michael Josten, Jessica Medrzycki
  */
 public class CurrentWeatherFragment extends Fragment {
 
     /*
      * desired interval for location updates, inexact. updates may be more or less frequent
      */
-    public static final long UPDATE_INTERVAL_IN_MILLISECONDS = 100;
+    public static final long UPDATE_INTERVAL_IN_MILLISECONDS = 1;
 
     /*
      * fastest rate for active location updates. exact. updates will never be more frequent than
@@ -69,6 +70,10 @@ public class CurrentWeatherFragment extends Fragment {
     }
 
 
+    /**
+     * method that is called when the curret weather fragment is created, Will start the
+     * location update and then display the current weather based on the devices current location
+     */
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
@@ -101,17 +106,13 @@ public class CurrentWeatherFragment extends Fragment {
             setLocationCallback();
             startLocationUpdates();
         }
-
-
-        //get the current location
-        //call GetAsyncTask to call the weather endpoint for current weather,
-        //pass in current location lat and lon
-        //display weather received from endpoint
-        //display icon based on weather code.
-
         return v;
     }
 
+    /**
+     * method that will set the location call back which is to stop location updates and
+     * set the weather based on the current device location.
+     */
     private void setLocationCallback() {
         mLocationCallback = new LocationCallback() {
             @Override
@@ -131,18 +132,10 @@ public class CurrentWeatherFragment extends Fragment {
         };
     }
 
-//    @Override
-//    public void onResume() {
-//        super.onResume();
-//        startLocationUpdates();
-//    }
 
-//    @Override
-//    public void onPause() {
-//        super.onPause();
-//        stopLocationUpdates();
-//    }
-
+    /**
+     * method that will start the location updates
+     */
     private void startLocationUpdates() {
         if (ActivityCompat.checkSelfPermission(getActivity(), Manifest.permission.ACCESS_FINE_LOCATION)
                 == PackageManager.PERMISSION_GRANTED
@@ -156,6 +149,9 @@ public class CurrentWeatherFragment extends Fragment {
 
     }
 
+    /**
+     * method that will stop the location updates.
+     */
     private void stopLocationUpdates() {
         mFusedLocationClient.removeLocationUpdates(mLocationCallback);
     }
@@ -268,29 +264,48 @@ public class CurrentWeatherFragment extends Fragment {
 
     }
 
+    /**
+     * helper method that will set the city text view to the city, country
+     */
     private void setCity(String city, String country) {
         String cityString = city + ", " + country;
         mCurrentCityText.setText(cityString);
     }
 
+    /**
+     * method that will set the weather condition text to the condition passed
+     */
     private void setCondition(String condition) {
         mCurrentConditionText.setText(condition);
     }
 
+    /**
+     * method that will set the temp text view to the temp
+     */
     private void setTemperature(double temp) {
         String tempString = temp + "°";
         mCurrentTempText.setText(tempString);
     }
 
 
+    /**
+     * method that will show the wait fragment
+     */
     private void handleGetWeatherOnPre() {
         mListener.onWaitFragmentInteractionShow();
     }
 
+    /**
+     * method that will log the error from the get requestr
+     */
     private void handleGetWeatherError(String error) {
         Log.e("WEATHER", "error with getting weather from backend: " + error);
     }
 
+    /**
+     * method that will handle a get request for the current weather.
+     * @param result JSON string which holds the result from the webservice
+     */
     private void handleGetWeatherOnPost(String result) {
         try {
             JSONObject resultJSON = new JSONObject(result);

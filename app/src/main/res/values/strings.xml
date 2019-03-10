@@ -35,10 +35,6 @@
     <string name="tv_message_contact">Message Contact</string>"
     <string name="imagebutton_message">Message Contact ImageButton</string>"
     <string name="imagebutton_request">Request Contact ImageButton</string>"
-
-    <!-- current weather strings -->
-    <string name="current_weather_no_location_permission_error">Can\'t display weather without location permission</string>
-
     <string name="tv_request_contact">Request Contact</string>
 
     <string-array name="member_search_values">
@@ -47,6 +43,16 @@
         <item>First Name</item>
         <item>Last Name</item>
     </string-array>
+
+    <!-- current weather strings -->
+    <string name="current_weather_no_location_permission_error">Can\'t display weather without location permission</string>
+    <string name="weather_dialog_postal_code_hint">Enter a zipcode</string>
+    <string name="weather_dialog_postal_code_error">Need to enter a zipcode</string>
+    <string name="weather_hour_fragment_tag">HOUR TAG</string>
+    <string name="weather_day_fragment_tag">DAY TAG</string>
+    <string name="weather_current_fragment_tag">CURRENT TAG</string>
+    <string name="title_activity_maps">Map</string>
+
 
     <!-- Forgot Password Strings -->
     <string name="tv_forgot_password">Forgot Password?</string>
