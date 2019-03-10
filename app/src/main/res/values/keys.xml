@@ -69,5 +69,6 @@
     <string name="keys_weather_map_intent_location">CURRENTLOCATION</string>
     <string name="keys_weather_location_from_map">Location from MapActivity</string>
     <string name="keys_weather_from_map_activity">Intent from MapActivity</string>
+    <string name="keys_prefs_locations">SharedPreferencesWeatherLocation</string>
 
 </resources>

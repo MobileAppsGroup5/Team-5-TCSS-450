@@ -173,6 +173,8 @@ public class HomeActivity extends AppCompatActivity
                     Bundle args = new Bundle();
                     args.putParcelable(getString(R.string.keys_weather_location_from_map),
                             getIntent().getParcelableExtra(getString(R.string.keys_weather_location_from_map)));
+                    args.putSerializable(getString(R.string.key_credentials), mCreds);
+                    args.putSerializable(getString(R.string.keys_intent_jwt), mJwToken);
                     wf.setArguments(args);
                     //load the weather fragment
                     loadFragment(wf);

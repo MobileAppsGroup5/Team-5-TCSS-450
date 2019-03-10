@@ -4,6 +4,7 @@ import android.Manifest;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.net.Uri;
@@ -37,12 +38,15 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
+import java.util.Set;
 
 import tcss450.uw.edu.chapp.MapsActivity;
 import tcss450.uw.edu.chapp.R;
 import tcss450.uw.edu.chapp.WaitFragment;
+import tcss450.uw.edu.chapp.model.Credentials;
 import tcss450.uw.edu.chapp.utils.GetAsyncTask;
 import tcss450.uw.edu.chapp.weather.WeatherHourContent.WeatherHourItem;
 import tcss450.uw.edu.chapp.weather.WeatherDayContent.WeatherDayItem;
@@ -80,6 +84,8 @@ public class WeatherFragment extends Fragment {
 
     private Location mCurrentLocation = null;
     private Location mMapLocation = null;
+    private Credentials mCreds;
+    private String mJwt;
 
     public WeatherFragment() {
         // Required empty public constructor
@@ -98,8 +104,10 @@ public class WeatherFragment extends Fragment {
         // Inflate the layout for this fragment
         View v = inflater.inflate(R.layout.fragment_weather, container, false);
 
-        //default to current device location to display weather upon initial creation
+        mCreds = (Credentials) getArguments().getSerializable(getString(R.string.key_credentials));
+        mJwt = getArguments().getString(getString(R.string.keys_intent_jwt));
 
+        //default to current device location to display weather upon initial creation
         //ask for permission for location
         mFusedLocationClient = LocationServices.getFusedLocationProviderClient(getActivity());
 
@@ -345,6 +353,8 @@ public class WeatherFragment extends Fragment {
      */
     private boolean saveLocation(MenuItem menuItem) {
         Log.i("WEATHER_OPTION_SELECT", "save location");
+        Log.wtf("WEATHER DEBUG", mCreds.asJSONObject().toString());
+
         return true;
     }
 
@@ -357,7 +367,6 @@ public class WeatherFragment extends Fragment {
         Log.i("WEATHER_OPTION_SELECT", "load location");
         return true;
     }
-
 
     /**
      * method that will set the fragment interaction listener to the
@@ -679,6 +688,14 @@ public class WeatherFragment extends Fragment {
                 int resId = getResources().getIdentifier(weatherJSON.getString("icon")
                         , "drawable", getActivity().getPackageName());
                 iconView.setImageResource(resId);
+
+                //set the current location
+                double lat = weatherInfoJSON.getDouble("lat");
+                double lon = weatherInfoJSON.getDouble("lon");
+                mCurrentLocation.setLongitude(lon);
+                mCurrentLocation.setLatitude(lat);
+                Log.wtf("WEATHER DEBUG", mCurrentLocation.toString());
+
 
 
             } else {
