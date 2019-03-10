@@ -38,7 +38,7 @@
 
     <!-- current weather strings -->
     <string name="current_weather_no_location_permission_error">Can\'t display weather without location permission</string>
-    
+
     <string name="tv_request_contact">Request Contact</string>
 
     <string-array name="member_search_values">
@@ -48,6 +48,8 @@
         <item>Last Name</item>
     </string-array>
 
-    <!-- TODO: Remove or change this placeholder text -->
-    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <!-- Forgot Password Strings -->
+    <string name="tv_forgot_password">Forgot Password?</string>
+    <string name="btn_reset_password">Reset Password</string>
+    <string name="tv_sent_password_result">Results From Email Database</string>
 </resources>
