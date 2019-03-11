@@ -1,7 +1,9 @@
 package tcss450.uw.edu.chapp;
 
 
+import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -260,5 +262,27 @@ public class ConnectionsContainerFragment extends Fragment implements PropertyCh
         void onWaitFragmentInteractionShow();
     }
 
+    /**
+     * A BroadcastReceiver that listens for messages sent from PushReceiver while
+     * the Home Activity is open (i.e. in App Notifications)
+     */
+    private class PushMessageReceiver extends BroadcastReceiver {
+
+        @Override
+        public void onReceive(Context context, Intent intent) {
+
+            String typeOfMessage = intent.getStringExtra("type");
+
+
+            if(typeOfMessage.equals("conn req")){ //if received broadcast from connection request.
+                //don't update badge on navigation drawer,
+                //just update the list of requests by calling web service
+                callWebServiceforConnections();
+                Log.e("Notification Receiver", "Received message type: conn req");
+            }
+
+
+        }
+    }
 
 }
