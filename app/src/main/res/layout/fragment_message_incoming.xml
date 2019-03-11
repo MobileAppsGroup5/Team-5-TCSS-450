@@ -77,6 +77,7 @@
             android:text="@string/sample_text"
             android:textAlignment="textEnd"
             android:textColor="@color/white"
+            android:textSize="10sp"
             android:translationX="-20dp"
             android:translationY="20dp"
             app:layout_constraintBaseline_toBaselineOf="@+id/text_view_sender"

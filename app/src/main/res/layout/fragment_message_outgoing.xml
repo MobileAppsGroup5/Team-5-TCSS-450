@@ -97,6 +97,7 @@
             android:text="@string/sample_text"
             android:textAlignment="textEnd"
             android:textColor="@color/white"
+            android:textSize="10sp"
             android:translationX="-10dp"
             android:translationY="10dp"
             app:layout_constraintBaseline_toBaselineOf="@+id/text_view_sender"
