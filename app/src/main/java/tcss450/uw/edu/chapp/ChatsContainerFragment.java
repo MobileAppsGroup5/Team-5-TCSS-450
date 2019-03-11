@@ -1,7 +1,10 @@
 package tcss450.uw.edu.chapp;
 
 
+import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -26,6 +29,7 @@ import java.util.Objects;
 import tcss450.uw.edu.chapp.chat.Chat;
 import tcss450.uw.edu.chapp.connections.Connection;
 import tcss450.uw.edu.chapp.model.Credentials;
+import tcss450.uw.edu.chapp.utils.PushReceiver;
 import tcss450.uw.edu.chapp.utils.SendPostAsyncTask;
 
 
@@ -43,6 +47,7 @@ public class ChatsContainerFragment extends Fragment implements PropertyChangeLi
     private String mJwToken;
     private OnChatInformationFetchListener mListener;
     private boolean mCompactMode = false;
+    private PushMessageReceiver mPushMessageReciever;
 
     public ChatsContainerFragment() {
         // Required empty public constructor
@@ -328,7 +333,20 @@ public class ChatsContainerFragment extends Fragment implements PropertyChangeLi
     @Override
     public void onResume() {
         super.onResume();
+        if (mPushMessageReciever == null) {
+            mPushMessageReciever = new PushMessageReceiver();
+        }
+        IntentFilter iFilter = new IntentFilter(PushReceiver.RECEIVED_NEW_MESSAGE);
+        getActivity().registerReceiver(mPushMessageReciever, iFilter);
         callWebServiceforChats();
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        if (mPushMessageReciever != null){
+            getActivity().unregisterReceiver(mPushMessageReciever);
+        }
     }
 
     @Override
@@ -348,5 +366,28 @@ public class ChatsContainerFragment extends Fragment implements PropertyChangeLi
         void updateChats(ArrayList<Chat> chats);
         void onWaitFragmentInteractionHide();
         void onWaitFragmentInteractionShow();
+    }
+
+    /**
+     * A BroadcastReceiver that listens for messages sent from PushReceiver while
+     * the Home Activity is open (i.e. in App Notifications)
+     */
+    private class PushMessageReceiver extends BroadcastReceiver {
+
+        @Override
+        public void onReceive(Context context, Intent intent) {
+
+            String typeOfMessage = intent.getStringExtra("type");
+
+
+            if(typeOfMessage.equals("convo req")){ //if received broadcast from connection request.
+                //don't update badge on navigation drawer,
+                //just update the list of requests by calling web service
+                callWebServiceforChats();
+                Log.e("Notification Receiver", "Received message type: conn req");
+            }
+
+
+        }
     }
 }
