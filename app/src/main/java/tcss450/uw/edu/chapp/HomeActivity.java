@@ -234,14 +234,11 @@ public class HomeActivity extends AppCompatActivity
      */
     private void loadHomeLandingPage(){
         Fragment frag = new LandingPage();
-        CurrentWeatherFragment cwf = new CurrentWeatherFragment();
         Bundle args = new Bundle();
         args.putSerializable(getString(R.string.key_credentials)
                 , mCreds);
         args.putSerializable(getString(R.string.keys_intent_jwt)
                 , mJwToken);
-
-
         frag.setArguments(args);
 
         // update homeactivity information with the latest
@@ -251,16 +248,15 @@ public class HomeActivity extends AppCompatActivity
 //        loadFragment(successFragment);
         getSupportFragmentManager().popBackStack(null, FragmentManager.POP_BACK_STACK_INCLUSIVE);
 
-        //TODO: use transaction to populate the dynamic home landing page
-        FragmentTransaction transaction = getSupportFragmentManager()
+        // swap in the landingpage
+        getSupportFragmentManager()
                 .beginTransaction()
-                .replace(R.id.fragment_container, frag);
-        transaction.replace(R.id.framelayout_homelanding_weather, cwf);
-
+                .replace(R.id.fragment_container, frag)
+                .commit();
         //transaction.replace(R.id.framelayout_homelanding_email, successFragment);
         //transaction.add(R.id.framelayout_homelanding_chatlist, chats);
 
-        transaction.commit();
+
     }
 
 //    @Override

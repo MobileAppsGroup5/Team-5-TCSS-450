@@ -10,6 +10,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.ViewSwitcher;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -20,6 +21,7 @@ import tcss450.uw.edu.chapp.utils.SendPostAsyncTask;
 
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -48,14 +50,17 @@ public class MyConnectionsRecyclerViewAdapter extends RecyclerView.Adapter<MyCon
     private Credentials mCredentials;
     private Context mContext;
     private String mJwToken;
+    private boolean mCompactMode;
 
-    public MyConnectionsRecyclerViewAdapter(List<Connection> items,
-                                            Credentials credentials, String jwToken, Context context) {
+    public MyConnectionsRecyclerViewAdapter(List<Connection> items, Credentials credentials,
+                                            String jwToken, Context context, boolean compactMode) {
+        Collections.reverse(items);
         mValues = items;
         mCredentials = credentials;
         mContext = context;
         mJwToken = jwToken;
         myPcs = new PropertyChangeSupport(this);
+        mCompactMode = compactMode;
     }
 
     @Override
@@ -84,15 +89,25 @@ public class MyConnectionsRecyclerViewAdapter extends RecyclerView.Adapter<MyCon
 
     @Override
     public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        View view;
-        if (viewType == SENT || viewType == RECIEVED_VERIFIED) {
-            // sent from us
-            view = LayoutInflater.from(parent.getContext())
-                    .inflate(R.layout.fragment_connections_outgoing, parent, false);
+        View view = LayoutInflater.from(parent.getContext())
+                .inflate(R.layout.fragment_empty, parent, false);
+        // if in compact mode, only show requests
+        if (mCompactMode) {
+            if (viewType == RECIEVED_NOT_VERIFIED) {
+                view = LayoutInflater.from(parent.getContext())
+                        .inflate(R.layout.fragment_connections_incoming, parent, false);
+            }
         } else {
-            // sent to us
-            view = LayoutInflater.from(parent.getContext())
-                    .inflate(R.layout.fragment_connections_incoming, parent, false);
+            // display everything
+            if (viewType == SENT || viewType == RECIEVED_VERIFIED) {
+                // sent from us
+                view = LayoutInflater.from(parent.getContext())
+                        .inflate(R.layout.fragment_connections_outgoing, parent, false);
+            } else {
+                // sent to us
+                view = LayoutInflater.from(parent.getContext())
+                        .inflate(R.layout.fragment_connections_incoming, parent, false);
+            }
         }
         return new ViewHolder(view);
     }
@@ -101,20 +116,28 @@ public class MyConnectionsRecyclerViewAdapter extends RecyclerView.Adapter<MyCon
     public void onBindViewHolder(final ViewHolder holder, int position) {
         holder.mItem = mValues.get(position);
 
-        if (holder.getItemViewType() == SENT) {
-            // display the username we sent to
-            holder.mUsernameView.setText(mValues.get(position).getUsernameB());
-        } else {
-            // display the username that sent the connection to us
-            holder.mUsernameView.setText(mValues.get(position).getUsernameA());
-            // Accept only shows up if this is recieved and not verified
+        if (mCompactMode) {
             if (holder.getItemViewType() == RECIEVED_NOT_VERIFIED) {
+                holder.mUsernameView.setText(mValues.get(position).getUsernameA());
                 holder.mView.findViewById(R.id.image_accept_contact).setOnClickListener(this::handleAcceptContact);
+                holder.mView.findViewById(R.id.image_cancel_contact).setOnClickListener(this::handleDeclineCancelContact);
             }
+        } else {
+            if (holder.getItemViewType() == SENT) {
+                // display the username we sent to
+                holder.mUsernameView.setText(mValues.get(position).getUsernameB());
+            } else {
+                // display the username that sent the connection to us
+                holder.mUsernameView.setText(mValues.get(position).getUsernameA());
+                // Accept only shows up if this is recieved and not verified
+                if (holder.getItemViewType() == RECIEVED_NOT_VERIFIED) {
+                    holder.mView.findViewById(R.id.image_accept_contact).setOnClickListener(this::handleAcceptContact);
+                }
+            }
+            // All adapter items will have a cancel button, handle it with one listener
+            holder.mView.findViewById(R.id.image_cancel_contact).setOnClickListener(this::handleDeclineCancelContact);
         }
 
-        // All adapter items will have a cancel button, handle it with one listener
-        holder.mView.findViewById(R.id.image_cancel_contact).setOnClickListener(this::handleDeclineCancelContact);
     }
 
     public void updateItems(List<Connection> theConnections) {
@@ -193,6 +216,7 @@ public class MyConnectionsRecyclerViewAdapter extends RecyclerView.Adapter<MyCon
     private void handleConnectionsChangePostExecute(String result) {
         // Our list changed, notify listeners that we need to be refreshed
         myPcs.firePropertyChange(ConnectionsContainerFragment.REFRESH_CONNECTIONS, null, result);
+        Log.e("RESULT", result);
     }
 
     @Override

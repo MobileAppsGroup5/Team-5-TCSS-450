@@ -185,11 +185,13 @@ public class CurrentWeatherFragment extends Fragment {
                     setLocationCallback();
                     startLocationUpdates();
 
+
                 } else {
                     //permission denied
                     //either display error message or do nothing with fragment.
                     mCurrentErrorText.setVisibility(TextView.VISIBLE);
                     mCurrentErrorText.setText(getString(R.string.current_weather_no_location_permission_error));
+
                 }
                 return;
             }

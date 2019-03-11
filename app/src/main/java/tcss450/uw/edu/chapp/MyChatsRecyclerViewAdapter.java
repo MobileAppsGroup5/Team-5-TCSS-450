@@ -21,6 +21,7 @@ import tcss450.uw.edu.chapp.utils.SendPostAsyncTask;
 
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
+import java.util.Collections;
 import java.util.List;
 import java.util.StringJoiner;
 
@@ -42,15 +43,28 @@ public class MyChatsRecyclerViewAdapter extends RecyclerView.Adapter<MyChatsRecy
     private final Credentials mCreds;
     private final Context mContext;
     private final String mJwToken;
+    private boolean mCompactMode;
 
     private PropertyChangeSupport myPcs = new PropertyChangeSupport(this);
 
-    public MyChatsRecyclerViewAdapter(List<Chat> items, OnListFragmentInteractionListener listener, Credentials credentials, Context context, String jwToken) {
-        mValues = items;
+    public MyChatsRecyclerViewAdapter(List<Chat> items, OnListFragmentInteractionListener listener,
+                                      Credentials credentials, Context context, String jwToken, boolean compactMode) {
+        Collections.reverse(items);
+        // if in compact mode, limit to first 5
+        if (compactMode) {
+            if (items.size() < 5) {
+                mValues = items;
+            } else {
+                mValues = items.subList(0, 5);
+            }
+        } else {
+            mValues = items;
+        }
         mListener = listener;
         mCreds = credentials;
         mContext = context;
         mJwToken = jwToken;
+        mCompactMode = compactMode;
     }
 
     @Override

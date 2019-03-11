@@ -27,6 +27,7 @@
     <string name="key_chatid">chatid key</string>
     <string name="key_username">username keys</string>
     <string name="key_intent_connections">these are connections</string>
+    <string name="key_flag_compact_mode">run in compact mode</string>
 
     <!-- Added this in Lab 5 -->
     <string name="key_email">email_key</string>

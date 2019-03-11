@@ -42,6 +42,7 @@ public class ChatsContainerFragment extends Fragment implements PropertyChangeLi
     private Credentials mCreds;
     private String mJwToken;
     private OnChatInformationFetchListener mListener;
+    private boolean mCompactMode = false;
 
     public ChatsContainerFragment() {
         // Required empty public constructor
@@ -50,11 +51,15 @@ public class ChatsContainerFragment extends Fragment implements PropertyChangeLi
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setHasOptionsMenu(true);
 
         if (getArguments() != null) {
             mCreds = (Credentials)getArguments().getSerializable(getString(R.string.key_credentials));
             mJwToken = (String)getArguments().getSerializable(getString(R.string.keys_intent_jwt));
+            if (getArguments().getSerializable(getString(R.string.key_flag_compact_mode)) != null) {
+                mCompactMode = true;
+            } else {
+                setHasOptionsMenu(true);
+            }
         } else {
             mChats = new ArrayList<>();
         }
@@ -178,6 +183,7 @@ public class ChatsContainerFragment extends Fragment implements PropertyChangeLi
                 args.putSerializable(ChatsFragment.ARG_CHAT_LIST, chatsAsArray);
                 args.putSerializable(getString(R.string.key_credentials), mCreds);
                 args.putSerializable(getString(R.string.keys_intent_jwt), mJwToken);
+                args.putSerializable(getString(R.string.key_flag_compact_mode), mCompactMode);
                 ChatsFragment frag = new ChatsFragment();
                 frag.setArguments(args);
 

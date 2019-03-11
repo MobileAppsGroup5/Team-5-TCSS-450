@@ -32,6 +32,7 @@ public class ConnectionsFragment extends Fragment implements PropertyChangeListe
     private Credentials mCreds;
     private String mJwToken;
     private MyConnectionsRecyclerViewAdapter mAdapter;
+    private boolean mCompactMode;
 
     private int mColumnCount = 1;
 
@@ -61,7 +62,7 @@ public class ConnectionsFragment extends Fragment implements PropertyChangeListe
             mConnections = new ArrayList<>(Arrays.asList((Connection[])getArguments().getSerializable(ARG_CONNECTIONS_LIST)));
             mCreds = (Credentials)getArguments().getSerializable(getString(R.string.key_credentials));
             mJwToken = (String)getArguments().getSerializable(getString(R.string.keys_intent_jwt));
-
+            mCompactMode = getArguments().getBoolean(getString(R.string.key_flag_compact_mode));
         } else {
             mConnections = new ArrayList<>();
         }
@@ -81,7 +82,7 @@ public class ConnectionsFragment extends Fragment implements PropertyChangeListe
             } else {
                 recyclerView.setLayoutManager(new GridLayoutManager(context, mColumnCount));
             }
-            mAdapter = new MyConnectionsRecyclerViewAdapter(mConnections, mCreds, mJwToken, getContext());
+            mAdapter = new MyConnectionsRecyclerViewAdapter(mConnections, mCreds, mJwToken, getContext(), mCompactMode);
             mAdapter.addPropertyChangeListener(this);
             recyclerView.setAdapter(mAdapter);
         }

@@ -37,6 +37,7 @@ public class ConnectionsContainerFragment extends Fragment implements PropertyCh
     private Credentials mCreds;
     private String mJwToken;
     private OnConnectionInformationFetchListener mListener;
+    private boolean mCompactMode = false;
 
 
     public ConnectionsContainerFragment() {
@@ -46,12 +47,15 @@ public class ConnectionsContainerFragment extends Fragment implements PropertyCh
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setHasOptionsMenu(true);
 
         if (getArguments() != null) {
             mCreds = (Credentials)getArguments().getSerializable(getString(R.string.key_credentials));
             mJwToken = (String)getArguments().getSerializable(getString(R.string.keys_intent_jwt));
-
+            if (getArguments().getSerializable(getString(R.string.key_flag_compact_mode)) != null) {
+                mCompactMode = true;
+            } else {
+                setHasOptionsMenu(true);
+            }
         } else {
             mConnections = new ArrayList<>();
         }
@@ -199,6 +203,7 @@ public class ConnectionsContainerFragment extends Fragment implements PropertyCh
         args.putSerializable(ConnectionsFragment.ARG_CONNECTIONS_LIST, connectionsAsArray);
         args.putSerializable(getString(R.string.key_credentials), mCreds);
         args.putSerializable(getString(R.string.keys_intent_jwt), mJwToken);
+        args.putSerializable(getString(R.string.key_flag_compact_mode), mCompactMode);
         ConnectionsFragment frag = new ConnectionsFragment();
         frag.setArguments(args);
 
