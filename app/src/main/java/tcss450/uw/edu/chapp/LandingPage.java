@@ -55,34 +55,6 @@ public class LandingPage extends Fragment {
             centerText.setText(message + mCreds.getEmail() + "!");
         }
 
-        // populate framelayouts
-        ChatsContainerFragment cchatf = new ChatsContainerFragment();
-        Bundle args2 = new Bundle();
-        args2.putSerializable(getString(R.string.key_credentials)
-                , mCreds);
-        args2.putSerializable(getString(R.string.keys_intent_jwt)
-                , mJwToken);
-        args2.putSerializable(getString(R.string.key_flag_compact_mode), true);
-        cchatf.setArguments(args2);
-
-        ConnectionsContainerFragment ccontactf = new ConnectionsContainerFragment();
-        Bundle args3 = new Bundle();
-        args3.putSerializable(getString(R.string.key_credentials)
-                , mCreds);
-        args3.putSerializable(getString(R.string.keys_intent_jwt)
-                , mJwToken);
-        args3.putSerializable(getString(R.string.key_flag_compact_mode), true);
-        ccontactf.setArguments(args3);
-
-        CurrentWeatherFragment cwf = new CurrentWeatherFragment();
-
-        getActivity().getSupportFragmentManager()
-                .beginTransaction()
-                .replace(R.id.framelayout_homelanding_weather, cwf)
-                .replace(R.id.framelayout_homelanding_contactlist, ccontactf)
-                .replace(R.id.framelayout_homelanding_chatlist, cchatf)
-                .commit();
-
         return v;
     }
 
