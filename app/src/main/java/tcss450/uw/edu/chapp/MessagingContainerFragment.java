@@ -352,9 +352,10 @@ public class MessagingContainerFragment extends Fragment {
                 //incoming with the notification
                 //and that the sender wasn't self
                 if (intent.getStringExtra("CHATID").equals(mChat.getId())
-                    && mMessageFragment != null && !sender.equals(mCreds.getUsername())) {
+                    && (mMessageFragment != null || !sender.equals(mCreds.getUsername()))) {
                     Log.e("MESSAGE FRAGMENT RECEIVER", "Calling webservice for messages");
                     callWebServiceforMessages(); //get new list of messages instead of show notificaiton inapp
+
 
                 } else {    //msg was received from a user in a separate chat than one being viewed
                     Log.e("MESSAGE FRAGMENT RECEIVER", "Calling Home Activity to update badge");
