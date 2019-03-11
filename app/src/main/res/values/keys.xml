@@ -82,5 +82,7 @@
     <string name="keys_weather_location_from_map">Location from MapActivity</string>
     <string name="keys_weather_from_map_activity">Intent from MapActivity</string>
     <string name="keys_prefs_locations">SharedPreferencesWeatherLocation</string>
+    <string name="keys_prefs_location_set">SharedPreferencesWeatherLocationSet</string>
+    <string name="keys_weather_location_load">LocationFromLoadFragment</string>
 
 </resources>

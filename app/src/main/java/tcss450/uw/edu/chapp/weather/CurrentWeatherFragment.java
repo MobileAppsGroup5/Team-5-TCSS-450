@@ -94,10 +94,11 @@ public class CurrentWeatherFragment extends Fragment {
                 != PackageManager.PERMISSION_GRANTED
                 && ActivityCompat.checkSelfPermission(getActivity(), Manifest.permission.ACCESS_COARSE_LOCATION)
                 != PackageManager.PERMISSION_GRANTED) {
+            Log.wtf("WEATHER DEBUG", "ASKING FOR PERMISSION ON CREATE");
 
-            ActivityCompat.requestPermissions(getActivity(),
+            requestPermissions(
                     new String[]{Manifest.permission.ACCESS_COARSE_LOCATION,
-                        Manifest.permission.ACCESS_FINE_LOCATION},
+                            Manifest.permission.ACCESS_FINE_LOCATION},
                     MY_PERMISSION_LOCATIONS);
 
         } else { //user already allowed locations
@@ -108,6 +109,8 @@ public class CurrentWeatherFragment extends Fragment {
         }
         return v;
     }
+
+
 
     /**
      * method that will set the location call back which is to stop location updates and
@@ -171,7 +174,8 @@ public class CurrentWeatherFragment extends Fragment {
      */
     @Override
     public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults) {
-
+        Log.wtf("WEATHER CURRENT DEBUG", "ASKED FOR PERMISSION");
+        super.onRequestPermissionsResult(requestCode,permissions, grantResults);
         switch(requestCode) {
             case MY_PERMISSION_LOCATIONS: {
                 //if reeult is cancelled, the resultArrays are empty/
@@ -184,6 +188,7 @@ public class CurrentWeatherFragment extends Fragment {
                     createLocationRequest();
                     setLocationCallback();
                     startLocationUpdates();
+                    Log.wtf("WEATHER CURRENT DEBUG", "permission granted");
 
                 } else {
                     //permission denied
