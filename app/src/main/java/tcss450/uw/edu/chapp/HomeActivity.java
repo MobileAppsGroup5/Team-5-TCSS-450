@@ -101,7 +101,7 @@ public class HomeActivity extends AppCompatActivity
         toggle.setDrawerArrowDrawable(badgeDrawable);
         drawer.addDrawerListener(toggle);
         toggle.syncState();
-        badgeDrawable.setEnabled(false);
+
 
         //initialize the navigation drawer counter badges
         mChatCounterView = (TextView) MenuItemCompat.getActionView(navigationView.getMenu().
@@ -321,6 +321,8 @@ public class HomeActivity extends AppCompatActivity
         //update badge icon
         if (mHasConnectionNotifications || mHasMessageNotifications){
             badgeDrawable.setEnabled(true);
+        } else {
+            badgeDrawable.setEnabled(false);
         }
 
     }
@@ -605,7 +607,7 @@ public class HomeActivity extends AppCompatActivity
                             .build());
                 }
                 // update the reference in HomeActivity
-                updateChats(mChats);
+                updateChats(chats);
 
 
 
@@ -779,18 +781,22 @@ public class HomeActivity extends AppCompatActivity
 
 
             if(typeOfMessage.equals("msg")){ //if received broadcast from message notification.
+                Log.e("Notification Receiver", "Received message type: msg");
 
-
-                if (findViewById(R.id.chats_container) == null){ //case where user is NOT in chat fragment
+                if (findViewById(R.id.fragment_chats_container) == null){ //case where user is NOT in chat fragment
+                    Log.e("Notification Receiver", "chat fragment not open");
                     String id = intent.getStringExtra("chatid");
+
                     for (Chat chats : mChats){
-                        if (id == chats.getId()){ //check if the message is in a chat room that the user is in
+                        if (id.equals(chats.getId())){ //check if the message is in a chat room that the user is in
                             List<String> users = chats.getUsersInChat();
                             List<Boolean> flags = chats.getAcceptedFlags();
 
                             //only show notification if user has accepted the chat room invite already
                             //flag should be true if accepted chatroom request
                             if (flags.get(users.indexOf(mCreds.getUsername()))) {
+                                Log.e("Notification Receiver", "Updating badge" );
+
                                 mHasMessageNotifications = true;
                                 badgeDrawable.setEnabled(true);
                                 mChatCounterView.setText("NEW");
@@ -800,33 +806,21 @@ public class HomeActivity extends AppCompatActivity
                     }
 
                 }
-                Log.e("Notification Receiver", "Received message type: msg");
+
 
             } else if(typeOfMessage.equals("conn req")){ //if received broadcast from connection request.
                 if (findViewById(R.id.all_connections_container) == null){ //case where user is NOT in connection fragment
+                    badgeDrawable.setEnabled(true);
+                    mContactCounterView.setText("NEW");
+                    mHasConnectionNotifications = true;
 
-                    String receiver = intent.getStringExtra("to");
-                    if (receiver ==mCreds.getUsername()){
-                        //only show badges when this user is the recipient of the connection request
-                        //update home icon and the counter
-                        badgeDrawable.setEnabled(true);
-                        mContactCounterView.setText("NEW");
-                        mHasConnectionNotifications = true;
-                    }
                 }
                 Log.e("Notification Receiver", "Received message type: conn req");
             } else if(typeOfMessage.equals("convo req")){ //if received broadcast from conversation request.
                 if (findViewById(R.id.chats_container) == null){ //case where user is NOT in chats fragment //fragment_chat
+                    badgeDrawable.setEnabled(true);
+                    mChatCounterView.setText("NEW");
 
-                    String receiver = intent.getStringExtra("to");
-                    if (receiver ==mCreds.getUsername()){
-                        //only show badges when this user is the recipient of the connection request
-                        //update home icon and the counter
-                        badgeDrawable.setEnabled(true);
-                        mChatCounterView.setText("NEW");
-                        //mHasMessageNotifications = true;
-                        //TODO update mHasConvoReq boolean
-                    }
                 }
                 Log.e("Notification Receiver", "Received message type: convo req");
             }
