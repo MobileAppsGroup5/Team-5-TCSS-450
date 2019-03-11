@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.graphics.Typeface;
+import android.location.Location;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -44,6 +45,8 @@ import tcss450.uw.edu.chapp.utils.PushReceiver;
 import tcss450.uw.edu.chapp.utils.SendPostAsyncTask;
 import tcss450.uw.edu.chapp.weather.CurrentWeatherFragment;
 import tcss450.uw.edu.chapp.weather.WeatherFragment;
+import tcss450.uw.edu.chapp.weather.WeatherLocationContent;
+import tcss450.uw.edu.chapp.weather.WeatherLocationFragment;
 
 /**
  *
@@ -64,7 +67,8 @@ public class HomeActivity extends AppCompatActivity
         ConnectionsContainerFragment.OnConnectionInformationFetchListener,
         ChatsContainerFragment.OnChatInformationFetchListener,
         WeatherFragment.OnFragmentInteractionListener,
-        CurrentWeatherFragment.OnCurrentWeatherFragmentInteractionListener {
+        CurrentWeatherFragment.OnCurrentWeatherFragmentInteractionListener,
+        WeatherLocationFragment.OnListFragmentInteractionListener {
 
     private Credentials mCreds;
     private String mJwToken;
@@ -666,6 +670,37 @@ public class HomeActivity extends AppCompatActivity
         badgeDrawable.setEnabled(true);
         mChatCounterView.setText(unreadChatList.size());
         //show badge on recycler view item in all chats.
+    }
+
+    /**
+     * This method will be called when the user clicks on a weather location to load from
+     * a saved weather location list.
+     * @param item
+     */
+    @Override
+    public void onListFragmentInteraction(WeatherLocationContent.WeatherLocationItem item) {
+        WeatherFragment wf = new WeatherFragment();
+        Location location = new Location("");
+        location.setLatitude(item.lat);
+        location.setLongitude(item.lon);
+        //add location from MapActivity as fragment argument
+        Bundle args = new Bundle();
+        args.putParcelable(getString(R.string.keys_weather_location_load), location);
+
+        args.putSerializable(getString(R.string.key_credentials), mCreds);
+        args.putSerializable(getString(R.string.keys_intent_jwt), mJwToken);
+        wf.setArguments(args);
+        //load the weather fragment
+        loadFragment(wf);
+    }
+
+    /**
+     * method that will load the WeatherLocationFragment.
+     * called from WeatherFragment load button.
+     */
+    @Override
+    public void onLoadWeatherClicked() {
+        loadFragment(new WeatherLocationFragment());
     }
 
 //    /**
