@@ -6,13 +6,13 @@ import android.app.PendingIntent;
 import android.content.Intent;
 import android.content.Context;
 import android.content.BroadcastReceiver;
-import android.graphics.BitmapFactory;
 import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 
 import me.pushy.sdk.Pushy;
 import tcss450.uw.edu.chapp.MainActivity;
 import tcss450.uw.edu.chapp.R;
+import tcss450.uw.edu.chapp.model.Credentials;
 
 import static android.app.ActivityManager.RunningAppProcessInfo.IMPORTANCE_FOREGROUND;
 import static android.app.ActivityManager.RunningAppProcessInfo.IMPORTANCE_VISIBLE;
@@ -20,20 +20,12 @@ import static android.app.ActivityManager.RunningAppProcessInfo.IMPORTANCE_VISIB
 public class PushReceiver extends BroadcastReceiver {
 
     public static final String RECEIVED_NEW_MESSAGE = "new message from pushy";
-
     private static final String CHANNEL_ID = "1";
+    private static Credentials mCreds; //TODO how do we get credentials of user to sift through notifications?
 
     @Override
     public void onReceive(Context context, Intent intent) {
 
-        //the following variables are used to store the information sent from Pushy
-        //In the WS, you define what gets sent. You can change it there to suit your needs
-        //Then here on the Android side, decide what to do with the message you got
-
-        //for the lab, the WS is only sending chat messages so the type will always be msg
-        //for your project, the WS need to send different types of push messages.
-        //perform so logic/routing based on the "type"
-        //feel free to change the key or type of values. You could use numbers like HTTP: 404 etc
         String typeOfMessage = intent.getStringExtra("type");
 
         Log.e("INTENTS", intent.getExtras().toString());
@@ -42,7 +34,7 @@ public class PushReceiver extends BroadcastReceiver {
         ActivityManager.getMyMemoryState(appProcessInfo);
 
         if (appProcessInfo.importance == IMPORTANCE_FOREGROUND || appProcessInfo.importance == IMPORTANCE_VISIBLE) {
-            if ("msg".equals(typeOfMessage)) {
+            if ("msg".equals(typeOfMessage)) { //new message
                 //app is in the foreground so send the message to the active Activities
                 Log.d("ChappApp", "Message received in foreground: " + intent.getStringExtra("message"));
 
@@ -54,13 +46,25 @@ public class PushReceiver extends BroadcastReceiver {
                 i.putExtras(intent.getExtras());
 
                 context.sendBroadcast(i);
-            } else if ("conn req".equals(typeOfMessage)) {
+            } else if ("conn req".equals(typeOfMessage)) { //new connection request
                 Log.d("ChappApp", "Conn req recieved in foreground: " + intent.getStringExtra("sender"));
 
                 //create an Intent to broadcast a request to other parts of the app.
                 Intent i = new Intent(RECEIVED_NEW_MESSAGE);
                 i.putExtra("SENDER", intent.getStringExtra("sender"));
                 i.putExtra("TO", intent.getStringExtra("to"));
+                i.putExtra("MESSAGE", intent.getStringExtra("message"));
+                i.putExtras(intent.getExtras());
+
+                context.sendBroadcast(i);
+            } else if ("convo req".equals(typeOfMessage)) { //new chat room request
+                Log.d("ChappApp", "Convo req recieved in foreground: " + intent.getStringExtra("sender"));
+
+                //create an Intent to broadcast a request to other parts of the app.
+                Intent i = new Intent(RECEIVED_NEW_MESSAGE);
+                i.putExtra("SENDER", intent.getStringExtra("sender"));
+                i.putExtra("TO", intent.getStringExtra("to"));
+                i.putExtra("CHATNAME", intent.getStringExtra("chatName"));
                 i.putExtra("MESSAGE", intent.getStringExtra("message"));
                 i.putExtras(intent.getExtras());
 
@@ -83,13 +87,15 @@ public class PushReceiver extends BroadcastReceiver {
                     .setSmallIcon(R.mipmap.chapp_logo_trans_foreground)
                     .setContentIntent(pendingIntent);
 
-            // TODO: spice these out of app notifications up, put relevant icons etc
+            //Styling the notifications out of app
             if (typeOfMessage.equals("msg")) {
                 builder.setContentTitle("Message from: " + intent.getStringExtra("sender"))
                         .setContentText(intent.getStringExtra("message"));
-            }
-            else if (typeOfMessage.equals("conn req")) {
+            } else if (typeOfMessage.equals("conn req")) {
                 builder.setContentTitle("Connection request from: " + intent.getStringExtra("sender"))
+                        .setContentText(intent.getStringExtra("message"));
+            } else if (typeOfMessage.equals("convo req")) {
+                builder.setContentTitle("Chat room invitation from: " + intent.getStringExtra("sender"))
                         .setContentText(intent.getStringExtra("message"));
             }
 

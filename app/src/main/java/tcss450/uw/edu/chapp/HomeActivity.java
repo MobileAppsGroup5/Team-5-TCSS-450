@@ -75,22 +75,11 @@ public class HomeActivity extends AppCompatActivity
     private BadgeDrawerIconDrawable badgeDrawable;
     private TextView mChatCounterView;
     private TextView mContactCounterView;
-    //tells if the user unread notifications
-    private boolean mHasNotifications = false;
-    private ArrayList<String> mUnreadChatList;
-    private List<Connection> mConnections;
-
-    private ArrayList<String> unreadChatList; //holds the chatIDs received from notifications
-    private int mChatCounter;
-    private int mContactCounter;
-
-    private static final String CHANNEL_ID = "1";
-
-    //currently open fragment
-    private Fragment mChatfragment;
-
-    // The list of connections for the current user.
+    private boolean mHasConnectionNotifications = false;
+    private boolean mHasMessageNotifications = false;
     private ArrayList<Connection> mConnections;
+
+
 
     // The list of chats for the current user
     private ArrayList<Chat> mChats;
@@ -121,7 +110,7 @@ public class HomeActivity extends AppCompatActivity
                 findItem(R.id.nav_connections));
         initializeCountDrawer(mChatCounterView);
         initializeCountDrawer(mContactCounterView);
-        unreadChatList = new ArrayList<String>();
+
 
 
         // Set the logout listener for the navigation drawer
@@ -138,33 +127,29 @@ public class HomeActivity extends AppCompatActivity
         mCreds = (Credentials) getIntent().getSerializableExtra(getString(R.string.key_credentials));
         mJwToken = getIntent().getStringExtra(getString(R.string.keys_intent_jwt));
 
-
-        // Load SuccessFragment into content_home (aka fragment_container)
+        checkForNotifications();
         if (savedInstanceState == null) {
             if (findViewById(R.id.fragment_container) != null) {
 
-                //Was the Bundle received from Main Activity spurred by a message notification?
                 if (getIntent().getBooleanExtra(getString(R.string.keys_intent_notification_msg), false)) {
+                    //Was the Bundle received from Main Activity spurred by a message notification?
                     Bundle args = new Bundle();
                     // Get value from intent and put it in fragment args
+                    Fragment chatfragment = new MessagingContainerFragment();
                     String chatid = getIntent().getStringExtra(getString(R.string.keys_intent_chatId));
-                    args.putSerializable(getString(R.string.key_credentials)
-                            , mCreds);
-                    args.putSerializable(getString(R.string.keys_intent_jwt)
-                            , mJwToken);
-                    args.putSerializable(getString(R.string.key_chatid),
-                            chatid);
-                    mChatfragment = new MessagingContainerFragment();
-
-                    mChatfragment.setArguments(args);
+                    args.putSerializable(getString(R.string.key_credentials), mCreds);
+                    args.putSerializable(getString(R.string.keys_intent_jwt), mJwToken);
+                    args.putSerializable(getString(R.string.key_chatid), chatid);
+                    chatfragment.setArguments(args);
 
                     getSupportFragmentManager()
                             .beginTransaction()
-                            .replace(R.id.fragment_container, mChatfragment)
+                            .replace(R.id.fragment_container, chatfragment)
                             .commit();
 
-                    //If the HomeActivity was loaded from the WeatherMapActivity
+
                 } else if (getIntent().getBooleanExtra(getString(R.string.keys_weather_from_map_activity), false)) {
+                    //If the HomeActivity was loaded from the WeatherMapActivity
                     WeatherFragment wf = new WeatherFragment();
                     //add location from MapActivity as fragment argument
                     Bundle args = new Bundle();
@@ -176,16 +161,26 @@ public class HomeActivity extends AppCompatActivity
                     //load the weather fragment
                     loadFragment(wf);
 
-                    //Was the Bundle received from Main Activity spurred by a connection notification?
+
                 } else if (getIntent().getBooleanExtra(getString(R.string.keys_intent_notification_connection), false)){
+                    //Was the Bundle received from Main Activity spurred by a connection notification?
                     //load the connections fragment
                     ConnectionsContainerFragment ctf = new ConnectionsContainerFragment();
                     Bundle args = new Bundle();
                     args.putSerializable(getString(R.string.keys_intent_jwt), mJwToken);
                     args.putSerializable(getString(R.string.key_credentials), mCreds);
-                    args.putStringArrayList(getString(R.string.keys_intent_chatId), mUnreadChatList);
                     ctf.setArguments(args);
                     loadFragment(ctf);
+
+                } else if (getIntent().getBooleanExtra(getString(R.string.keys_intent_notification_conversation), false)){
+                    //Was the Bundle received from Main Activity spurred by a conversation request notification?
+                    //load the chats container fragment
+                    ChatsContainerFragment ccf = new ChatsContainerFragment();
+                    Bundle args = new Bundle();
+                    args.putSerializable(getString(R.string.keys_intent_jwt), mJwToken);
+                    args.putSerializable(getString(R.string.key_credentials), mCreds);
+                    ccf.setArguments(args);
+                    loadFragment(ccf);
 
                 } else {
                     loadHomeLandingPage();
@@ -293,6 +288,43 @@ public class HomeActivity extends AppCompatActivity
 //        return super.onOptionsItemSelected(item);
 //    }
 
+    private void checkForNotifications(){
+        callWebServiceforChats(); //updates mChats
+        callWebServiceforConnections(); //update mConnections
+
+        if (mConnections!= null) {
+            for (Connection contact : mConnections) {
+                //usernameB is the recipient of the request
+                if (contact.getVerified() == 0 && contact.getUsernameB() == mCreds.getUsername()) {
+                    //if the user is the recipient of the request and it hasn't been accepted yet
+                    //show notification icons
+                    mHasConnectionNotifications = true;
+                    mContactCounterView.setText("NEW");
+                }
+            }
+        }
+        if (mChats!= null) {
+            for (Chat chat : mChats) {
+                //check if last message in chat was sent by another user
+                //and if that last message has been not been read
+                if (chat.getLastMessageUsername() != mCreds.getUsername() && !chat.isHasBeenRead()) {
+                    //unread message
+                    mHasMessageNotifications = true;
+                    mContactCounterView.setText("NEW");
+                    return;
+                }
+            }
+        }
+
+        //TODO maybe add in item for checking if chat has been verified. It is same icon on chats not adding for now
+
+        //update badge icon
+        if (mHasConnectionNotifications || mHasMessageNotifications){
+            badgeDrawable.setEnabled(true);
+        }
+
+    }
+
     /**
      * Navigation drawer item listener.
      * When action item has been clicked, the counter for notifications gets set to not show.
@@ -324,7 +356,7 @@ public class HomeActivity extends AppCompatActivity
                 Bundle args = new Bundle();
                 args.putSerializable(getString(R.string.keys_intent_jwt), mJwToken);
                 args.putSerializable(getString(R.string.key_credentials), mCreds);
-                args.putStringArrayList(getString(R.string.keys_intent_chatId), mUnreadChatList);
+//                args.putStringArrayList(getString(R.string.keys_intent_chatId), unreadChatList);
                 frag.setArguments(args);
                 loadFragment(frag);
                 break;
@@ -605,14 +637,14 @@ public class HomeActivity extends AppCompatActivity
      */
     @Override
     public void onListFragmentInteraction(Chat item) {
-        mChatfragment = new MessagingContainerFragment();             //MessagingContainerFragment chatfrag
+        MessagingContainerFragment chatfragment = new MessagingContainerFragment();
         Bundle args = new Bundle();
         args.putSerializable(getString(R.string.keys_intent_jwt), mJwToken);
         args.putSerializable(getString(R.string.key_credentials), mCreds);
         args.putSerializable(getString(R.string.key_chat), item);
         args.putSerializable(getString(R.string.key_intent_connections), mConnections);
-        mChatfragment.setArguments(args);
-        loadFragment(mChatfragment);
+        chatfragment.setArguments(args);
+        loadFragment(chatfragment);
     }
 
 
@@ -631,6 +663,11 @@ public class HomeActivity extends AppCompatActivity
         mConnections = connections;
     }
 
+    /**
+     * Part of the interface from ChatsContainer Fragment that sends in the updated list
+     * of all chats for the user on create of the chatscontainer.
+     * @param chats     list of chats user is in
+     */
     @Override
     public void updateChats(ArrayList<Chat> chats) {
         mChats = chats;
@@ -658,22 +695,27 @@ public class HomeActivity extends AppCompatActivity
         // don't do anything for now, messages aren't able to be interacted with
     }
 
-    /**
-     * From the MessagingContainerFragment interface that updates the count of unread
-     * chat Ids from notifications.
-     * @param chatId    chatId to add to the list
-     */
-    @Override
-    public void incrementUnreadChatNotifications(String chatId) {
+//    /**
+//     * From the MessagingContainerFragment interface that updates the count of unread
+//     * chat Ids from notifications.
+//     * @param chatId    chatId to add to the list
+//     */
+//    @Override
+//    public void incrementUnreadChatNotifications(String chatId) {
+//
+//        //adds the chatId to list of unread chats
+//        //show badge on home button.
+//        //show number on nav menu chat button
+//        mHasNotifications = true;
+//        unreadChatList.add(chatId);
+//        badgeDrawable.setEnabled(true);
+//        mChatCounterView.setText("NEW");
+//        //show badge on recycler view item in all chats.
+//    }
 
-        //adds the chatId to list of unread chats
-        //show badge on home button.
-        //show number on nav menu chat button
-        mHasNotifications = true;
-        unreadChatList.add(chatId);
-        badgeDrawable.setEnabled(true);
-        mChatCounterView.setText("NEW");
-        //show badge on recycler view item in all chats.
+    @Override
+    public void unreadMessageReceivedinOtherChatNotifications(String chatId) {
+
     }
 
 //    /**
@@ -737,29 +779,56 @@ public class HomeActivity extends AppCompatActivity
 
 
             if(typeOfMessage.equals("msg")){ //if received broadcast from message notification.
-                if (findViewById(R.id.fragment_chat) == null){ //case where user is NOT in chat fragment
+
+
+                if (findViewById(R.id.chats_container) == null){ //case where user is NOT in chat fragment
                     String id = intent.getStringExtra("chatid");
-                    unreadChatList.add(id);
-                    //update home icon and the counter
-                    badgeDrawable.setEnabled(true);
-                    mChatCounterView.setText("NEW");
+                    for (Chat chats : mChats){
+                        if (id == chats.getId()){ //check if the message is in a chat room that the user is in
+                            List<String> users = chats.getUsersInChat();
+                            List<Boolean> flags = chats.getAcceptedFlags();
 
-                    //how to add in red dot alongside specific chat room?
-                    //call backend to get all chatIds with unread messages
-                    //then add to global list, increment counts and count views.
-                    Log.e("Notification Receiver", "Received message type: msg");
+                            //only show notification if user has accepted the chat room invite already
+                            //flag should be true if accepted chatroom request
+                            if (flags.get(users.indexOf(mCreds.getUsername()))) {
+                                mHasMessageNotifications = true;
+                                badgeDrawable.setEnabled(true);
+                                mChatCounterView.setText("NEW");
+                            }
+                            return;
+                        }
+                    }
+
                 }
-
+                Log.e("Notification Receiver", "Received message type: msg");
 
             } else if(typeOfMessage.equals("conn req")){ //if received broadcast from connection request.
-                if (findViewById(R.id.allconnections_container) == null){ //case where user is NOT in connection fragment
+                if (findViewById(R.id.all_connections_container) == null){ //case where user is NOT in connection fragment
 
-                    //update home icon and the counter
-                    badgeDrawable.setEnabled(true);
-                    mContactCounterView.setText("NEW");
-
-                    Log.e("Notification Receiver", "Received message type: conn req");
+                    String receiver = intent.getStringExtra("to");
+                    if (receiver ==mCreds.getUsername()){
+                        //only show badges when this user is the recipient of the connection request
+                        //update home icon and the counter
+                        badgeDrawable.setEnabled(true);
+                        mContactCounterView.setText("NEW");
+                        mHasConnectionNotifications = true;
+                    }
                 }
+                Log.e("Notification Receiver", "Received message type: conn req");
+            } else if(typeOfMessage.equals("convo req")){ //if received broadcast from conversation request.
+                if (findViewById(R.id.chats_container) == null){ //case where user is NOT in chats fragment //fragment_chat
+
+                    String receiver = intent.getStringExtra("to");
+                    if (receiver ==mCreds.getUsername()){
+                        //only show badges when this user is the recipient of the connection request
+                        //update home icon and the counter
+                        badgeDrawable.setEnabled(true);
+                        mChatCounterView.setText("NEW");
+                        //mHasMessageNotifications = true;
+                        //TODO update mHasConvoReq boolean
+                    }
+                }
+                Log.e("Notification Receiver", "Received message type: convo req");
             }
 
 

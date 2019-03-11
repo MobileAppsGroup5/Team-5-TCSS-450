@@ -18,6 +18,7 @@ public class MainActivity extends AppCompatActivity implements LoginFragment.OnL
 
     private boolean mLoadFromChatNotification = false;
     private boolean mLoadFromConnectionRequest = false;
+    private boolean mLoadFromConversationRequest = false;
     private static final String TAG = MainActivity.class.getSimpleName();
     private String mNotifChatId;
 
@@ -35,8 +36,9 @@ public class MainActivity extends AppCompatActivity implements LoginFragment.OnL
                     mNotifChatId = getIntent().getExtras().getString("chatid");
                 } else if (mLoadFromConnectionRequest = getIntent().getExtras().getString("type").equals("conn req")){
                     //get keys sender, message, to
+                } else if (mLoadFromConnectionRequest = getIntent().getExtras().getString("type").equals("conn req")){
+                    //get sender, message, to, chatName
                 }
-
 
             }
         }
@@ -60,6 +62,7 @@ public class MainActivity extends AppCompatActivity implements LoginFragment.OnL
         intent.putExtra(getString(R.string.key_credentials), theCredentials);
         intent.putExtra(getString(R.string.keys_intent_notification_msg), mLoadFromChatNotification);
         intent.putExtra(getString(R.string.keys_intent_notification_connection), mLoadFromConnectionRequest);
+        intent.putExtra(getString(R.string.keys_intent_notification_conversation), mLoadFromConversationRequest);
         intent.putExtra(getString(R.string.keys_intent_jwt), jwt);
         intent.putExtra(getString(R.string.keys_intent_chatId), mNotifChatId);
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);

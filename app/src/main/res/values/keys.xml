@@ -35,6 +35,8 @@
     <string name="keys_prefs_password">see_the_city_see_the_zoo</string>
     <string name="keys_intent_notification_msg">was app started from message notification?</string>
     <string name="keys_intent_notification_connection">was app started from connection request?</string>
+    <string name="keys_intent_notification_conversation">was app started from conversation notification?</string>
+
 
     <!-- register keys -->
     <string name="keys_json_register_error">error</string>
