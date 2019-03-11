@@ -96,7 +96,8 @@ public class HomeActivity extends AppCompatActivity
         // Initialize drawer icon and it's ActionBarDrawerToggle object to
         // manage the on and off red dot for notifications.
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
-        ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(this, drawer,toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
+        ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(this, drawer,toolbar,
+                R.string.navigation_drawer_open, R.string.navigation_drawer_close);
         badgeDrawable = new BadgeDrawerIconDrawable(getSupportActionBar().getThemedContext());
         toggle.setDrawerArrowDrawable(badgeDrawable);
         drawer.addDrawerListener(toggle);
@@ -104,10 +105,8 @@ public class HomeActivity extends AppCompatActivity
 
 
         //initialize the navigation drawer counter badges
-        mChatCounterView = (TextView) MenuItemCompat.getActionView(navigationView.getMenu().
-                findItem(R.id.nav_chat));
-        mContactCounterView = (TextView) MenuItemCompat.getActionView(navigationView.getMenu().
-                findItem(R.id.nav_connections));
+        mChatCounterView = (TextView) MenuItemCompat.getActionView(navigationView.getMenu().findItem(R.id.nav_chat));
+        mContactCounterView = (TextView) MenuItemCompat.getActionView(navigationView.getMenu().findItem(R.id.nav_connections));
         initializeCountDrawer(mChatCounterView);
         initializeCountDrawer(mContactCounterView);
 
@@ -295,7 +294,7 @@ public class HomeActivity extends AppCompatActivity
         if (mConnections!= null) {
             for (Connection contact : mConnections) {
                 //usernameB is the recipient of the request
-                if (contact.getVerified() == 0 && contact.getUsernameB() == mCreds.getUsername()) {
+                if (contact.getVerified() == 0 && contact.getUsernameB().equals(mCreds.getUsername())) {
                     //if the user is the recipient of the request and it hasn't been accepted yet
                     //show notification icons
                     mHasConnectionNotifications = true;
@@ -307,7 +306,7 @@ public class HomeActivity extends AppCompatActivity
             for (Chat chat : mChats) {
                 //check if last message in chat was sent by another user
                 //and if that last message has been not been read
-                if (chat.getLastMessageUsername() != mCreds.getUsername() && !chat.isHasBeenRead()) {
+                if (!chat.getLastMessageUsername().equals(mCreds.getUsername()) && !chat.isHasBeenRead()) {
                     //unread message
                     mHasMessageNotifications = true;
                     mContactCounterView.setText("NEW");
@@ -349,11 +348,10 @@ public class HomeActivity extends AppCompatActivity
 
             case R.id.nav_connections:
 
+                if (!mHasMessageNotifications){ //make sure there are no other pending notifications
+                    badgeDrawable.setEnabled(false);
+                }
                 mContactCounterView.setText("");
-                badgeDrawable.setEnabled(false);
-//                if (!mHasNotifications) {
-//                    badgeDrawable.setEnabled(false);
-//                }
                 Fragment frag = new ConnectionsContainerFragment();
                 Bundle args = new Bundle();
                 args.putSerializable(getString(R.string.keys_intent_jwt), mJwToken);
@@ -365,7 +363,9 @@ public class HomeActivity extends AppCompatActivity
 
             case R.id.nav_chat:
                 mChatCounterView.setText("");
-                badgeDrawable.setEnabled(false);
+                if (!mHasConnectionNotifications){ //make sure there are no other pending notifications
+                    badgeDrawable.setEnabled(false);
+                }
                 frag = new ChatsContainerFragment();
                 args = new Bundle();
                 args.putSerializable(getString(R.string.keys_intent_jwt), mJwToken);
@@ -783,7 +783,7 @@ public class HomeActivity extends AppCompatActivity
             if(typeOfMessage.equals("msg")){ //if received broadcast from message notification.
                 Log.e("Notification Receiver", "Received message type: msg");
 
-                if (findViewById(R.id.fragment_chats_container) == null){ //case where user is NOT in chat fragment
+                if (findViewById(R.id.chats_container) == null){ //case where user is NOT in chat list fragment
                     Log.e("Notification Receiver", "chat fragment not open");
                     String id = intent.getStringExtra("chatid");
 
