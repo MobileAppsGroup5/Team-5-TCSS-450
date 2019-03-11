@@ -70,7 +70,7 @@ public class ChatsContainerFragment extends Fragment implements PropertyChangeLi
         }
     }
 
-    public void callWebServiceforChats() {
+    private void callWebServiceforChats() {
         Uri uri = new Uri.Builder()
             .scheme("https")
             .appendPath(getString(R.string.ep_base_url))

@@ -150,7 +150,6 @@ public class ConnectionsContainerFragment extends Fragment implements PropertyCh
      * Database given the specified chatid.
      */
     public void callWebServiceforConnections(){
-        Log.e("CONNECTIONS", "CALLED WEB SERVICE FOR CONNECTIONS");
         mListener.onWaitFragmentInteractionShow();
         Uri uri = new Uri.Builder()
                 .scheme("https")
@@ -287,7 +286,6 @@ public class ConnectionsContainerFragment extends Fragment implements PropertyCh
 
         @Override
         public void onReceive(Context context, Intent intent) {
-            Log.e("RECIEVED", "RECIEVED IN CONNECTIONSCONTAINER");
 
             String typeOfMessage = intent.getStringExtra("type");
 
