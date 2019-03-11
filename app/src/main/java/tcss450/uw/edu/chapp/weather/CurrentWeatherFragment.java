@@ -190,11 +190,13 @@ public class CurrentWeatherFragment extends Fragment {
                     startLocationUpdates();
                     Log.wtf("WEATHER CURRENT DEBUG", "permission granted");
 
+
                 } else {
                     //permission denied
                     //either display error message or do nothing with fragment.
                     mCurrentErrorText.setVisibility(TextView.VISIBLE);
                     mCurrentErrorText.setText(getString(R.string.current_weather_no_location_permission_error));
+
                 }
                 return;
             }
@@ -330,15 +332,19 @@ public class CurrentWeatherFragment extends Fragment {
                     setIcon(weather.getString("icon"));
 
                     mListener.onWaitFragmentInteractionHide();
+                    Log.e("WEATHERFRAGMENT", "SUCCESSFUL");
 
                 } else {
                     Log.e("WEATHER", "weather result does not have count");
+                    mListener.onWaitFragmentInteractionHide();
                 }
             } else {
                 Log.e("WEATHER", "weather result does not have weather data");
+                mListener.onWaitFragmentInteractionHide();
             }
         } catch(JSONException e) {
             Log.e("WEATHER", e.toString());
+            mListener.onWaitFragmentInteractionHide();
         }
     }
 

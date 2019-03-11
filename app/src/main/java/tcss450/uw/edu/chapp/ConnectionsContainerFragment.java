@@ -41,6 +41,7 @@ public class ConnectionsContainerFragment extends Fragment implements PropertyCh
     private Credentials mCreds;
     private String mJwToken;
     private OnConnectionInformationFetchListener mListener;
+    private boolean mCompactMode = false;
     private PushMessageReceiver mPushMessageReciever;
 
     public ConnectionsContainerFragment() {
@@ -50,12 +51,15 @@ public class ConnectionsContainerFragment extends Fragment implements PropertyCh
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setHasOptionsMenu(true);
 
         if (getArguments() != null) {
             mCreds = (Credentials)getArguments().getSerializable(getString(R.string.key_credentials));
             mJwToken = (String)getArguments().getSerializable(getString(R.string.keys_intent_jwt));
-
+            if (getArguments().getSerializable(getString(R.string.key_flag_compact_mode)) != null) {
+                mCompactMode = true;
+            } else {
+                setHasOptionsMenu(true);
+            }
         } else {
             mConnections = new ArrayList<>();
         }
@@ -118,6 +122,7 @@ public class ConnectionsContainerFragment extends Fragment implements PropertyCh
                 args.putSerializable(NewConnectionFragment.ARG_CRED_LIST, credsAsArray);
                 args.putSerializable(getString(R.string.key_credentials), mCreds);
                 args.putSerializable(getString(R.string.keys_intent_jwt), mJwToken);
+                args.putSerializable(getString(R.string.key_intent_connections), mConnections);
                 NewConnectionFragment newConnectionFrag = new NewConnectionFragment();
                 newConnectionFrag.setArguments(args);
 
@@ -183,6 +188,7 @@ public class ConnectionsContainerFragment extends Fragment implements PropertyCh
 
                 constructConnections();
                 mListener.onWaitFragmentInteractionHide();
+                Log.e("CONNECTIONSCONTAINER", "SUCCESSFUL");
             } else {
                 Log.e("ERROR!", "No data array");
                 mListener.onWaitFragmentInteractionHide();
@@ -203,6 +209,7 @@ public class ConnectionsContainerFragment extends Fragment implements PropertyCh
         args.putSerializable(ConnectionsFragment.ARG_CONNECTIONS_LIST, connectionsAsArray);
         args.putSerializable(getString(R.string.key_credentials), mCreds);
         args.putSerializable(getString(R.string.keys_intent_jwt), mJwToken);
+        args.putSerializable(getString(R.string.key_flag_compact_mode), mCompactMode);
         ConnectionsFragment frag = new ConnectionsFragment();
         frag.setArguments(args);
 
@@ -224,12 +231,20 @@ public class ConnectionsContainerFragment extends Fragment implements PropertyCh
     @Override
     public void onResume() {
         super.onResume();
-        if (mPushMessageReciever == null) {
-            mPushMessageReciever = new PushMessageReceiver();
-        }
-        IntentFilter iFilter = new IntentFilter(PushReceiver.RECEIVED_NEW_MESSAGE);
-        getActivity().registerReceiver(mPushMessageReciever, iFilter);
+//        if (mPushMessageReciever == null) {
+//            mPushMessageReciever = new PushMessageReceiver();
+//        }
+//        IntentFilter iFilter = new IntentFilter(PushReceiver.RECEIVED_NEW_MESSAGE);
+//        getActivity().registerReceiver(mPushMessageReciever, iFilter);
         callWebServiceforConnections();
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+//        if (mPushMessageReciever != null){
+//            getActivity().unregisterReceiver(mPushMessageReciever);
+//        }
     }
 
     @Override
@@ -247,13 +262,6 @@ public class ConnectionsContainerFragment extends Fragment implements PropertyCh
     public void onDetach() {
         super.onDetach();
         mListener = null;
-        if (mPushMessageReciever != null){
-            getActivity().unregisterReceiver(mPushMessageReciever);
-        }
-    }
-    @Override
-    public void onPause() {
-        super.onPause();
         if (mPushMessageReciever != null){
             getActivity().unregisterReceiver(mPushMessageReciever);
         }
@@ -289,7 +297,8 @@ public class ConnectionsContainerFragment extends Fragment implements PropertyCh
                 //don't update badge on navigation drawer,
                 //just update the list of requests by calling web service
                 callWebServiceforConnections();
-                Log.e("Notification Receiver", "Received message type: conn req");
+                Log.e("INTENT", intent.toString());
+                Log.e("ConnectionsContainer", "Received message type: conn req");
             }
 
 

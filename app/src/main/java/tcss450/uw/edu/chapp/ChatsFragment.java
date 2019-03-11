@@ -33,6 +33,7 @@ public class ChatsFragment extends Fragment implements PropertyChangeListener {
     private List<Chat> mChats;
     private Credentials mCreds;
     private String mJwToken;
+    private boolean mCompactMode;
 
     private int mColumnCount = 1;
     private OnListFragmentInteractionListener mListener;
@@ -61,75 +62,12 @@ public class ChatsFragment extends Fragment implements PropertyChangeListener {
             mChats = new ArrayList<>(Arrays.asList((Chat[])getArguments().getSerializable(ARG_CHAT_LIST)));
             mCreds = (Credentials)getArguments().getSerializable(getString(R.string.key_credentials));
             mJwToken = (String)getArguments().getSerializable(getString(R.string.keys_intent_jwt));
+            mCompactMode = getArguments().getBoolean(getString(R.string.key_flag_compact_mode));
 
         } else {
             mChats = new ArrayList<>();
         }
     }
-
-//    /**
-//     * Begins the async task for grabbing the chats from the database that the user is in
-//     */
-//    private void callWebServiceforChats(){
-//        //Create the url for getting all chats
-//        Uri uri = new Uri.Builder()
-//                .scheme("https")
-//                .appendPath(getString(R.string.ep_base_url))
-//                .appendPath(getString(R.string.ep_chats_base))
-//                .appendPath(getString(R.string.ep_chats_get_chats))
-//                .build();
-//
-//        // Create the JSON object with given chatID
-//        JSONObject msg = new JSONObject();
-//        try {
-//            msg.put("username", mCreds.getUsername());
-//        } catch (Exception e) {
-//            e.printStackTrace();
-//        }
-//
-//        new SendPostAsyncTask.Builder(uri.toString(), msg)
-////                .onPreExecute(this::handleWaitFragmentShow)
-//                .onPostExecute(this::handleChatsPostOnPostExecute)
-////                .onCancelled(this::handleErrorsInTask)
-//                .addHeaderField("authorization", mJwToken) //add the JWT as a header
-//                .build().execute();
-//    }
-//
-//    private void handleChatsPostOnPostExecute(String result) {
-//        // parse JSON
-//        try {
-//            JSONObject root = new JSONObject(result);
-//            if (root.has(getString(R.string.keys_json_chats_chatlist))) {
-//
-//                JSONArray data = root.getJSONArray(
-//                        getString(R.string.keys_json_chats_chatlist));
-//                List<Chat> chats = new ArrayList<>();
-//                for(int i = 0; i < data.length(); i++) {
-//                    JSONObject jsonChat = data.getJSONObject(i);
-//                    chats.add(new Chat.Builder(
-//                            jsonChat.getString(getString(R.string.keys_json_chats_chatid)),
-//                            jsonChat.getString(getString(R.string.keys_json_chats_name)))
-//                            .build());
-//                }
-//
-//                mChats = chats;
-//                inflateView();
-//            } else {
-//                Log.e("ERROR!", "No data array");
-//                // notify user in the future
-//            }
-//        } catch (JSONException e) {
-//            e.printStackTrace();
-//            Log.e("ERROR!", e.getMessage());
-//            // notify user in the future
-//        }
-//    }
-//
-//    @Override
-//    public void onResume() {
-//        super.onResume();
-//        callWebServiceforChats();
-//    }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -145,7 +83,7 @@ public class ChatsFragment extends Fragment implements PropertyChangeListener {
             } else {
                 recyclerView.setLayoutManager(new GridLayoutManager(context, mColumnCount));
             }
-            MyChatsRecyclerViewAdapter adapter = new MyChatsRecyclerViewAdapter(mChats, mListener, mCreds, getContext(), mJwToken);
+            MyChatsRecyclerViewAdapter adapter = new MyChatsRecyclerViewAdapter(mChats, mListener, mCreds, getContext(), mJwToken, mCompactMode);
             adapter.addPropertyChangeListener(this);
             recyclerView.setAdapter(adapter);
         }

@@ -46,6 +46,7 @@ public class ChatsContainerFragment extends Fragment implements PropertyChangeLi
     private Credentials mCreds;
     private String mJwToken;
     private OnChatInformationFetchListener mListener;
+    private boolean mCompactMode = false;
     private PushMessageReceiver mPushMessageReciever;
 
     public ChatsContainerFragment() {
@@ -55,18 +56,21 @@ public class ChatsContainerFragment extends Fragment implements PropertyChangeLi
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setHasOptionsMenu(true);
-        mPushMessageReciever = new PushMessageReceiver();
 
         if (getArguments() != null) {
-            mCreds = (Credentials) getArguments().getSerializable(getString(R.string.key_credentials));
-            mJwToken = (String) getArguments().getSerializable(getString(R.string.keys_intent_jwt));
+            mCreds = (Credentials)getArguments().getSerializable(getString(R.string.key_credentials));
+            mJwToken = (String)getArguments().getSerializable(getString(R.string.keys_intent_jwt));
+            if (getArguments().getSerializable(getString(R.string.key_flag_compact_mode)) != null) {
+                mCompactMode = true;
+            } else {
+                setHasOptionsMenu(true);
+            }
         } else {
             mChats = new ArrayList<>();
         }
     }
 
-    private void callWebServiceforChats() {
+    public void callWebServiceforChats() {
         Uri uri = new Uri.Builder()
                 .scheme("https")
                 .appendPath(getString(R.string.ep_base_url))
@@ -185,6 +189,7 @@ public class ChatsContainerFragment extends Fragment implements PropertyChangeLi
                 args.putSerializable(ChatsFragment.ARG_CHAT_LIST, chatsAsArray);
                 args.putSerializable(getString(R.string.key_credentials), mCreds);
                 args.putSerializable(getString(R.string.keys_intent_jwt), mJwToken);
+                args.putSerializable(getString(R.string.key_flag_compact_mode), mCompactMode);
                 ChatsFragment frag = new ChatsFragment();
                 frag.setArguments(args);
 
@@ -193,8 +198,9 @@ public class ChatsContainerFragment extends Fragment implements PropertyChangeLi
                         .replace(R.id.chats_container, frag)
                         .commit();
 
-                mListener.onWaitFragmentInteractionHide();
                 frag.addPropertyChangeListener(this);
+                mListener.onWaitFragmentInteractionHide();
+                Log.e("CHATSCONTAINER", "SUCCESSFUL");
             } else {
                 Log.e("ERROR!", "No data array" + root.toString());
                 //notify user
@@ -329,27 +335,27 @@ public class ChatsContainerFragment extends Fragment implements PropertyChangeLi
     @Override
     public void onResume() {
         super.onResume();
-        if (mPushMessageReciever == null) {
-            mPushMessageReciever = new PushMessageReceiver();
-        }
-        IntentFilter iFilter = new IntentFilter(PushReceiver.RECEIVED_NEW_MESSAGE);
-        getActivity().registerReceiver(mPushMessageReciever, iFilter);
+//        if (mPushMessageReciever == null) {
+//            mPushMessageReciever = new PushMessageReceiver();
+//        }
+//        IntentFilter iFilter = new IntentFilter(PushReceiver.RECEIVED_NEW_MESSAGE);
+//        getActivity().registerReceiver(mPushMessageReciever, iFilter);
         callWebServiceforChats();
 
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+//        if (mPushMessageReciever != null){
+//            getActivity().unregisterReceiver(mPushMessageReciever);
+//        }
     }
 
     @Override
     public void onDetach() {
         super.onDetach();
         mListener = null;
-    }
-
-    @Override
-    public void onPause() {
-        super.onPause();
-        if (mPushMessageReciever != null){
-            getActivity().unregisterReceiver(mPushMessageReciever);
-        }
     }
 
 

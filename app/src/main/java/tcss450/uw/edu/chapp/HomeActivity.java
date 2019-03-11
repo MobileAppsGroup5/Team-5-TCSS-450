@@ -10,6 +10,7 @@ import android.location.Location;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.design.widget.NavigationView;
@@ -67,8 +68,9 @@ public class HomeActivity extends AppCompatActivity
         ConnectionsContainerFragment.OnConnectionInformationFetchListener,
         ChatsContainerFragment.OnChatInformationFetchListener,
         WeatherFragment.OnFragmentInteractionListener,
+        WeatherLocationFragment.OnListFragmentInteractionListener,
         CurrentWeatherFragment.OnCurrentWeatherFragmentInteractionListener,
-        WeatherLocationFragment.OnListFragmentInteractionListener {
+        LandingPage.OnLandingPageReturnListener {
 
     /** CREDENTIAL CONSTANTS */
     private Credentials mCreds;
@@ -82,6 +84,8 @@ public class HomeActivity extends AppCompatActivity
     private boolean mHasConnectionNotifications = false;
     private boolean mHasMessageNotifications = false;
     private ArrayList<Connection> mConnections;
+    private ChatsContainerFragment mCurrentChatsContainerInstance;
+    private ConnectionsContainerFragment mCurrentConnectionsContainerInstance;
 
 
 
@@ -168,22 +172,22 @@ public class HomeActivity extends AppCompatActivity
                 } else if (getIntent().getBooleanExtra(getString(R.string.keys_intent_notification_connection), false)){
                     //Was the Bundle received from Main Activity spurred by a connection notification?
                     //load the connections fragment
-                    ConnectionsContainerFragment ctf = new ConnectionsContainerFragment();
+                    mCurrentConnectionsContainerInstance = new ConnectionsContainerFragment();
                     Bundle args = new Bundle();
                     args.putSerializable(getString(R.string.keys_intent_jwt), mJwToken);
                     args.putSerializable(getString(R.string.key_credentials), mCreds);
-                    ctf.setArguments(args);
-                    loadFragment(ctf);
+                    mCurrentConnectionsContainerInstance.setArguments(args);
+                    loadFragment(mCurrentConnectionsContainerInstance);
 
                 } else if (getIntent().getBooleanExtra(getString(R.string.keys_intent_notification_conversation), false)){
                     //Was the Bundle received from Main Activity spurred by a conversation request notification?
                     //load the chats container fragment
-                    ChatsContainerFragment ccf = new ChatsContainerFragment();
+                    mCurrentChatsContainerInstance = new ChatsContainerFragment();
                     Bundle args = new Bundle();
                     args.putSerializable(getString(R.string.keys_intent_jwt), mJwToken);
                     args.putSerializable(getString(R.string.key_credentials), mCreds);
-                    ccf.setArguments(args);
-                    loadFragment(ccf);
+                    mCurrentChatsContainerInstance.setArguments(args);
+                    loadFragment(mCurrentChatsContainerInstance);
 
                 } else {
                     loadHomeLandingPage();
@@ -239,14 +243,11 @@ public class HomeActivity extends AppCompatActivity
      */
     private void loadHomeLandingPage(){
         Fragment frag = new LandingPage();
-        CurrentWeatherFragment cwf = new CurrentWeatherFragment();
         Bundle args = new Bundle();
         args.putSerializable(getString(R.string.key_credentials)
                 , mCreds);
         args.putSerializable(getString(R.string.keys_intent_jwt)
                 , mJwToken);
-
-
         frag.setArguments(args);
 
         // update homeactivity information with the latest
@@ -256,16 +257,48 @@ public class HomeActivity extends AppCompatActivity
 //        loadFragment(successFragment);
         getSupportFragmentManager().popBackStack(null, FragmentManager.POP_BACK_STACK_INCLUSIVE);
 
-        //TODO: use transaction to populate the dynamic home landing page
-        FragmentTransaction transaction = getSupportFragmentManager()
-                .beginTransaction()
-                .replace(R.id.fragment_container, frag);
-        transaction.replace(R.id.framelayout_homelanding_weather, cwf);
+        // populate framelayouts
+        mCurrentChatsContainerInstance = new ChatsContainerFragment();
+        Bundle args2 = new Bundle();
+        args2.putSerializable(getString(R.string.key_credentials)
+                , mCreds);
+        args2.putSerializable(getString(R.string.keys_intent_jwt)
+                , mJwToken);
+        args2.putSerializable(getString(R.string.key_flag_compact_mode), true);
+        mCurrentChatsContainerInstance.setArguments(args2);
 
+        mCurrentConnectionsContainerInstance = new ConnectionsContainerFragment();
+        Bundle args3 = new Bundle();
+        args3.putSerializable(getString(R.string.key_credentials)
+                , mCreds);
+        args3.putSerializable(getString(R.string.keys_intent_jwt)
+                , mJwToken);
+        args3.putSerializable(getString(R.string.key_flag_compact_mode), true);
+        mCurrentConnectionsContainerInstance.setArguments(args3);
+
+        CurrentWeatherFragment cwf = new CurrentWeatherFragment();
+
+
+        getSupportFragmentManager()
+                .beginTransaction()
+                .replace(R.id.fragment_container, frag, "1")
+                .replace(R.id.framelayout_homelanding_weather, cwf, "2")
+                .replace(R.id.framelayout_homelanding_contactlist, mCurrentConnectionsContainerInstance, "3")
+                .replace(R.id.framelayout_homelanding_chatlist, mCurrentChatsContainerInstance, "4")
+                .commit();
+
+
+        // make sure wait fragment is removed
+        if (getSupportFragmentManager().findFragmentByTag("WAIT") != null) {
+            getSupportFragmentManager()
+                    .beginTransaction()
+                    .remove(getSupportFragmentManager().findFragmentByTag("WAIT"))
+                    .commit();
+        }
         //transaction.replace(R.id.framelayout_homelanding_email, successFragment);
         //transaction.add(R.id.framelayout_homelanding_chatlist, chats);
 
-        transaction.commit();
+
     }
 
 //    @Override
@@ -356,26 +389,26 @@ public class HomeActivity extends AppCompatActivity
                     badgeDrawable.setEnabled(false);
                 }
                 mContactCounterView.setText("");
-                Fragment frag = new ConnectionsContainerFragment();
+                mCurrentConnectionsContainerInstance = new ConnectionsContainerFragment();
                 Bundle args = new Bundle();
                 args.putSerializable(getString(R.string.keys_intent_jwt), mJwToken);
                 args.putSerializable(getString(R.string.key_credentials), mCreds);
 //                args.putStringArrayList(getString(R.string.keys_intent_chatId), unreadChatList);
-                frag.setArguments(args);
-                loadFragment(frag);
+                mCurrentConnectionsContainerInstance.setArguments(args);
+                loadFragment(mCurrentConnectionsContainerInstance);
                 break;
 
             case R.id.nav_chat:
                 mChatCounterView.setText("");
+                mCurrentChatsContainerInstance = new ChatsContainerFragment();
                 if (!mHasConnectionNotifications){ //make sure there are no other pending notifications
                     badgeDrawable.setEnabled(false);
                 }
-                frag = new ChatsContainerFragment();
                 args = new Bundle();
                 args.putSerializable(getString(R.string.keys_intent_jwt), mJwToken);
                 args.putSerializable(getString(R.string.key_credentials), mCreds);
-                frag.setArguments(args);
-                loadFragment(frag);
+                mCurrentChatsContainerInstance.setArguments(args);
+                loadFragment(mCurrentChatsContainerInstance);
                 break;
 
             case R.id.nav_weather:
@@ -724,6 +757,11 @@ public class HomeActivity extends AppCompatActivity
 
     }
 
+    @Override
+    public void reloadLandingPage() {
+        loadHomeLandingPage();
+    }
+
     /**
      * This method will be called when the user clicks on a weather location to load from
      * a saved weather location list.
@@ -850,6 +888,7 @@ public class HomeActivity extends AppCompatActivity
                     mHasConnectionNotifications = true;
 
                 }
+                mCurrentConnectionsContainerInstance.callWebServiceforConnections();
                 Log.e("Notification Receiver", "Received message type: conn req");
             } else if(typeOfMessage.equals("convo req")){ //if received broadcast from conversation request.
                 if (findViewById(R.id.chats_container) == null){ //case where user is NOT in chats fragment //fragment_chat
@@ -857,6 +896,8 @@ public class HomeActivity extends AppCompatActivity
                     mChatCounterView.setText("NEW");
 
                 }
+                mCurrentChatsContainerInstance.callWebServiceforChats();
+                Log.e("RELOAD", "RELOADING CHATS FROM IN APP NOTIFICATION");
                 Log.e("Notification Receiver", "Received message type: convo req");
             }
 
