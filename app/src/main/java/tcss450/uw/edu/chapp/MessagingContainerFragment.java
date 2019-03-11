@@ -329,7 +329,7 @@ public class MessagingContainerFragment extends Fragment {
     }
 
     public interface OnChatMessageFragmentInteractionListener {
-        void incrementUnreadChatNotifications(String chatId);
+        void unreadMessageReceivedinOtherChatNotifications(String chatId);
        // void updateViewedChatroom(String chatId);
     }
 
@@ -339,7 +339,7 @@ public class MessagingContainerFragment extends Fragment {
     private class PushMessageReceiver extends BroadcastReceiver {
         @Override
         public void onReceive(Context context, Intent intent) {
-            Log.e("CHAT FRAGMENT RECEIVER", intent.getStringExtra("MESSAGE"));
+            Log.e("MESSAGE FRAGMENT RECEIVER", intent.getStringExtra("MESSAGE"));
             if(intent.hasExtra("SENDER")
                     && intent.hasExtra("MESSAGE")
                     && intent.hasExtra("CHATID")) {
@@ -350,14 +350,15 @@ public class MessagingContainerFragment extends Fragment {
 
                 //Checks if the current chat that's open matches the one
                 //incoming with the notification
+                //and that the sender wasn't self
                 if (intent.getStringExtra("CHATID").equals(mChat.getId())
-                    && mMessageFragment != null) {
+                    && mMessageFragment != null && !sender.equals(mCreds.getUsername())) {
+                    Log.e("MESSAGE FRAGMENT RECEIVER", "Calling webservice for messages");
                     callWebServiceforMessages(); //get new list of messages instead of show notificaiton inapp
 
                 } else {    //msg was received from a user in a separate chat than one being viewed
-
-                    //update home fragments list of notifications to be viewed.
-                    mListener.incrementUnreadChatNotifications(chatId);
+                    Log.e("MESSAGE FRAGMENT RECEIVER", "Calling Home Activity to update badge");
+                    mListener.unreadMessageReceivedinOtherChatNotifications(chatId);
 
                 }
 //                Snackbar snack = Snackbar.make(getActivity().findViewById(R.id.chat_messages_container), "MESSAGE", Snackbar.LENGTH_LONG);

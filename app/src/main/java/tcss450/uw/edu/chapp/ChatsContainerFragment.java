@@ -1,7 +1,10 @@
 package tcss450.uw.edu.chapp;
 
 
+import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -26,6 +29,7 @@ import java.util.Objects;
 import tcss450.uw.edu.chapp.chat.Chat;
 import tcss450.uw.edu.chapp.connections.Connection;
 import tcss450.uw.edu.chapp.model.Credentials;
+import tcss450.uw.edu.chapp.utils.PushReceiver;
 import tcss450.uw.edu.chapp.utils.SendPostAsyncTask;
 
 
@@ -42,6 +46,7 @@ public class ChatsContainerFragment extends Fragment implements PropertyChangeLi
     private Credentials mCreds;
     private String mJwToken;
     private OnChatInformationFetchListener mListener;
+    private PushMessageReceiver mPushMessageReciever;
 
     public ChatsContainerFragment() {
         // Required empty public constructor
@@ -51,10 +56,11 @@ public class ChatsContainerFragment extends Fragment implements PropertyChangeLi
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setHasOptionsMenu(true);
+        mPushMessageReciever = new PushMessageReceiver();
 
         if (getArguments() != null) {
-            mCreds = (Credentials)getArguments().getSerializable(getString(R.string.key_credentials));
-            mJwToken = (String)getArguments().getSerializable(getString(R.string.keys_intent_jwt));
+            mCreds = (Credentials) getArguments().getSerializable(getString(R.string.key_credentials));
+            mJwToken = (String) getArguments().getSerializable(getString(R.string.keys_intent_jwt));
         } else {
             mChats = new ArrayList<>();
         }
@@ -62,24 +68,25 @@ public class ChatsContainerFragment extends Fragment implements PropertyChangeLi
 
     private void callWebServiceforChats() {
         Uri uri = new Uri.Builder()
-            .scheme("https")
-            .appendPath(getString(R.string.ep_base_url))
-            .appendPath(getString(R.string.ep_chats_base))
-            .appendPath(getString(R.string.ep_chats_get_chats))
-            .build();
+                .scheme("https")
+                .appendPath(getString(R.string.ep_base_url))
+                .appendPath(getString(R.string.ep_chats_base))
+                .appendPath(getString(R.string.ep_chats_get_chats))
+                .build();
         // Pass the credentials
         JSONObject msg = mCreds.asJSONObject();
         mListener.onWaitFragmentInteractionShow();
         new SendPostAsyncTask.Builder(uri.toString(), msg)
-            .onPostExecute(this::handleChatsPostOnPostExecute)
-            .onCancelled(error -> Log.e("ConnectionsContainerFragment", error))
-            .addHeaderField("authorization", mJwToken) //add the JWT as a header
-            .build().execute();
+                .onPostExecute(this::handleChatsPostOnPostExecute)
+                .onCancelled(error -> Log.e("ConnectionsContainerFragment", error))
+                .addHeaderField("authorization", mJwToken) //add the JWT as a header
+                .build().execute();
     }
 
     /**
      * Post call for retrieving the list of Chats from the Database.
      * Calls chat fragment to load and sends in the chatId to load into.
+     *
      * @param result the chatId and name of the chats from the result to display in UI
      */
     private void handleChatsPostOnPostExecute(final String result) {
@@ -91,7 +98,7 @@ public class ChatsContainerFragment extends Fragment implements PropertyChangeLi
                 JSONArray data = root.getJSONArray(
                         getString(R.string.keys_json_chats_chatlist));
                 ArrayList<Chat> chats = new ArrayList<>();
-                for(int i = 0; i < data.length(); i++) {
+                for (int i = 0; i < data.length(); i++) {
                     JSONObject jsonChat = data.getJSONObject(i);
 
                     String chatid = jsonChat.getString(getString(R.string.keys_json_chats_chatid));
@@ -111,7 +118,7 @@ public class ChatsContainerFragment extends Fragment implements PropertyChangeLi
                     JSONArray lastSenders = jsonChat.getJSONArray(getString(R.string.keys_json_chats_last_senders));
                     // iterate to find the greatest primary key
                     int maxPrimaryKey = 0;
-                    if (!lastSenders.getJSONObject(lastSenders.length()-1).isNull("f2")) {
+                    if (!lastSenders.getJSONObject(lastSenders.length() - 1).isNull("f2")) {
                         hasMessages = true;
                         // iterate once to get the max
                         for (int j = 0; j < lastSenders.length(); j++) {
@@ -262,7 +269,7 @@ public class ChatsContainerFragment extends Fragment implements PropertyChangeLi
                 JSONArray data = root.getJSONArray(
                         getString(R.string.keys_json_connections));
                 List<Connection> connections = new ArrayList<>();
-                for(int i = 0; i < data.length(); i++) {
+                for (int i = 0; i < data.length(); i++) {
                     JSONObject jsonChat = data.getJSONObject(i);
                     connections.add(new Connection.Builder(
                             jsonChat.getString(getString(R.string.keys_json_connections_from)),
@@ -322,7 +329,13 @@ public class ChatsContainerFragment extends Fragment implements PropertyChangeLi
     @Override
     public void onResume() {
         super.onResume();
+        if (mPushMessageReciever == null) {
+            mPushMessageReciever = new PushMessageReceiver();
+        }
+        IntentFilter iFilter = new IntentFilter(PushReceiver.RECEIVED_NEW_MESSAGE);
+        getActivity().registerReceiver(mPushMessageReciever, iFilter);
         callWebServiceforChats();
+
     }
 
     @Override
@@ -330,6 +343,15 @@ public class ChatsContainerFragment extends Fragment implements PropertyChangeLi
         super.onDetach();
         mListener = null;
     }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        if (mPushMessageReciever != null){
+            getActivity().unregisterReceiver(mPushMessageReciever);
+        }
+    }
+
 
     @Override
     public void propertyChange(PropertyChangeEvent evt) {
@@ -340,7 +362,30 @@ public class ChatsContainerFragment extends Fragment implements PropertyChangeLi
 
     interface OnChatInformationFetchListener {
         void updateChats(ArrayList<Chat> chats);
+
         void onWaitFragmentInteractionHide();
+
         void onWaitFragmentInteractionShow();
+    }
+
+    /**
+     * A BroadcastReceiver that listens for messages sent from PushReceiver while
+     * the Home Activity is open (i.e. in App Notifications)
+     */
+    private class PushMessageReceiver extends BroadcastReceiver {
+
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            Log.e("Notification Receiver", "Received broadcast in chat fragment activity");
+
+            String typeOfMessage = intent.getStringExtra("type");
+            String sender = intent.getStringExtra("sender");
+
+
+            if(typeOfMessage.equals("msg")) { //if received broadcast from message notification.
+                Log.e("Notification Receiver", "Received message type: msg");
+                callWebServiceforChats();
+            }
+        }
     }
 }
