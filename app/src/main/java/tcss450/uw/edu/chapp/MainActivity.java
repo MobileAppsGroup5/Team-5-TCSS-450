@@ -36,7 +36,7 @@ public class MainActivity extends AppCompatActivity implements LoginFragment.OnL
                     mNotifChatId = getIntent().getExtras().getString("chatid");
                 } else if (mLoadFromConnectionRequest = getIntent().getExtras().getString("type").equals("conn req")){
                     //get keys sender, message, to
-                } else if (mLoadFromConnectionRequest = getIntent().getExtras().getString("type").equals("conn req")){
+                } else if (mLoadFromConversationRequest = getIntent().getExtras().getString("type").equals("convo req")){
                     //get sender, message, to, chatName
                 }
 

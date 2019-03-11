@@ -118,7 +118,7 @@ public class MyChatsRecyclerViewAdapter extends RecyclerView.Adapter<MyChatsRecy
             // unread message icon only show up when chat room accepted
             TextView unreadView =  (TextView) holder.mView.findViewById(R.id.list_item_chat_unread);
             if (holder.mItem.getLastMessageUsername() != null) {
-                if (holder.mItem.getLastMessageUsername() != mCreds.getUsername() && !holder.mItem.isHasBeenRead()) {
+                if (!holder.mItem.getLastMessageUsername().equals(mCreds.getUsername()) && !holder.mItem.isHasBeenRead()) {
                     //check last sent message not from self and also has not been read
                     //update unread view
                     unreadView.setText("UNREAD");

@@ -52,6 +52,8 @@
     <string name="weather_day_fragment_tag">DAY TAG</string>
     <string name="weather_current_fragment_tag">CURRENT TAG</string>
     <string name="title_activity_maps">Map</string>
+    <!-- regex that will get each field of a weatherLocationItem from the String set in the shared preferences -->
+    <string name="weather_prefs_location_regex">.*?city:(.*?),lat:(.*?),lon:(.*)</string>
 
 
     <!-- Forgot Password Strings -->

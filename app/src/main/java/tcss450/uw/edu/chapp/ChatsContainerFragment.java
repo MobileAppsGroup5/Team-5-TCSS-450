@@ -72,24 +72,25 @@ public class ChatsContainerFragment extends Fragment implements PropertyChangeLi
 
     public void callWebServiceforChats() {
         Uri uri = new Uri.Builder()
-            .scheme("https")
-            .appendPath(getString(R.string.ep_base_url))
-            .appendPath(getString(R.string.ep_chats_base))
-            .appendPath(getString(R.string.ep_chats_get_chats))
-            .build();
+                .scheme("https")
+                .appendPath(getString(R.string.ep_base_url))
+                .appendPath(getString(R.string.ep_chats_base))
+                .appendPath(getString(R.string.ep_chats_get_chats))
+                .build();
         // Pass the credentials
         JSONObject msg = mCreds.asJSONObject();
         mListener.onWaitFragmentInteractionShow();
         new SendPostAsyncTask.Builder(uri.toString(), msg)
-            .onPostExecute(this::handleChatsPostOnPostExecute)
-            .onCancelled(error -> Log.e("ConnectionsContainerFragment", error))
-            .addHeaderField("authorization", mJwToken) //add the JWT as a header
-            .build().execute();
+                .onPostExecute(this::handleChatsPostOnPostExecute)
+                .onCancelled(error -> Log.e("ConnectionsContainerFragment", error))
+                .addHeaderField("authorization", mJwToken) //add the JWT as a header
+                .build().execute();
     }
 
     /**
      * Post call for retrieving the list of Chats from the Database.
      * Calls chat fragment to load and sends in the chatId to load into.
+     *
      * @param result the chatId and name of the chats from the result to display in UI
      */
     private void handleChatsPostOnPostExecute(final String result) {
@@ -101,7 +102,7 @@ public class ChatsContainerFragment extends Fragment implements PropertyChangeLi
                 JSONArray data = root.getJSONArray(
                         getString(R.string.keys_json_chats_chatlist));
                 ArrayList<Chat> chats = new ArrayList<>();
-                for(int i = 0; i < data.length(); i++) {
+                for (int i = 0; i < data.length(); i++) {
                     JSONObject jsonChat = data.getJSONObject(i);
 
                     String chatid = jsonChat.getString(getString(R.string.keys_json_chats_chatid));
@@ -121,7 +122,7 @@ public class ChatsContainerFragment extends Fragment implements PropertyChangeLi
                     JSONArray lastSenders = jsonChat.getJSONArray(getString(R.string.keys_json_chats_last_senders));
                     // iterate to find the greatest primary key
                     int maxPrimaryKey = 0;
-                    if (!lastSenders.getJSONObject(lastSenders.length()-1).isNull("f2")) {
+                    if (!lastSenders.getJSONObject(lastSenders.length() - 1).isNull("f2")) {
                         hasMessages = true;
                         // iterate once to get the max
                         for (int j = 0; j < lastSenders.length(); j++) {
@@ -274,7 +275,7 @@ public class ChatsContainerFragment extends Fragment implements PropertyChangeLi
                 JSONArray data = root.getJSONArray(
                         getString(R.string.keys_json_connections));
                 List<Connection> connections = new ArrayList<>();
-                for(int i = 0; i < data.length(); i++) {
+                for (int i = 0; i < data.length(); i++) {
                     JSONObject jsonChat = data.getJSONObject(i);
                     connections.add(new Connection.Builder(
                             jsonChat.getString(getString(R.string.keys_json_connections_from)),
@@ -340,6 +341,7 @@ public class ChatsContainerFragment extends Fragment implements PropertyChangeLi
 //        IntentFilter iFilter = new IntentFilter(PushReceiver.RECEIVED_NEW_MESSAGE);
 //        getActivity().registerReceiver(mPushMessageReciever, iFilter);
         callWebServiceforChats();
+
     }
 
     @Override
@@ -357,6 +359,15 @@ public class ChatsContainerFragment extends Fragment implements PropertyChangeLi
     }
 
     @Override
+    public void onPause() {
+        super.onPause();
+        if (mPushMessageReciever != null){
+            getActivity().unregisterReceiver(mPushMessageReciever);
+        }
+    }
+
+
+    @Override
     public void propertyChange(PropertyChangeEvent evt) {
         if (PROPERTY_REFRESH_CHATS.equals(evt.getPropertyName())) {
             callWebServiceforChats();
@@ -365,7 +376,9 @@ public class ChatsContainerFragment extends Fragment implements PropertyChangeLi
 
     interface OnChatInformationFetchListener {
         void updateChats(ArrayList<Chat> chats);
+
         void onWaitFragmentInteractionHide();
+
         void onWaitFragmentInteractionShow();
     }
 
@@ -377,18 +390,16 @@ public class ChatsContainerFragment extends Fragment implements PropertyChangeLi
 
         @Override
         public void onReceive(Context context, Intent intent) {
+            Log.e("Notification Receiver", "Received broadcast in chat fragment activity");
 
             String typeOfMessage = intent.getStringExtra("type");
+            String sender = intent.getStringExtra("sender");
 
 
-            if(typeOfMessage.equals("convo req")){ //if received broadcast from connection request.
-                //don't update badge on navigation drawer,
-                //just update the list of requests by calling web service
+            if(typeOfMessage.equals("msg")) { //if received broadcast from message notification.
+                Log.e("Notification Receiver", "Received message type: msg");
                 callWebServiceforChats();
-                Log.e("Notification Receiver", "Received message type: conn req");
             }
-
-
         }
     }
 }

@@ -44,7 +44,6 @@ public class ConnectionsContainerFragment extends Fragment implements PropertyCh
     private boolean mCompactMode = false;
     private PushMessageReceiver mPushMessageReciever;
 
-
     public ConnectionsContainerFragment() {
         // Required empty public constructor
     }
@@ -263,6 +262,16 @@ public class ConnectionsContainerFragment extends Fragment implements PropertyCh
     public void onDetach() {
         super.onDetach();
         mListener = null;
+        if (mPushMessageReciever != null){
+            getActivity().unregisterReceiver(mPushMessageReciever);
+        }
+    }
+    @Override
+    public void onPause() {
+        super.onPause();
+        if (mPushMessageReciever != null){
+            getActivity().unregisterReceiver(mPushMessageReciever);
+        }
     }
 
     @Override

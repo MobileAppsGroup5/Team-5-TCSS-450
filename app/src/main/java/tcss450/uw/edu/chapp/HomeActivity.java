@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.graphics.Typeface;
+import android.location.Location;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -44,6 +45,8 @@ import tcss450.uw.edu.chapp.utils.PushReceiver;
 import tcss450.uw.edu.chapp.utils.SendPostAsyncTask;
 import tcss450.uw.edu.chapp.weather.CurrentWeatherFragment;
 import tcss450.uw.edu.chapp.weather.WeatherFragment;
+import tcss450.uw.edu.chapp.weather.WeatherLocationContent;
+import tcss450.uw.edu.chapp.weather.WeatherLocationFragment;
 
 /**
  *
@@ -64,6 +67,7 @@ public class HomeActivity extends AppCompatActivity
         ConnectionsContainerFragment.OnConnectionInformationFetchListener,
         ChatsContainerFragment.OnChatInformationFetchListener,
         WeatherFragment.OnFragmentInteractionListener,
+        WeatherLocationFragment.OnListFragmentInteractionListener,
         CurrentWeatherFragment.OnCurrentWeatherFragmentInteractionListener,
         LandingPage.OnLandingPageReturnListener {
 
@@ -99,7 +103,8 @@ public class HomeActivity extends AppCompatActivity
         // Initialize drawer icon and it's ActionBarDrawerToggle object to
         // manage the on and off red dot for notifications.
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
-        ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(this, drawer,toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
+        ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(this, drawer,toolbar,
+                R.string.navigation_drawer_open, R.string.navigation_drawer_close);
         badgeDrawable = new BadgeDrawerIconDrawable(getSupportActionBar().getThemedContext());
         toggle.setDrawerArrowDrawable(badgeDrawable);
         drawer.addDrawerListener(toggle);
@@ -107,10 +112,8 @@ public class HomeActivity extends AppCompatActivity
 
 
         //initialize the navigation drawer counter badges
-        mChatCounterView = (TextView) MenuItemCompat.getActionView(navigationView.getMenu().
-                findItem(R.id.nav_chat));
-        mContactCounterView = (TextView) MenuItemCompat.getActionView(navigationView.getMenu().
-                findItem(R.id.nav_connections));
+        mChatCounterView = (TextView) MenuItemCompat.getActionView(navigationView.getMenu().findItem(R.id.nav_chat));
+        mContactCounterView = (TextView) MenuItemCompat.getActionView(navigationView.getMenu().findItem(R.id.nav_connections));
         initializeCountDrawer(mChatCounterView);
         initializeCountDrawer(mContactCounterView);
 
@@ -330,7 +333,7 @@ public class HomeActivity extends AppCompatActivity
         if (mConnections!= null) {
             for (Connection contact : mConnections) {
                 //usernameB is the recipient of the request
-                if (contact.getVerified() == 0 && contact.getUsernameB() == mCreds.getUsername()) {
+                if (contact.getVerified() == 0 && contact.getUsernameB().equals(mCreds.getUsername())) {
                     //if the user is the recipient of the request and it hasn't been accepted yet
                     //show notification icons
                     mHasConnectionNotifications = true;
@@ -342,7 +345,7 @@ public class HomeActivity extends AppCompatActivity
             for (Chat chat : mChats) {
                 //check if last message in chat was sent by another user
                 //and if that last message has been not been read
-                if (chat.getLastMessageUsername() != mCreds.getUsername() && !chat.isHasBeenRead()) {
+                if (!chat.getLastMessageUsername().equals(mCreds.getUsername()) && !chat.isHasBeenRead()) {
                     //unread message
                     mHasMessageNotifications = true;
                     mContactCounterView.setText("NEW");
@@ -384,11 +387,10 @@ public class HomeActivity extends AppCompatActivity
 
             case R.id.nav_connections:
 
+                if (!mHasMessageNotifications){ //make sure there are no other pending notifications
+                    badgeDrawable.setEnabled(false);
+                }
                 mContactCounterView.setText("");
-                badgeDrawable.setEnabled(false);
-//                if (!mHasNotifications) {
-//                    badgeDrawable.setEnabled(false);
-//                }
                 mCurrentConnectionsContainerInstance = new ConnectionsContainerFragment();
                 Bundle args = new Bundle();
                 args.putSerializable(getString(R.string.keys_intent_jwt), mJwToken);
@@ -400,8 +402,10 @@ public class HomeActivity extends AppCompatActivity
 
             case R.id.nav_chat:
                 mChatCounterView.setText("");
-                badgeDrawable.setEnabled(false);
                 mCurrentChatsContainerInstance = new ChatsContainerFragment();
+                if (!mHasConnectionNotifications){ //make sure there are no other pending notifications
+                    badgeDrawable.setEnabled(false);
+                }
                 args = new Bundle();
                 args.putSerializable(getString(R.string.keys_intent_jwt), mJwToken);
                 args.putSerializable(getString(R.string.key_credentials), mCreds);
@@ -760,6 +764,37 @@ public class HomeActivity extends AppCompatActivity
         loadHomeLandingPage();
     }
 
+    /**
+     * This method will be called when the user clicks on a weather location to load from
+     * a saved weather location list.
+     * @param item
+     */
+    @Override
+    public void onListFragmentInteraction(WeatherLocationContent.WeatherLocationItem item) {
+        WeatherFragment wf = new WeatherFragment();
+        Location location = new Location("");
+        location.setLatitude(item.lat);
+        location.setLongitude(item.lon);
+        //add location from MapActivity as fragment argument
+        Bundle args = new Bundle();
+        args.putParcelable(getString(R.string.keys_weather_location_load), location);
+
+        args.putSerializable(getString(R.string.key_credentials), mCreds);
+        args.putSerializable(getString(R.string.keys_intent_jwt), mJwToken);
+        wf.setArguments(args);
+        //load the weather fragment
+        loadFragment(wf);
+    }
+
+    /**
+     * method that will load the WeatherLocationFragment.
+     * called from WeatherFragment load button.
+     */
+    @Override
+    public void onLoadWeatherClicked() {
+        loadFragment(new WeatherLocationFragment());
+    }
+
 //    /**
 //     * From the MessagingContainerFragment interface that removes a viewed chatid from the counter
 //     * of unread chat ids
@@ -822,13 +857,13 @@ public class HomeActivity extends AppCompatActivity
 
             if(typeOfMessage.equals("msg")){ //if received broadcast from message notification.
                 Log.e("Notification Receiver", "Received message type: msg");
-
-                if (findViewById(R.id.fragment_chats_container) == null){ //case where user is NOT in chat fragment
+                callWebServiceforChats(); //update chat list
+                if (findViewById(R.id.chats_container) == null ){ //case where user is NOT in chat list fragment
                     Log.e("Notification Receiver", "chat fragment not open");
                     String id = intent.getStringExtra("chatid");
 
                     for (Chat chats : mChats){
-                        if (id.equals(chats.getId())){ //check if the message is in a chat room that the user is in
+                        if (id.equals(chats.getId()) && !chats.getLastMessageUsername().equals(mCreds.getUsername())){ //check if the message is in a chat room that the user is in
                             List<String> users = chats.getUsersInChat();
                             List<Boolean> flags = chats.getAcceptedFlags();
 
