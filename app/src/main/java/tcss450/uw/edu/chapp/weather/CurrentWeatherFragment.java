@@ -327,15 +327,19 @@ public class CurrentWeatherFragment extends Fragment {
                     setIcon(weather.getString("icon"));
 
                     mListener.onWaitFragmentInteractionHide();
+                    Log.e("WEATHERFRAGMENT", "SUCCESSFUL");
 
                 } else {
                     Log.e("WEATHER", "weather result does not have count");
+                    mListener.onWaitFragmentInteractionHide();
                 }
             } else {
                 Log.e("WEATHER", "weather result does not have weather data");
+                mListener.onWaitFragmentInteractionHide();
             }
         } catch(JSONException e) {
             Log.e("WEATHER", e.toString());
+            mListener.onWaitFragmentInteractionHide();
         }
     }
 

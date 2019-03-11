@@ -70,7 +70,7 @@ public class ChatsContainerFragment extends Fragment implements PropertyChangeLi
         }
     }
 
-    private void callWebServiceforChats() {
+    public void callWebServiceforChats() {
         Uri uri = new Uri.Builder()
             .scheme("https")
             .appendPath(getString(R.string.ep_base_url))
@@ -197,8 +197,9 @@ public class ChatsContainerFragment extends Fragment implements PropertyChangeLi
                         .replace(R.id.chats_container, frag)
                         .commit();
 
-                mListener.onWaitFragmentInteractionHide();
                 frag.addPropertyChangeListener(this);
+                mListener.onWaitFragmentInteractionHide();
+                Log.e("CHATSCONTAINER", "SUCCESSFUL");
             } else {
                 Log.e("ERROR!", "No data array" + root.toString());
                 //notify user
@@ -333,20 +334,20 @@ public class ChatsContainerFragment extends Fragment implements PropertyChangeLi
     @Override
     public void onResume() {
         super.onResume();
-        if (mPushMessageReciever == null) {
-            mPushMessageReciever = new PushMessageReceiver();
-        }
-        IntentFilter iFilter = new IntentFilter(PushReceiver.RECEIVED_NEW_MESSAGE);
-        getActivity().registerReceiver(mPushMessageReciever, iFilter);
+//        if (mPushMessageReciever == null) {
+//            mPushMessageReciever = new PushMessageReceiver();
+//        }
+//        IntentFilter iFilter = new IntentFilter(PushReceiver.RECEIVED_NEW_MESSAGE);
+//        getActivity().registerReceiver(mPushMessageReciever, iFilter);
         callWebServiceforChats();
     }
 
     @Override
     public void onPause() {
         super.onPause();
-        if (mPushMessageReciever != null){
-            getActivity().unregisterReceiver(mPushMessageReciever);
-        }
+//        if (mPushMessageReciever != null){
+//            getActivity().unregisterReceiver(mPushMessageReciever);
+//        }
     }
 
     @Override

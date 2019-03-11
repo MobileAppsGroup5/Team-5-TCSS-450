@@ -64,7 +64,8 @@ public class HomeActivity extends AppCompatActivity
         ConnectionsContainerFragment.OnConnectionInformationFetchListener,
         ChatsContainerFragment.OnChatInformationFetchListener,
         WeatherFragment.OnFragmentInteractionListener,
-        CurrentWeatherFragment.OnCurrentWeatherFragmentInteractionListener {
+        CurrentWeatherFragment.OnCurrentWeatherFragmentInteractionListener,
+        LandingPage.OnLandingPageReturnListener {
 
     /** CREDENTIAL CONSTANTS */
     private Credentials mCreds;
@@ -78,6 +79,8 @@ public class HomeActivity extends AppCompatActivity
     private boolean mHasConnectionNotifications = false;
     private boolean mHasMessageNotifications = false;
     private ArrayList<Connection> mConnections;
+    private ChatsContainerFragment mCurrentChatsContainerInstance;
+    private ConnectionsContainerFragment mCurrentConnectionsContainerInstance;
 
 
 
@@ -165,22 +168,22 @@ public class HomeActivity extends AppCompatActivity
                 } else if (getIntent().getBooleanExtra(getString(R.string.keys_intent_notification_connection), false)){
                     //Was the Bundle received from Main Activity spurred by a connection notification?
                     //load the connections fragment
-                    ConnectionsContainerFragment ctf = new ConnectionsContainerFragment();
+                    mCurrentConnectionsContainerInstance = new ConnectionsContainerFragment();
                     Bundle args = new Bundle();
                     args.putSerializable(getString(R.string.keys_intent_jwt), mJwToken);
                     args.putSerializable(getString(R.string.key_credentials), mCreds);
-                    ctf.setArguments(args);
-                    loadFragment(ctf);
+                    mCurrentConnectionsContainerInstance.setArguments(args);
+                    loadFragment(mCurrentConnectionsContainerInstance);
 
                 } else if (getIntent().getBooleanExtra(getString(R.string.keys_intent_notification_conversation), false)){
                     //Was the Bundle received from Main Activity spurred by a conversation request notification?
                     //load the chats container fragment
-                    ChatsContainerFragment ccf = new ChatsContainerFragment();
+                    mCurrentChatsContainerInstance = new ChatsContainerFragment();
                     Bundle args = new Bundle();
                     args.putSerializable(getString(R.string.keys_intent_jwt), mJwToken);
                     args.putSerializable(getString(R.string.key_credentials), mCreds);
-                    ccf.setArguments(args);
-                    loadFragment(ccf);
+                    mCurrentChatsContainerInstance.setArguments(args);
+                    loadFragment(mCurrentChatsContainerInstance);
 
                 } else {
                     loadHomeLandingPage();
@@ -257,32 +260,40 @@ public class HomeActivity extends AppCompatActivity
                 .commit();
 
         // populate framelayouts
-        ChatsContainerFragment cchatf = new ChatsContainerFragment();
+        mCurrentChatsContainerInstance = new ChatsContainerFragment();
         Bundle args2 = new Bundle();
         args2.putSerializable(getString(R.string.key_credentials)
                 , mCreds);
         args2.putSerializable(getString(R.string.keys_intent_jwt)
                 , mJwToken);
         args2.putSerializable(getString(R.string.key_flag_compact_mode), true);
-        cchatf.setArguments(args2);
+        mCurrentChatsContainerInstance.setArguments(args2);
 
-        ConnectionsContainerFragment ccontactf = new ConnectionsContainerFragment();
+        mCurrentConnectionsContainerInstance = new ConnectionsContainerFragment();
         Bundle args3 = new Bundle();
         args3.putSerializable(getString(R.string.key_credentials)
                 , mCreds);
         args3.putSerializable(getString(R.string.keys_intent_jwt)
                 , mJwToken);
         args3.putSerializable(getString(R.string.key_flag_compact_mode), true);
-        ccontactf.setArguments(args3);
+        mCurrentConnectionsContainerInstance.setArguments(args3);
 
         CurrentWeatherFragment cwf = new CurrentWeatherFragment();
 
         getSupportFragmentManager()
                 .beginTransaction()
                 .replace(R.id.framelayout_homelanding_weather, cwf)
-                .replace(R.id.framelayout_homelanding_contactlist, ccontactf)
-                .replace(R.id.framelayout_homelanding_chatlist, cchatf)
+                .replace(R.id.framelayout_homelanding_contactlist, mCurrentConnectionsContainerInstance)
+                .replace(R.id.framelayout_homelanding_chatlist, mCurrentChatsContainerInstance)
                 .commit();
+
+        // make sure wait fragment is removed
+        if (getSupportFragmentManager().findFragmentByTag("WAIT") != null) {
+            getSupportFragmentManager()
+                    .beginTransaction()
+                    .remove(getSupportFragmentManager().findFragmentByTag("WAIT"))
+                    .commit();
+        }
         //transaction.replace(R.id.framelayout_homelanding_email, successFragment);
         //transaction.add(R.id.framelayout_homelanding_chatlist, chats);
 
@@ -378,24 +389,24 @@ public class HomeActivity extends AppCompatActivity
 //                if (!mHasNotifications) {
 //                    badgeDrawable.setEnabled(false);
 //                }
-                Fragment frag = new ConnectionsContainerFragment();
+                mCurrentConnectionsContainerInstance = new ConnectionsContainerFragment();
                 Bundle args = new Bundle();
                 args.putSerializable(getString(R.string.keys_intent_jwt), mJwToken);
                 args.putSerializable(getString(R.string.key_credentials), mCreds);
 //                args.putStringArrayList(getString(R.string.keys_intent_chatId), unreadChatList);
-                frag.setArguments(args);
-                loadFragment(frag);
+                mCurrentConnectionsContainerInstance.setArguments(args);
+                loadFragment(mCurrentConnectionsContainerInstance);
                 break;
 
             case R.id.nav_chat:
                 mChatCounterView.setText("");
                 badgeDrawable.setEnabled(false);
-                frag = new ChatsContainerFragment();
+                mCurrentChatsContainerInstance = new ChatsContainerFragment();
                 args = new Bundle();
                 args.putSerializable(getString(R.string.keys_intent_jwt), mJwToken);
                 args.putSerializable(getString(R.string.key_credentials), mCreds);
-                frag.setArguments(args);
-                loadFragment(frag);
+                mCurrentChatsContainerInstance.setArguments(args);
+                loadFragment(mCurrentChatsContainerInstance);
                 break;
 
             case R.id.nav_weather:
@@ -744,6 +755,11 @@ public class HomeActivity extends AppCompatActivity
 
     }
 
+    @Override
+    public void reloadLandingPage() {
+        loadHomeLandingPage();
+    }
+
 //    /**
 //     * From the MessagingContainerFragment interface that removes a viewed chatid from the counter
 //     * of unread chat ids
@@ -839,6 +855,7 @@ public class HomeActivity extends AppCompatActivity
                     mHasConnectionNotifications = true;
 
                 }
+                mCurrentConnectionsContainerInstance.callWebServiceforConnections();
                 Log.e("Notification Receiver", "Received message type: conn req");
             } else if(typeOfMessage.equals("convo req")){ //if received broadcast from conversation request.
                 if (findViewById(R.id.chats_container) == null){ //case where user is NOT in chats fragment //fragment_chat
@@ -846,6 +863,8 @@ public class HomeActivity extends AppCompatActivity
                     mChatCounterView.setText("NEW");
 
                 }
+                mCurrentChatsContainerInstance.callWebServiceforChats();
+                Log.e("RELOAD", "RELOADING CHATS FROM IN APP NOTIFICATION");
                 Log.e("Notification Receiver", "Received message type: convo req");
             }
 

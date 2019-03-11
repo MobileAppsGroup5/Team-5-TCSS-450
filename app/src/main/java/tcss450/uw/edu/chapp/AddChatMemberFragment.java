@@ -69,11 +69,15 @@ public class AddChatMemberFragment extends Fragment implements AdapterView.OnIte
 
         // remove us
         while (mUsernameList.remove(mCreds.getUsername()));
+        Log.e("BEFORE TRIM", mUsernameList.toString());
 
         // remove people already in the chat
         mChat.getUsersInChat().forEach(username -> {
             while (mUsernameList.remove(username));
         });
+
+        Log.e("AFTER TRIM", mUsernameList.toString());
+
 
         ArrayAdapter<String> adapter = new ArrayAdapter<>(getActivity(),
                 android.R.layout.simple_dropdown_item_1line,
@@ -107,7 +111,8 @@ public class AddChatMemberFragment extends Fragment implements AdapterView.OnIte
         JSONObject msg = new JSONObject();
         try {
 //            Log.e("STUFF", )
-            msg.put("username", username);
+            msg.put("usernameTo", username);
+            msg.put("usernameFrom", mCreds.getUsername());
             msg.put("chatid", mChat.getId());
         } catch (JSONException e) {
             e.printStackTrace();

@@ -125,7 +125,12 @@ public class MyConnectionsRecyclerViewAdapter extends RecyclerView.Adapter<MyCon
         } else {
             if (holder.getItemViewType() == SENT) {
                 // display the username we sent to
-                holder.mUsernameView.setText(mValues.get(position).getUsernameB());
+                Log.e("VERIFIED", Integer.toString(mValues.get(position).getVerified()));
+            if (mValues.get(position).getVerified() == 1) {
+                    holder.mUsernameView.setText(mValues.get(position).getUsernameB());
+                } else {
+                    holder.mUsernameView.setText(mValues.get(position).getUsernameB() + "\n(not accepted)");
+                }
             } else {
                 // display the username that sent the connection to us
                 holder.mUsernameView.setText(mValues.get(position).getUsernameA());
@@ -147,7 +152,13 @@ public class MyConnectionsRecyclerViewAdapter extends RecyclerView.Adapter<MyCon
 
     private void handleDeclineCancelContact(View view) {
         View parent = (View) view.getParent();
-        String otherUsername = ((TextView)parent.findViewById(R.id.list_item_connection_name)).getText().toString();
+        String temp = ((TextView)parent.findViewById(R.id.list_item_connection_name)).getText().toString();
+        // trim if necessary
+        if (temp.endsWith("\n(not accepted)")) {
+            temp = temp.substring(0, temp.indexOf("\n(not accepted)"));
+            Log.e("TRIMMED", temp);
+        }
+        final String otherUsername = temp;
 
         // confirm with the user
         AlertDialog.Builder builder = new AlertDialog.Builder(mContext);

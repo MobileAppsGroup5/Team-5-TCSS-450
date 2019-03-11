@@ -1,6 +1,7 @@
 package tcss450.uw.edu.chapp;
 
 
+import android.content.Context;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
@@ -26,6 +27,8 @@ public class LandingPage extends Fragment {
 
     private Credentials mCreds;
     private String mJwToken;
+    private OnLandingPageReturnListener mListener;
+    private boolean mAlreadyLoaded;
 
     public LandingPage() {
         // Required empty public constructor
@@ -46,6 +49,14 @@ public class LandingPage extends Fragment {
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         View v = inflater.inflate(R.layout.fragment_landing_page, container, false);
+        if (mAlreadyLoaded) {
+            mListener.reloadLandingPage();
+        }
+
+        if (savedInstanceState == null && !mAlreadyLoaded) {
+            mAlreadyLoaded = true;
+        }
+
 
         TextView centerText = v.findViewById(R.id.text_success_email2);
         String message = "Welcome to Chapp ";
@@ -56,6 +67,27 @@ public class LandingPage extends Fragment {
         }
 
         return v;
+    }
+
+    @Override
+    public void onAttach(Context context) {
+        super.onAttach(context);
+        if (context instanceof WaitFragment.OnFragmentInteractionListener) {
+            mListener = (OnLandingPageReturnListener) context;
+        } else {
+            throw new RuntimeException(context.toString()
+                    + " must implement OnLandingPageReturnListener");
+        }
+    }
+
+    @Override
+    public void onDetach() {
+        super.onDetach();
+        mListener = null;
+    }
+
+    public interface OnLandingPageReturnListener {
+        void reloadLandingPage();
     }
 
 }

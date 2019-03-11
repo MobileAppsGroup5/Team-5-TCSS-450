@@ -189,6 +189,7 @@ public class ConnectionsContainerFragment extends Fragment implements PropertyCh
 
                 constructConnections();
                 mListener.onWaitFragmentInteractionHide();
+                Log.e("CONNECTIONSCONTAINER", "SUCCESSFUL");
             } else {
                 Log.e("ERROR!", "No data array");
                 mListener.onWaitFragmentInteractionHide();
@@ -231,20 +232,20 @@ public class ConnectionsContainerFragment extends Fragment implements PropertyCh
     @Override
     public void onResume() {
         super.onResume();
-        if (mPushMessageReciever == null) {
-            mPushMessageReciever = new PushMessageReceiver();
-        }
-        IntentFilter iFilter = new IntentFilter(PushReceiver.RECEIVED_NEW_MESSAGE);
-        getActivity().registerReceiver(mPushMessageReciever, iFilter);
+//        if (mPushMessageReciever == null) {
+//            mPushMessageReciever = new PushMessageReceiver();
+//        }
+//        IntentFilter iFilter = new IntentFilter(PushReceiver.RECEIVED_NEW_MESSAGE);
+//        getActivity().registerReceiver(mPushMessageReciever, iFilter);
         callWebServiceforConnections();
     }
 
     @Override
     public void onPause() {
         super.onPause();
-        if (mPushMessageReciever != null){
-            getActivity().unregisterReceiver(mPushMessageReciever);
-        }
+//        if (mPushMessageReciever != null){
+//            getActivity().unregisterReceiver(mPushMessageReciever);
+//        }
     }
 
     @Override
@@ -294,7 +295,8 @@ public class ConnectionsContainerFragment extends Fragment implements PropertyCh
                 //don't update badge on navigation drawer,
                 //just update the list of requests by calling web service
                 callWebServiceforConnections();
-                Log.e("Notification Receiver", "Received message type: conn req");
+                Log.e("INTENT", intent.toString());
+                Log.e("ConnectionsContainer", "Received message type: conn req");
             }
 
 

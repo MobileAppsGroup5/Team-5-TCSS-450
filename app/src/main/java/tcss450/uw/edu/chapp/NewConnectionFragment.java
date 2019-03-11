@@ -200,6 +200,7 @@ public class NewConnectionFragment extends Fragment implements AdapterView.OnIte
 
                 //set the output text to show the sent message
                 tv.setText("Member added!");
+                mAutoCompleteSearchBox.setText("");
 
             } else {
                 // error
