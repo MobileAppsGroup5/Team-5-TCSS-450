@@ -13,17 +13,22 @@
     <string name="ep_messaging_base">messaging</string>
     <string name="ep_messaging_send">send</string>
     <string name="ep_chats_base">chats</string>
-    <string name="ep_chats_new">new</string>
+    <string name="ep_chats_submit_request">submitRequest</string>
     <string name="ep_chats_get_chats">getChats</string>
     <string name="ep_chats_get_messages">getAll</string>
-    <string name="ep_chats_add_member">addUserToChat</string>
+    <string name="ep_chats_add_member">addUser</string>
+    <string name="ep_chats_leave">leaveChat</string>
+    <string name="ep_chats_accept_request">acceptRequest</string>
+    <string name="ep_forgot_base">forgot</string>
+    <string name="ep_forgot_email">email</string>
+
     <!-- weather end points -->
     <string name="ep_weather_base">weather</string>
     <string name="ep_weather_current">current</string>
     <string name="ep_weather_24h">24h</string>
     <string name="ep_weather_10d">10d</string>
     <string name="ep_connections_base">connections</string>
-    <string name="ep_connections_get_contacts">getAllConnectionsAndRequests</string>
+    <string name="ep_connections_get_connections_and_requests">getAllConnectionsAndRequests</string>
     <string name="ep_connections_accept_request">acceptRequest</string>
     <string name="ep_connections_decline_request">declineCancelOrDeleteRequest</string>
     <string name="ep_connections_submit_request">submitRequest</string>

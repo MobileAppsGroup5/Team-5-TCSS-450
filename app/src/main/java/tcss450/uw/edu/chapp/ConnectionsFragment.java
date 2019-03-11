@@ -21,12 +21,9 @@ import tcss450.uw.edu.chapp.connections.Connection;
 import tcss450.uw.edu.chapp.model.Credentials;
 
 /**
- * A fragment representing a list of Connections.
- *
- * Activities containing this fragment MUST implement the {@link OnListFragmentInteractionListener}
- * interface.
+ * A fragment representing a list of Items.
  */
-public class AllConnectionsFragment extends Fragment implements PropertyChangeListener {
+public class ConnectionsFragment extends Fragment implements PropertyChangeListener {
 
     // Misspell this to lower the change of a tag conflict
     public static final String ARG_CONNECTIONS_LIST = "connections lists";
@@ -34,23 +31,22 @@ public class AllConnectionsFragment extends Fragment implements PropertyChangeLi
     private List<Connection> mConnections;
     private Credentials mCreds;
     private String mJwToken;
-    private MyAllConnectionsRecyclerViewAdapter mAdapter;
+    private MyConnectionsRecyclerViewAdapter mAdapter;
 
     private int mColumnCount = 1;
-    private OnListFragmentInteractionListener mListener;
 
     private PropertyChangeSupport myPcs = new PropertyChangeSupport(this);
 
     /**
      * Mandatory empty constructor for the fragment manager to instantiate the
-     * fragment
+     * fragment (e.g. upon screen orientation changes).
      */
-    public AllConnectionsFragment() {
+    public ConnectionsFragment() {
     }
 
 
-    public static AllConnectionsFragment newInstance(int columnCount) {
-        AllConnectionsFragment fragment = new AllConnectionsFragment();
+    public static ConnectionsFragment newInstance(int columnCount) {
+        ConnectionsFragment fragment = new ConnectionsFragment();
         Bundle args = new Bundle();
         args.putInt(ARG_COLUMN_COUNT, columnCount);
         fragment.setArguments(args);
@@ -74,7 +70,7 @@ public class AllConnectionsFragment extends Fragment implements PropertyChangeLi
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.fragment_all_connections_list, container, false);
+        View view = inflater.inflate(R.layout.fragment_connections_list, container, false);
 
         // Set the adapter
         if (view instanceof RecyclerView) {
@@ -85,29 +81,12 @@ public class AllConnectionsFragment extends Fragment implements PropertyChangeLi
             } else {
                 recyclerView.setLayoutManager(new GridLayoutManager(context, mColumnCount));
             }
-            mAdapter = new MyAllConnectionsRecyclerViewAdapter(mConnections, mListener, mCreds, mJwToken, getContext());
+            mAdapter = new MyConnectionsRecyclerViewAdapter(mConnections, mCreds, mJwToken, getContext());
             mAdapter.addPropertyChangeListener(this);
             recyclerView.setAdapter(mAdapter);
         }
 
         return view;
-    }
-
-    @Override
-    public void onAttach(Context context) {
-        super.onAttach(context);
-        if (context instanceof OnListFragmentInteractionListener) {
-            mListener = (OnListFragmentInteractionListener) context;
-        } else {
-            throw new RuntimeException(context.toString()
-                    + " must implement OnListFragmentInteractionListener");
-        }
-    }
-
-    @Override
-    public void onDetach() {
-        super.onDetach();
-        mListener = null;
     }
 
     public void addPropertyChangeListener(PropertyChangeListener listener) {
@@ -125,21 +104,5 @@ public class AllConnectionsFragment extends Fragment implements PropertyChangeLi
             myPcs.firePropertyChange(ConnectionsContainerFragment.REFRESH_CONNECTIONS,
                     null, evt.getNewValue());
         }
-    }
-
-    /**
-     * This interface must be implemented by activities that contain this
-     * fragment to allow an interaction in this fragment to be communicated
-     * to the activity and potentially other fragments contained in that
-     * activity.
-     * <p/>
-     * See the Android Training lesson <a href=
-     * "http://developer.android.com/training/basics/fragments/communicating.html"
-     * >Communicating with Other Fragments</a> for more information.
-     */
-    public interface OnListFragmentInteractionListener {
-        void onXClicked(Connection c);
-        void onCheckClicked(Connection c);
-        void callWebServiceforConnections();
     }
 }

@@ -15,6 +15,12 @@ import java.util.List;
 
 import tcss450.uw.edu.chapp.R;
 
+/**
+ * class the will populate a list of weather hour items to display on the list recylcer view for
+ * weather hour items
+ *
+ * @author Mike Osborne, Trung Thai, Michael Josten, Jessica Medrzycki
+ */
 public class MyWeatherHourRecyclerViewAdapter extends RecyclerView.Adapter<MyWeatherHourRecyclerViewAdapter.ViewHolder> {
 
     private final List<WeatherHourItem> mValues;
@@ -50,6 +56,9 @@ public class MyWeatherHourRecyclerViewAdapter extends RecyclerView.Adapter<MyWea
         return mValues.size();
     }
 
+    /**
+     * inner class that holds the text views of each weather hour item
+     */
     public class ViewHolder extends RecyclerView.ViewHolder {
         public final View mView;
 

@@ -12,6 +12,7 @@ import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.design.widget.NavigationView;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.view.MenuItemCompat;
 import android.support.v4.widget.DrawerLayout;
@@ -21,7 +22,6 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Gravity;
-import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.TextView;
@@ -42,6 +42,7 @@ import tcss450.uw.edu.chapp.model.Credentials;
 import tcss450.uw.edu.chapp.utils.BadgeDrawerIconDrawable;
 import tcss450.uw.edu.chapp.utils.PushReceiver;
 import tcss450.uw.edu.chapp.utils.SendPostAsyncTask;
+import tcss450.uw.edu.chapp.weather.CurrentWeatherFragment;
 import tcss450.uw.edu.chapp.weather.WeatherFragment;
 
 /**
@@ -57,13 +58,13 @@ import tcss450.uw.edu.chapp.weather.WeatherFragment;
 public class HomeActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener,
         WaitFragment.OnFragmentInteractionListener,
-        AllChatsFragment.OnListFragmentInteractionListener,
-        ChatFragment.OnChatMessageFragmentInteractionListener,
-        AllConnectionsFragment.OnListFragmentInteractionListener,
-        MessageFragment.OnListFragmentInteractionListener,
-        NewChatMembersFragment.OnListFragmentInteractionListener,
-        ConnectionsContainerFragment.OnListFragmentInteractionListener,
-        WeatherFragment.OnFragmentInteractionListener {
+        ChatsFragment.OnListFragmentInteractionListener,
+        MessagingContainerFragment.OnChatMessageFragmentInteractionListener,
+        MessagingFragment.OnListFragmentInteractionListener,
+        ConnectionsContainerFragment.OnConnectionInformationFetchListener,
+        ChatsContainerFragment.OnChatInformationFetchListener,
+        WeatherFragment.OnFragmentInteractionListener,
+        CurrentWeatherFragment.OnCurrentWeatherFragmentInteractionListener {
 
     /** CREDENTIAL CONSTANTS */
     private Credentials mCreds;
@@ -72,11 +73,27 @@ public class HomeActivity extends AppCompatActivity
 
     /** NAVIGATION CONSTANTS */
     private BadgeDrawerIconDrawable badgeDrawable;
-    private TextView mNavDrawerChatNotifView;
-    private TextView mNavDrawerConnectionNotifView;
+    private TextView mChatCounterView;
+    private TextView mContactCounterView;
+    //tells if the user unread notifications
     private boolean mHasNotifications = false;
     private ArrayList<String> mUnreadChatList;
     private List<Connection> mConnections;
+
+    private ArrayList<String> unreadChatList; //holds the chatIDs received from notifications
+    private int mChatCounter;
+    private int mContactCounter;
+
+    private static final String CHANNEL_ID = "1";
+
+    //currently open fragment
+    private Fragment mChatfragment;
+
+    // The list of connections for the current user.
+    private ArrayList<Connection> mConnections;
+
+    // The list of chats for the current user
+    private ArrayList<Chat> mChats;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -98,12 +115,14 @@ public class HomeActivity extends AppCompatActivity
         badgeDrawable.setEnabled(false);
 
         //initialize the navigation drawer counter badges
-        mNavDrawerChatNotifView = (TextView) MenuItemCompat.getActionView(navigationView.getMenu().findItem(R.id.nav_chat));
-        mNavDrawerConnectionNotifView = (TextView) MenuItemCompat.getActionView(navigationView.getMenu().findItem(R.id.nav_connections));
-        initializeCountDrawer(mNavDrawerChatNotifView);
-        initializeCountDrawer(mNavDrawerConnectionNotifView);
-        mUnreadChatList = new ArrayList<String>();
-        mUnreadChatList.add("55");
+        mChatCounterView = (TextView) MenuItemCompat.getActionView(navigationView.getMenu().
+                findItem(R.id.nav_chat));
+        mContactCounterView = (TextView) MenuItemCompat.getActionView(navigationView.getMenu().
+                findItem(R.id.nav_connections));
+        initializeCountDrawer(mChatCounterView);
+        initializeCountDrawer(mContactCounterView);
+        unreadChatList = new ArrayList<String>();
+
 
         // Set the logout listener for the navigation drawer
         TextView logoutText = (TextView) findViewById(R.id.nav_logout);
@@ -118,7 +137,7 @@ public class HomeActivity extends AppCompatActivity
         // Get values from the intent
         mCreds = (Credentials) getIntent().getSerializableExtra(getString(R.string.key_credentials));
         mJwToken = getIntent().getStringExtra(getString(R.string.keys_intent_jwt));
-        Fragment fragment = new Fragment();
+
 
         // Load SuccessFragment into content_home (aka fragment_container)
         if (savedInstanceState == null) {
@@ -129,35 +148,50 @@ public class HomeActivity extends AppCompatActivity
                     Bundle args = new Bundle();
                     // Get value from intent and put it in fragment args
                     String chatid = getIntent().getStringExtra(getString(R.string.keys_intent_chatId));
-                    args.putSerializable(getString(R.string.key_credentials), mCreds);
-                    args.putSerializable(getString(R.string.keys_intent_jwt), mJwToken);
-                    args.putSerializable(getString(R.string.key_chatid), chatid);
-                    fragment = new ChatFragment();
-                    fragment.setArguments(args);
+                    args.putSerializable(getString(R.string.key_credentials)
+                            , mCreds);
+                    args.putSerializable(getString(R.string.keys_intent_jwt)
+                            , mJwToken);
+                    args.putSerializable(getString(R.string.key_chatid),
+                            chatid);
+                    mChatfragment = new MessagingContainerFragment();
+
+                    mChatfragment.setArguments(args);
 
                     getSupportFragmentManager()
                             .beginTransaction()
-                            .replace(R.id.fragment_container, fragment)
+                            .replace(R.id.fragment_container, mChatfragment)
                             .commit();
+
+                    //If the HomeActivity was loaded from the WeatherMapActivity
+                } else if (getIntent().getBooleanExtra(getString(R.string.keys_weather_from_map_activity), false)) {
+                    WeatherFragment wf = new WeatherFragment();
+                    //add location from MapActivity as fragment argument
+                    Bundle args = new Bundle();
+                    args.putParcelable(getString(R.string.keys_weather_location_from_map),
+                            getIntent().getParcelableExtra(getString(R.string.keys_weather_location_from_map)));
+                    args.putSerializable(getString(R.string.key_credentials), mCreds);
+                    args.putSerializable(getString(R.string.keys_intent_jwt), mJwToken);
+                    wf.setArguments(args);
+                    //load the weather fragment
+                    loadFragment(wf);
 
                     //Was the Bundle received from Main Activity spurred by a connection notification?
                 } else if (getIntent().getBooleanExtra(getString(R.string.keys_intent_notification_connection), false)){
                     //load the connections fragment
-                    fragment = new ConnectionsContainerFragment();
+                    ConnectionsContainerFragment ctf = new ConnectionsContainerFragment();
                     Bundle args = new Bundle();
                     args.putSerializable(getString(R.string.keys_intent_jwt), mJwToken);
                     args.putSerializable(getString(R.string.key_credentials), mCreds);
                     args.putStringArrayList(getString(R.string.keys_intent_chatId), mUnreadChatList);
-                    fragment.setArguments(args);
-                    loadFragment(fragment);
+                    ctf.setArguments(args);
+                    loadFragment(ctf);
 
                 } else {
-                    loadHomeLandingPage(fragment);
+                    loadHomeLandingPage();
                 }
             }
         }
-
-
     }
 
     /**
@@ -205,62 +239,59 @@ public class HomeActivity extends AppCompatActivity
      * and *later* load the contacts fragment.
      *
      */
-    private void loadHomeLandingPage(Fragment fragment){
-        fragment = new LandingPage();
-        SuccessFragment successFragment = new SuccessFragment();
+    private void loadHomeLandingPage(){
+        Fragment frag = new LandingPage();
+        CurrentWeatherFragment cwf = new CurrentWeatherFragment();
         Bundle args = new Bundle();
         args.putSerializable(getString(R.string.key_credentials)
                 , mCreds);
         args.putSerializable(getString(R.string.keys_intent_jwt)
                 , mJwToken);
 
-        //set the email to show in the top fragment
-        successFragment.setArguments(args);
-        fragment.setArguments(args);
+
+        frag.setArguments(args);
+
+        // update homeactivity information with the latest
+        callWebServiceforConnections();
+        callWebServiceforChats();
 
 //        loadFragment(successFragment);
         getSupportFragmentManager().popBackStack(null, FragmentManager.POP_BACK_STACK_INCLUSIVE);
 
-        getSupportFragmentManager()
+        //TODO: use transaction to populate the dynamic home landing page
+        FragmentTransaction transaction = getSupportFragmentManager()
                 .beginTransaction()
-                .replace(R.id.fragment_container, successFragment)
-                .commit();
+                .replace(R.id.fragment_container, frag);
+        transaction.replace(R.id.framelayout_homelanding_weather, cwf);
 
+        //transaction.replace(R.id.framelayout_homelanding_email, successFragment);
+        //transaction.add(R.id.framelayout_homelanding_chatlist, chats);
 
-        //ORIGINAL SCROLL VIEW WITH BLOG POST SCROLLING
-//        FragmentTransaction transaction = getSupportFragmentManager()
-//                .beginTransaction()
-//                .replace(R.id.fragment_container, frag)
-//                .addToBackStack(null);
-//         //Commit the transaction (obviously)
-//        transaction.replace(R.id.framelayout_homelanding_email, successFragment);
-//        //transaction.add(R.id.framelayout_homelanding_chatlist, chats);
+        transaction.commit();
+    }
+
+//    @Override
+//    public boolean onCreateOptionsMenu(Menu menu) {
+//        // Inflate the menu; this adds items to the action bar if it is present.
+//        getMenuInflater().inflate(R.menu.home, menu);
+//        return true;
+//    }
 //
-//        transaction.commit();
-    }
-
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.home, menu);
-        return true;
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-//        int id = item.getItemId();
+//    @Override
+//    public boolean onOptionsItemSelected(MenuItem item) {
+//        // Handle action bar item clicks here. The action bar will
+//        // automatically handle clicks on the Home/Up button, so long
+//        // as you specify a parent activity in AndroidManifest.xml.
+////        int id = item.getItemId();
+////
+////        //noinspection SimplifiableIfStatement
+////        if (id == R.id.action_logout) {
+////            logout();
+////            return true;
+////        }
 //
-//        //noinspection SimplifiableIfStatement
-//        if (id == R.id.action_logout) {
-//            logout();
-//            return true;
-//        }
-
-        return super.onOptionsItemSelected(item);
-    }
+//        return super.onOptionsItemSelected(item);
+//    }
 
     /**
      * Navigation drawer item listener.
@@ -279,13 +310,12 @@ public class HomeActivity extends AppCompatActivity
 
         switch(id) {
             case R.id.nav_home:
-                Fragment fragment = new Fragment();
-                loadHomeLandingPage(fragment);
+                loadHomeLandingPage();
                 break;
 
             case R.id.nav_connections:
 
-                mNavDrawerConnectionNotifView.setText("");
+                mContactCounterView.setText("");
                 badgeDrawable.setEnabled(false);
 //                if (!mHasNotifications) {
 //                    badgeDrawable.setEnabled(false);
@@ -300,33 +330,24 @@ public class HomeActivity extends AppCompatActivity
                 break;
 
             case R.id.nav_chat:
-
-                mNavDrawerChatNotifView.setText("");
+                mChatCounterView.setText("");
                 badgeDrawable.setEnabled(false);
-//                if (!mHasNotifications) {
-//                    badgeDrawable.setEnabled(false);
-//                }
-                uri = new Uri.Builder()
-                    .scheme("https")
-                    .appendPath(getString(R.string.ep_base_url))
-                    .appendPath(getString(R.string.ep_chats_base))
-                    .appendPath(getString(R.string.ep_chats_get_chats))
-                    .build();
-
-                // Pass the credentials
-                msg = mCreds.asJSONObject();
-                new SendPostAsyncTask.Builder(uri.toString(), msg)
-                    .onPreExecute(this::onWaitFragmentInteractionShow)
-                    .onPostExecute(this::handleChatsPostOnPostExecute)
-                    .onCancelled(this::handleErrorsInTask)
-                    .addHeaderField("authorization", mJwToken) //add the JWT as a header
-                    .build().execute();
+                frag = new ChatsContainerFragment();
+                args = new Bundle();
+                args.putSerializable(getString(R.string.keys_intent_jwt), mJwToken);
+                args.putSerializable(getString(R.string.key_credentials), mCreds);
+                frag.setArguments(args);
+                loadFragment(frag);
                 break;
 
             case R.id.nav_weather:
 //                CurrentWeatherFragment cwf = new CurrentWeatherFragment();
 //                loadFragment(cwf);
                 WeatherFragment wf = new WeatherFragment();
+                Bundle wArgs = new Bundle();
+                wArgs.putSerializable(getString(R.string.keys_intent_jwt), mJwToken);
+                wArgs.putSerializable(getString(R.string.key_credentials), mCreds);
+                wf.setArguments(wArgs);
                 loadFragment(wf);
                 break;
 
@@ -338,76 +359,6 @@ public class HomeActivity extends AppCompatActivity
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
         return true;
-    }
-
-    /**
-     * Begins the async task for grabbing the messages from the
-     * Database given the specified chatid.
-     */
-    public void callWebServiceforConnections(){
-        onWaitFragmentInteractionShow();
-        Uri uri = new Uri.Builder()
-                .scheme("https")
-                .appendPath(getString(R.string.ep_base_url))
-                .appendPath(getString(R.string.ep_connections_base))
-                .appendPath(getString(R.string.ep_connections_get_contacts))
-                .build();
-        // Pass the credentials
-        JSONObject msg = mCreds.asJSONObject();
-        new SendPostAsyncTask.Builder(uri.toString(), msg)
-                .onPostExecute(this::handleConnectionsOnPostExecute)
-                .onCancelled(error -> Log.e("AllConnectionsFragment", error))
-                .addHeaderField("authorization", mJwToken) //add the JWT as a header
-                .build().execute();
-    }
-
-    private void handleConnectionsOnPostExecute(String result) {
-        // parse JSON
-        try {
-            JSONObject root = new JSONObject(result);
-            if (root.has(getString(R.string.keys_json_connections))) {
-
-                JSONArray data = root.getJSONArray(
-                        getString(R.string.keys_json_connections));
-                List<Connection> connections = new ArrayList<>();
-                for(int i = 0; i < data.length(); i++) {
-                    JSONObject jsonChat = data.getJSONObject(i);
-                    connections.add(new Connection.Builder(
-                            jsonChat.getString(getString(R.string.keys_json_connections_from)),
-                            jsonChat.getString(getString(R.string.keys_json_connections_to)),
-                            Integer.parseInt(jsonChat.getString(getString(R.string.keys_json_connections_verified))))
-                            .build());
-                }
-                mConnections = new ArrayList<>(connections);
-
-                constructConnections();
-                onWaitFragmentInteractionHide();
-            } else {
-                Log.e("ERROR!", "No data array");
-            }
-        } catch (JSONException e) {
-            e.printStackTrace();
-            Log.e("ERROR!", e.getMessage());
-        }
-    }
-
-    private void constructConnections() {
-        Bundle args = new Bundle();
-
-        // Do this swapping so we can send in an array of Messages not Objects
-        Connection[] connectionsAsArray = new Connection[mConnections.size()];
-        connectionsAsArray = mConnections.toArray(connectionsAsArray);
-        args.putSerializable(AllConnectionsFragment.ARG_CONNECTIONS_LIST, connectionsAsArray);
-        args.putSerializable(getString(R.string.key_credentials), mCreds);
-        args.putSerializable(getString(R.string.keys_intent_jwt), mJwToken);
-        AllConnectionsFragment frag = new AllConnectionsFragment();
-        frag.setArguments(args);
-
-        getSupportFragmentManager()
-                .beginTransaction()
-                .replace(R.id.fragment_container, frag)
-                .commit();
-
     }
 
     /**
@@ -435,10 +386,10 @@ public class HomeActivity extends AppCompatActivity
                 Connection[] connectionsAsArray = new Connection[connections.size()];
                 connectionsAsArray = connections.toArray(connectionsAsArray);
                 Bundle args = new Bundle();
-                args.putSerializable(AllConnectionsFragment.ARG_CONNECTIONS_LIST, connectionsAsArray);
+                args.putSerializable(ConnectionsFragment.ARG_CONNECTIONS_LIST, connectionsAsArray);
                 args.putSerializable(getString(R.string.key_credentials), mCreds);
                 args.putSerializable(getString(R.string.keys_intent_jwt), mJwToken);
-                Fragment frag = new AllConnectionsFragment();
+                Fragment frag = new ConnectionsFragment();
                 frag.setArguments(args);
                 onWaitFragmentInteractionHide();
                 loadFragment(frag);
@@ -465,6 +416,71 @@ public class HomeActivity extends AppCompatActivity
     }
 
     /**
+     * Begins the async task for grabbing connections from the db
+     */
+    public void callWebServiceforConnections(){
+        Uri uri = new Uri.Builder()
+                .scheme("https")
+                .appendPath(getString(R.string.ep_base_url))
+                .appendPath(getString(R.string.ep_connections_base))
+                .appendPath(getString(R.string.ep_connections_get_connections_and_requests))
+                .build();
+        // Pass the credentials
+        JSONObject msg = mCreds.asJSONObject();
+        new SendPostAsyncTask.Builder(uri.toString(), msg)
+                .onPostExecute(this::handleConnectionsOnPostExecute)
+                .onCancelled(error -> Log.e("ConnectionsContainerFragment", error))
+                .addHeaderField("authorization", mJwToken) //add the JWT as a header
+                .build().execute();
+    }
+
+
+    private void handleConnectionsOnPostExecute(String result) {
+        // parse JSON
+        try {
+            JSONObject root = new JSONObject(result);
+            if (root.has(getString(R.string.keys_json_connections))) {
+
+                JSONArray data = root.getJSONArray(
+                        getString(R.string.keys_json_connections));
+                List<Connection> connections = new ArrayList<>();
+                for(int i = 0; i < data.length(); i++) {
+                    JSONObject jsonChat = data.getJSONObject(i);
+                    connections.add(new Connection.Builder(
+                            jsonChat.getString(getString(R.string.keys_json_connections_from)),
+                            jsonChat.getString(getString(R.string.keys_json_connections_to)),
+                            Integer.parseInt(jsonChat.getString(getString(R.string.keys_json_connections_verified))))
+                            .build());
+                }
+                mConnections = new ArrayList<>(connections);
+                // update the reference in home activity
+                updateConnections(mConnections);
+            } else {
+                Log.e("ERROR!", "No data array");
+            }
+        } catch (JSONException e) {
+            e.printStackTrace();
+            Log.e("ERROR!", e.getMessage());
+        }
+    }
+
+    private void callWebServiceforChats() {
+        Uri uri = new Uri.Builder()
+                .scheme("https")
+                .appendPath(getString(R.string.ep_base_url))
+                .appendPath(getString(R.string.ep_chats_base))
+                .appendPath(getString(R.string.ep_chats_get_chats))
+                .build();
+        // Pass the credentials
+        JSONObject msg = mCreds.asJSONObject();
+        new SendPostAsyncTask.Builder(uri.toString(), msg)
+                .onPostExecute(this::handleChatsPostOnPostExecute)
+                .onCancelled(error -> Log.e("ConnectionsContainerFragment", error))
+                .addHeaderField("authorization", mJwToken) //add the JWT as a header
+                .build().execute();
+    }
+
+    /**
      * Post call for retrieving the list of Chats from the Database.
      * Calls chat fragment to load and sends in the chatId to load into.
      * @param result the chatId and name of the chats from the result to display in UI
@@ -475,44 +491,102 @@ public class HomeActivity extends AppCompatActivity
             JSONObject root = new JSONObject(result);
             if (root.has(getString(R.string.keys_json_chats_chatlist))) {
 
-                    JSONArray data = root.getJSONArray(
-                            getString(R.string.keys_json_chats_chatlist));
-                    List<Chat> chats = new ArrayList<>();
-                    for(int i = 0; i < data.length(); i++) {
-                        JSONObject jsonChat = data.getJSONObject(i);
-                        chats.add(new Chat.Builder(
-                                jsonChat.getString(getString(R.string.keys_json_chats_chatid)),
-                                jsonChat.getString(getString(R.string.keys_json_chats_name)))
-                                .build());
+                JSONArray data = root.getJSONArray(
+                        getString(R.string.keys_json_chats_chatlist));
+                ArrayList<Chat> chats = new ArrayList<>();
+                for(int i = 0; i < data.length(); i++) {
+                    JSONObject jsonChat = data.getJSONObject(i);
+
+                    String chatid = jsonChat.getString(getString(R.string.keys_json_chats_chatid));
+
+                    // First, build the list of users in the chat
+                    ArrayList<String> usersInChat = new ArrayList<String>();
+                    JSONArray jArray = (JSONArray) jsonChat.get(getString(R.string.keys_json_chats_users));
+                    if (jArray != null) {
+                        for (int j = 0; j < jArray.length(); j++) {
+                            usersInChat.add(jArray.getString(j));
+                        }
                     }
-                    Chat[] chatsAsArray = new Chat[chats.size()];
-                    chatsAsArray = chats.toArray(chatsAsArray);
-                    Bundle args = new Bundle();
-                    args.putSerializable(AllChatsFragment.ARG_CHAT_LIST, chatsAsArray);
-                    args.putSerializable(getString(R.string.key_credentials), mCreds);
-                    args.putSerializable(getString(R.string.keys_intent_jwt), mJwToken);
-                    Fragment frag = new AllChatsFragment();
-                    frag.setArguments(args);
-                    onWaitFragmentInteractionHide();
-                    loadFragment(frag);
-                } else {
-                    Log.e("ERROR!", "No data array");
-                    //notify user
-                    onWaitFragmentInteractionHide();
+
+                    // Now inspect last senders to find out the last sender
+                    String lastSender = "";
+                    boolean hasMessages = false;
+                    JSONArray lastSenders = jsonChat.getJSONArray(getString(R.string.keys_json_chats_last_senders));
+                    // iterate to find the greatest primary key
+                    int maxPrimaryKey = 0;
+                    if (!lastSenders.getJSONObject(lastSenders.length()-1).isNull("f2")) {
+                        hasMessages = true;
+                        // iterate once to get the max
+                        for (int j = 0; j < lastSenders.length(); j++) {
+                            int tempKey = Integer.parseInt(lastSenders.getJSONObject(j).getString("f2"));
+                            if (tempKey > maxPrimaryKey) {
+                                maxPrimaryKey = tempKey;
+                            }
+                        }
+                        // iterate again to find the associated username
+                        for (int j = 0; j < lastSenders.length(); j++) {
+                            int tempKey = Integer.parseInt(lastSenders.getJSONObject(j).getString("f2"));
+                            if (tempKey == maxPrimaryKey) {
+                                lastSender = lastSenders.getJSONObject(j).getString("f1");
+                            }
+                        }
+                    }
+
+                    Boolean hasBeenRead = null;
+                    if (!hasMessages) {
+                        // No messages have been sent in this chat, set last sender to null so we know
+                        // this fact in other parts of the app
+                        lastSender = null;
+                    } else {
+                        // if it's not null, capture if it's has been read or not.
+                        if (!jsonChat.isNull(getString(R.string.keys_json_chats_has_been_read))) {
+                            hasBeenRead = ((Integer) jsonChat.get(getString(R.string.keys_json_chats_has_been_read))) == 1;
+                        }
+                    }
+
+                    // Retrieve accepted flags to know who has/hasn't accepted the chat room invite.
+                    ArrayList<Boolean> acceptedFlags = new ArrayList<>();
+                    JSONArray jsonFlags = jsonChat.getJSONArray(getString(R.string.keys_json_chats_accepted_list));
+                    for (int j = 0; j < usersInChat.size(); j++) {
+                        String currentUsername = usersInChat.get(j);
+                        for (int x = 0; x < jsonFlags.length(); x++) {
+                            if (currentUsername.equals(jsonFlags.getJSONObject(x).getString("f2"))) {
+                                acceptedFlags.add("1".equals(jsonFlags.getJSONObject(x).getString("f1")));
+                            }
+                        }
+                    }
+
+//                    Log.e("users?", usersInChat.toString());
+//                    Log.e("NAME", jsonChat.getString(getString(R.string.keys_json_chats_name)));
+//                    Log.e("LAST SENDER", lastSender == null ? "NULL" : lastSender);
+//                    Log.e("READ?", hasBeenRead == null ? "NULL" : Boolean.toString(hasBeenRead));
+//                    Log.e("flags?", acceptedFlags.toString());
+
+
+                    chats.add(new Chat.Builder(
+                            chatid,
+                            jsonChat.getString(getString(R.string.keys_json_chats_name)),
+                            usersInChat,
+                            acceptedFlags,
+                            hasBeenRead,
+                            lastSender)
+                            .build());
                 }
+                // update the reference in HomeActivity
+                updateChats(mChats);
+
+
+
+            } else {
+                Log.e("ERROR!", "No data array" + root.toString());
+
+            }
         } catch (JSONException e) {
             e.printStackTrace();
             Log.e("ERROR!", e.getMessage());
-            //notify user
-            onWaitFragmentInteractionHide();
+
         }
     }
-
-    /**
-     * Post call for Async Task when returning from getting all messages from
-     * Database with the given chatID.
-     * @param result
-     */
 
 
     /**
@@ -531,13 +605,14 @@ public class HomeActivity extends AppCompatActivity
      */
     @Override
     public void onListFragmentInteraction(Chat item) {
-        Fragment fragment = new ChatFragment();
+        mChatfragment = new MessagingContainerFragment();             //MessagingContainerFragment chatfrag
         Bundle args = new Bundle();
         args.putSerializable(getString(R.string.keys_intent_jwt), mJwToken);
         args.putSerializable(getString(R.string.key_credentials), mCreds);
-        args.putSerializable(getString(R.string.key_chatid), item.getId());
-        fragment.setArguments(args);
-        loadFragment(fragment);
+        args.putSerializable(getString(R.string.key_chat), item);
+        args.putSerializable(getString(R.string.key_intent_connections), mConnections);
+        mChatfragment.setArguments(args);
+        loadFragment(mChatfragment);
     }
 
 
@@ -548,6 +623,17 @@ public class HomeActivity extends AppCompatActivity
                 .beginTransaction()
                 .add(R.id.fragment_container, new WaitFragment(), "WAIT")
                 .commit();
+    }
+
+    // Whenever a web service call to fetch connections is made, update the reference in homeactivity
+    @Override
+    public void updateConnections(ArrayList<Connection> connections) {
+        mConnections = connections;
+    }
+
+    @Override
+    public void updateChats(ArrayList<Chat> chats) {
+        mChats = chats;
     }
 
     @Override
@@ -572,131 +658,33 @@ public class HomeActivity extends AppCompatActivity
         // don't do anything for now, messages aren't able to be interacted with
     }
 
-//    @Override
-//    public void onListFragmentInteraction(DummyContent.Contact contact) {
-//        ChatFragment chatFrag = new ChatFragment();
-//        Bundle args = new Bundle();
-//        args.putSerializable(getString(R.string.keys_intent_jwt), mJwToken);
-//        args.putSerializable(getString(R.string.key_credentials), mCreds);
-//        args.putSerializable(getString(R.string.key_chatid), contact.username);
-//        chatFrag.setArguments(args);
-//        FragmentTransaction transaction = getSupportFragmentManager()
-//                .beginTransaction()
-//                .replace(R.id.fragment_container, chatFrag)
-//                .addToBackStack(null);
-//        transaction.commit();
-//    }
-
-    @Override
-    public void onListFragmentInteraction(User item) {
-
-    }
-
     /**
-     * Called when you click x on a contact in {@link AllConnectionsFragment}
-     * Prompts the user if they want to delete the contact, then deletes it on confirm
-     * @param c The connection that was clicked on
-     */
-    @Override
-    public void onXClicked(Connection c) {
-        String otherUsername = ((TextView)findViewById(R.id.list_item_connection_name)).getText().toString();
-
-        // confirm with the user
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setMessage("Are you sure you want to cancel/delete " + otherUsername + "?")
-                .setTitle("Delete/Cancel?")
-                .setPositiveButton("YES", (dialog, which) -> {
-                    deleteContact(otherUsername);
-                })
-                .setNegativeButton("CANCEL", (dialog, which) -> {});
-        AlertDialog dialog = builder.create();
-        dialog.show();
-        Log.e("CONTACTSBUTTONCLICKED", "DECLINE CLICKED ON "
-                + ((TextView)findViewById(R.id.list_item_connection_name)).getText().toString());
-    }
-
-    /**
-     * Helper method for onXClicked, called when the user confirms they want to delete/cancel contact
-     * @param otherUsername The username of the other person in the contact.
-     */
-    private void deleteContact(String otherUsername) {
-        JSONObject messageJson = new JSONObject();
-        try {
-            messageJson.put("decliningUsername", mCreds.getUsername());
-            messageJson.put("requestUsername", otherUsername);
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
-
-        Uri uri = new Uri.Builder()
-                .scheme("https")
-                .appendPath(getString(R.string.ep_base_url))
-                .appendPath(getString(R.string.ep_connections_base))
-                .appendPath(getString(R.string.ep_connections_decline_request))
-                .build();
-        new SendPostAsyncTask.Builder(uri.toString(), messageJson)
-                .onPostExecute(this::handleConnectionsChangePostExecute)
-                .onCancelled(error -> Log.e("MyAllConnectionsRecyclerViewAdapter", error))
-                .addHeaderField("authorization", mJwToken)
-                .build().execute();
-    }
-
-    /**
-     * Called when you click check on a contact in {@link AllConnectionsFragment}
-     * @param c The connection that was clicked on
-     */
-    @Override
-    public void onCheckClicked(Connection c) {
-        String otherUsername = ((TextView)findViewById(R.id.list_item_connection_name)).getText().toString();
-        JSONObject messageJson = new JSONObject();
-        try {
-            messageJson.put("acceptingUsername", mCreds.getUsername());
-            messageJson.put("requestUsername", otherUsername);
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
-
-        Uri uri = new Uri.Builder()
-                .scheme("https")
-                .appendPath(getString(R.string.ep_base_url))
-                .appendPath(getString(R.string.ep_connections_base))
-                .appendPath(getString(R.string.ep_connections_accept_request))
-                .build();
-        new SendPostAsyncTask.Builder(uri.toString(), messageJson)
-                .onPostExecute(this::handleConnectionsChangePostExecute)
-                .onCancelled(error -> Log.e("HomeActivity", error))
-                .addHeaderField("authorization", mJwToken)
-                .build().execute();
-
-        Log.e("CONTACTSBUTTONCLICKED", "ACCEPT CLICKED ON "
-                + ((TextView)findViewById(R.id.list_item_connection_name)).getText().toString());
-    }
-
-    private void handleConnectionsChangePostExecute(String result) {
-        // for now, reload the fragment regardless
-        // TODO: in the future handle error catching and displaying
-        callWebServiceforConnections();
-    }
-
-    /**
-     * From the ChatFragment interface that updates the count of unread
-     * chat Ids from notifications. Specifically for when the chatFragment
-     * is open but it is not the same one that relates to the given notification
+     * From the MessagingContainerFragment interface that updates the count of unread
+     * chat Ids from notifications.
      * @param chatId    chatId to add to the list
      */
     @Override
-    public void unreadMessageReceivedinOtherChatNotifications(String chatId) {
+    public void incrementUnreadChatNotifications(String chatId) {
 
         //adds the chatId to list of unread chats
         //show badge on home button.
         //show number on nav menu chat button
-
         mHasNotifications = true;
-        mUnreadChatList.add(chatId);
+        unreadChatList.add(chatId);
         badgeDrawable.setEnabled(true);
-        mNavDrawerChatNotifView.setText("NEW");
+        mChatCounterView.setText("NEW");
         //show badge on recycler view item in all chats.
     }
+
+//    /**
+//     * From the MessagingContainerFragment interface that removes a viewed chatid from the counter
+//     * of unread chat ids
+//     * @param chatId    the chatId already viewed.
+//     */
+//    @Override
+//    public void updateViewedChatroom(String chatId) {
+//        unreadChatList.remove(chatId);
+//    }
 
 
     // Deleting the Pushy device token must be done asynchronously. Good thing
@@ -751,11 +739,10 @@ public class HomeActivity extends AppCompatActivity
             if(typeOfMessage.equals("msg")){ //if received broadcast from message notification.
                 if (findViewById(R.id.fragment_chat) == null){ //case where user is NOT in chat fragment
                     String id = intent.getStringExtra("chatid");
-                    mUnreadChatList.add(id);
+                    unreadChatList.add(id);
                     //update home icon and the counter
-                    mUnreadChatList.add(id);
                     badgeDrawable.setEnabled(true);
-                    mNavDrawerChatNotifView.setText("NEW");
+                    mChatCounterView.setText("NEW");
 
                     //how to add in red dot alongside specific chat room?
                     //call backend to get all chatIds with unread messages
@@ -769,7 +756,7 @@ public class HomeActivity extends AppCompatActivity
 
                     //update home icon and the counter
                     badgeDrawable.setEnabled(true);
-                    mNavDrawerConnectionNotifView.setText("NEW");
+                    mContactCounterView.setText("NEW");
 
                     Log.e("Notification Receiver", "Received message type: conn req");
                 }

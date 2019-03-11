@@ -24,7 +24,7 @@ import java.util.List;
  * Activities containing this fragment MUST implement the {@link OnListFragmentInteractionListener}
  * interface.
  */
-public class MessageFragment extends Fragment {
+public class MessagingFragment extends Fragment {
 
     public static final String ARG_MESSAGE_LIST = "messages list";
     private static final String ARG_COLUMN_COUNT = "column-count";
@@ -33,7 +33,7 @@ public class MessageFragment extends Fragment {
 
     private RecyclerView mRecyclerView;
     private GridLayoutManager mLayoutManager;
-    private MyMessageRecyclerViewAdapter mAdapter;
+    private MyMessagingRecyclerViewAdapter mAdapter;
 
     private int mColumnCount = 1;
     private OnListFragmentInteractionListener mListener;
@@ -42,11 +42,11 @@ public class MessageFragment extends Fragment {
      * Mandatory empty constructor for the fragment manager to instantiate the
      * fragment (e.g. upon screen orientation changes).
      */
-    public MessageFragment() {
+    public MessagingFragment() {
     }
 
-    public static MessageFragment newInstance(int columnCount) {
-        MessageFragment fragment = new MessageFragment();
+    public static MessagingFragment newInstance(int columnCount) {
+        MessagingFragment fragment = new MessagingFragment();
         Bundle args = new Bundle();
         args.putInt(ARG_COLUMN_COUNT, columnCount);
         fragment.setArguments(args);
@@ -83,7 +83,7 @@ public class MessageFragment extends Fragment {
                 mLayoutManager = new GridLayoutManager(context, mColumnCount);
                 mRecyclerView.setLayoutManager(mLayoutManager);
             }
-            mAdapter = new MyMessageRecyclerViewAdapter(mMessages, mListener, mCredentials.getUsername());
+            mAdapter = new MyMessagingRecyclerViewAdapter(mMessages, mListener, mCredentials.getUsername());
             mRecyclerView.setAdapter(mAdapter);
         }
         return view;

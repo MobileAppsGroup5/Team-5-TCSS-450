@@ -17,8 +17,8 @@ import tcss450.uw.edu.chapp.WaitFragment;
 import tcss450.uw.edu.chapp.weather.WeatherDayContent.WeatherDayItem;
 
 /**
- * A fragment representing a list of Items.
- * <p/>
+ * WeatherDayFragment which can take a list of WeatherDayItems and then set the recycler view to
+ * the list.
  */
 public class WeatherDayFragment extends Fragment {
 

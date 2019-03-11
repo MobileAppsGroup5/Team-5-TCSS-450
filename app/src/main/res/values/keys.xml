@@ -21,17 +21,12 @@
     <string name="keys_json_setlists_set_list_data">setlistdata</string>
     <string name="keys_json_setlists_set_list_notes">setlistnotes</string>
     <string name="keys_json_setlists_url">url</string>
-    <string name="keys_json_chats_chatlist">chats</string>
-    <string name="keys_json_chats_chatid">chatid</string>
-    <string name="keys_json_chats_name">name</string>
-    <string name="keys_json_chats_message">message</string>
-    <string name="keys_json_chats_messages">messages</string>
-    <string name="keys_json_chats_time">timestamp</string>
     <string name="key_credentials">chapp_credentials_information</string>
     <string name="key_blog_post">chapp_blog_post_information</string>
     <string name="key_set_list">chapp_set_list_information</string>
     <string name="key_chatid">chatid key</string>
     <string name="key_username">username keys</string>
+    <string name="key_intent_connections">these are connections</string>
 
     <!-- Added this in Lab 5 -->
     <string name="key_email">email_key</string>
@@ -56,6 +51,23 @@
     <string name="keys_json_connections_request_username">requestUsername</string>
     <string name="keys_json_connections_accept_username">acceptingUsername</string>
 
+    <!-- chats keys-->
+    <string name="keys_chats_arg">here are chats in the args</string>
+    <string name="keys_json_chats_chatlist">chats</string>
+    <string name="keys_json_chats_chatid">chatid</string>
+    <string name="keys_json_chats_name">name</string>
+    <string name="keys_json_chats_chat_name">chatName</string>
+    <string name="keys_json_chats_message">message</string>
+    <string name="keys_json_chats_messages">messages</string>
+    <string name="keys_json_chats_time">timestamp</string>
+    <string name="keys_json_chats_users">usernames</string>
+    <string name="keys_json_chats_last_senders">lastsenders</string>
+    <string name="keys_json_chats_has_been_read">hasbeenread</string>
+    <string name="keys_json_chats_accepted_list">acceptedpairs</string>
+    <string name="keys_json_username_from">usernameFrom</string>
+    <string name="keys_json_username_to">usernameTo</string>
+    <string name="key_chat">this is a chat object</string>
+
     <!-- things relating to credentials/users-->
     <string name="keys_json_users">users</string>
     <string name="keys_json_username">username</string>
@@ -66,5 +78,9 @@
     <!-- weather keys -->
     <string name="keys_weather_hour_list_arg">WeatherHourFragmentBundleArgListWeatherItem</string>
     <string name="keys_weather_day_list_arg">WeatherDayFragmentBundleArgListWeatherItem</string>
+    <string name="keys_weather_map_intent_location">CURRENTLOCATION</string>
+    <string name="keys_weather_location_from_map">Location from MapActivity</string>
+    <string name="keys_weather_from_map_activity">Intent from MapActivity</string>
+    <string name="keys_prefs_locations">SharedPreferencesWeatherLocation</string>
 
 </resources>

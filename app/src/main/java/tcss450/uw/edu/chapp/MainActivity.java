@@ -77,6 +77,16 @@ public class MainActivity extends AppCompatActivity implements LoginFragment.OnL
     }
 
     @Override
+    public void onForgotPasswordClicked() {
+        FragmentTransaction transaction = getSupportFragmentManager()
+                .beginTransaction()
+                .replace(R.id.frame_main_container, new ForgotPasswordFragment())
+                .addToBackStack(null);
+        transaction.commit();
+
+    }
+
+    @Override
     public void onRegisterSuccess(Credentials theCredentials) {
         LoginFragment loginFragment;
 

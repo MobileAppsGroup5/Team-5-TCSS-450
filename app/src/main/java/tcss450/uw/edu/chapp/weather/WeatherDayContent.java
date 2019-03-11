@@ -6,9 +6,9 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Helper class for providing sample content for user interfaces created by
- * Android template wizards.
- * <p>
+ * class which represents a weather day item
+ *
+ * @author Mike Osborne, Trung Thai, Michael Josten, Jessica Medrzycki
  */
 public class WeatherDayContent {
 

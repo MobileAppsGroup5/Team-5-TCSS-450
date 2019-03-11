@@ -29,7 +29,9 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
+import tcss450.uw.edu.chapp.chat.Chat;
 import tcss450.uw.edu.chapp.chat.Message;
+import tcss450.uw.edu.chapp.connections.Connection;
 import tcss450.uw.edu.chapp.model.Credentials;
 import tcss450.uw.edu.chapp.utils.PushReceiver;
 import tcss450.uw.edu.chapp.utils.SendPostAsyncTask;
@@ -42,27 +44,28 @@ import tcss450.uw.edu.chapp.utils.SendPostAsyncTask;
  * @author Mike Osborne, Jessica Medrzycki
  * @version 02/25/19
  */
-public class ChatFragment extends Fragment {
+public class MessagingContainerFragment extends Fragment {
 
     private static final String TAG = "CHAT_FRAG";
     public static final String ARG_MESSAGE_LIST = "message list";
 
-    private MessageFragment mMessageFragment;
+    private MessagingFragment mMessageFragment;
     private EditText mMessageInputEditText;
     private List<Message> mMessages;
     private OnChatMessageFragmentInteractionListener mListener;
+    private ArrayList<Connection> mConnections;
 
 
     private Credentials mCreds;
     private String mJwToken;
     private String mSendUrl;
-    private String mChatId = "";
+    private Chat mChat;
 
 
     private PushMessageReceiver mPushMessageReciever;
 
 
-    public ChatFragment() {
+    public MessagingContainerFragment() {
         // Required empty public constructor
     }
 
@@ -82,7 +85,9 @@ public class ChatFragment extends Fragment {
             //get the email and JWT from the Activity. Make sure the Keys match what you used
             mCreds = ((Credentials) getArguments().get(getString(R.string.key_credentials)));
             mJwToken = getArguments().getString(getString(R.string.keys_intent_jwt));
-            mChatId = getArguments().getString(getString(R.string.key_chatid));
+            mChat = (Chat) getArguments().get(getString(R.string.key_chat));
+            mConnections = (ArrayList<Connection>) getArguments().get(getString(R.string.key_intent_connections));
+            Log.e("mconnection nul?", mConnections == null ? "NULLLL" : mConnections.toString());
 
             //get the messages grabbed from the database
             callWebServiceforMessages();
@@ -104,7 +109,7 @@ public class ChatFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        View rootLayout = inflater.inflate(R.layout.fragment_chat, container, false);
+        View rootLayout = inflater.inflate(R.layout.fragment_messaging, container, false);
 
 //        mMessageOutputTextView = rootLayout.findViewById(R.id.text_chat_message_display);
         mMessageInputEditText = rootLayout.findViewById(R.id.edit_chat_message_input);
@@ -115,7 +120,7 @@ public class ChatFragment extends Fragment {
     }
 
     public String getChatId(){
-        return mChatId;
+        return mChat.getId();
     }
 
     /**
@@ -140,11 +145,12 @@ public class ChatFragment extends Fragment {
         Bundle args = new Bundle();
         args.putSerializable(getString(R.string.key_credentials), mCreds);
         args.putSerializable(getString(R.string.keys_intent_jwt), mJwToken);
-        args.putSerializable(getString(R.string.key_chatid), mChatId);
+        args.putSerializable(getString(R.string.key_chat), mChat);
+        args.putSerializable(getString(R.string.key_intent_connections), mConnections);
         frag.setArguments(args);
         getActivity().getSupportFragmentManager()
                 .beginTransaction()
-                .replace(R.id.fragment_container, frag)
+                .replace(R.id.chat_add_connection_container, frag)
                 .addToBackStack(null)
                 .commit();
 
@@ -167,7 +173,8 @@ public class ChatFragment extends Fragment {
         // Create the JSON object with given chatID
         JSONObject msg = new JSONObject();
         try {
-            msg.put("chatId", mChatId);
+            msg.put("chatId", mChat.getId());
+            msg.put(getString(R.string.keys_json_username), mCreds.getUsername());
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -231,9 +238,9 @@ public class ChatFragment extends Fragment {
         // Do this swapping so we can send in an array of Messages not Objects
         Message[] messagesAsArray = new Message[mMessages.size()];
         messagesAsArray = mMessages.toArray(messagesAsArray);
-        args.putSerializable(MessageFragment.ARG_MESSAGE_LIST, messagesAsArray);
+        args.putSerializable(MessagingFragment.ARG_MESSAGE_LIST, messagesAsArray);
         args.putSerializable(getString(R.string.key_credentials), mCreds);
-        mMessageFragment = new MessageFragment();
+        mMessageFragment = new MessagingFragment();
         mMessageFragment.setArguments(args);
 
         getActivity().getSupportFragmentManager()
@@ -248,7 +255,7 @@ public class ChatFragment extends Fragment {
         String msg = mMessageInputEditText.getText().toString();
         JSONObject messageJson = new JSONObject();
         try {
-            messageJson.put("chatId", mChatId);
+            messageJson.put("chatId", mChat.getId());
             messageJson.put("username", mCreds.getUsername());
             messageJson.put("message", msg);
         } catch (JSONException e) {
@@ -343,7 +350,7 @@ public class ChatFragment extends Fragment {
 
                 //Checks if the current chat that's open matches the one
                 //incoming with the notification
-                if (intent.getStringExtra("CHATID").equals(mChatId)
+                if (intent.getStringExtra("CHATID").equals(mChat.getId())
                     && mMessageFragment != null) {
                     callWebServiceforMessages(); //get new list of messages instead of show notificaiton inapp
 
