@@ -6,9 +6,9 @@
     android:name="tcss450.uw.edu.chapp.ContactFragment"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:layout_marginLeft="8dp"
-    android:layout_marginTop="16dp"
-    android:layout_marginRight="8dp"
+    android:layout_marginLeft="0dp"
+    android:layout_marginTop="0dp"
+    android:layout_marginRight="0dp"
     app:layoutManager="android.support.v7.widget.LinearLayoutManager"
     tools:context=".ConnectionsFragment"
     tools:listitem="@layout/fragment_connections_outgoing" />

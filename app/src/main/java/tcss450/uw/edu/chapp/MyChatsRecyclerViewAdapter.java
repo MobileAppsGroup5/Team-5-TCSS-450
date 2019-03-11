@@ -21,6 +21,7 @@ import tcss450.uw.edu.chapp.utils.SendPostAsyncTask;
 
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
+import java.util.Collections;
 import java.util.List;
 import java.util.StringJoiner;
 
@@ -42,15 +43,28 @@ public class MyChatsRecyclerViewAdapter extends RecyclerView.Adapter<MyChatsRecy
     private final Credentials mCreds;
     private final Context mContext;
     private final String mJwToken;
+    private boolean mCompactMode;
 
     private PropertyChangeSupport myPcs = new PropertyChangeSupport(this);
 
-    public MyChatsRecyclerViewAdapter(List<Chat> items, OnListFragmentInteractionListener listener, Credentials credentials, Context context, String jwToken) {
-        mValues = items;
+    public MyChatsRecyclerViewAdapter(List<Chat> items, OnListFragmentInteractionListener listener,
+                                      Credentials credentials, Context context, String jwToken, boolean compactMode) {
+        Collections.reverse(items);
+        // if in compact mode, limit to first 5
+        if (compactMode) {
+            if (items.size() < 5) {
+                mValues = items;
+            } else {
+                mValues = items.subList(0, 5);
+            }
+        } else {
+            mValues = items;
+        }
         mListener = listener;
         mCreds = credentials;
         mContext = context;
         mJwToken = jwToken;
+        mCompactMode = compactMode;
     }
 
     @Override
@@ -100,7 +114,18 @@ public class MyChatsRecyclerViewAdapter extends RecyclerView.Adapter<MyChatsRecy
         } else {
             holder.mMembersView.setText("Members: " + joiner.toString());
         }
+        if (holder.getItemViewType() == ACCEPTED) {
+            // unread message icon only show up when chat room accepted
+            TextView unreadView =  (TextView) holder.mView.findViewById(R.id.list_item_chat_unread);
+            if (holder.mItem.getLastMessageUsername() != null) {
+                if (!holder.mItem.getLastMessageUsername().equals(mCreds.getUsername()) && !holder.mItem.isHasBeenRead()) {
+                    //check last sent message not from self and also has not been read
+                    //update unread view
+                    unreadView.setText("UNREAD");
+                }
+            }
 
+        }
         if (holder.getItemViewType() == NOT_ACCEPTED) {
             // Accept only shows up if this is not accepted
             holder.mView.findViewById(R.id.image_accept_chat).setOnClickListener(this::handleAcceptChat);
@@ -220,6 +245,7 @@ public class MyChatsRecyclerViewAdapter extends RecyclerView.Adapter<MyChatsRecy
         public final View mView;
         public final TextView mNameView;
         public final TextView mMembersView;
+        public final TextView mUnreadView;
         public Chat mItem;
 
         public ViewHolder(View view) {
@@ -227,6 +253,8 @@ public class MyChatsRecyclerViewAdapter extends RecyclerView.Adapter<MyChatsRecy
             mView = view;
             mNameView = (TextView) view.findViewById(R.id.list_item_chat_name);
             mMembersView = (TextView) view.findViewById(R.id.list_item_chat_members);
+            mUnreadView = (TextView) view.findViewById(R.id.list_item_chat_unread);
+
         }
 
         @Override

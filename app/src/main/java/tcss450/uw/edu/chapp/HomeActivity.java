@@ -10,10 +10,11 @@ import android.location.Location;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
-import android.support.v4.app.FragmentTransaction;
 import android.support.design.widget.NavigationView;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.view.MenuItemCompat;
 import android.support.v4.widget.DrawerLayout;
@@ -55,7 +56,7 @@ import tcss450.uw.edu.chapp.weather.WeatherLocationFragment;
  * Fragment.
  *
  * @author Mike Osborne, Trung Thai, Michael Josten, Jessica Medrzycki
- * @version 02/25/19
+ * @version 03/08/19
  *
  */
 public class HomeActivity extends AppCompatActivity
@@ -67,32 +68,26 @@ public class HomeActivity extends AppCompatActivity
         ConnectionsContainerFragment.OnConnectionInformationFetchListener,
         ChatsContainerFragment.OnChatInformationFetchListener,
         WeatherFragment.OnFragmentInteractionListener,
+        WeatherLocationFragment.OnListFragmentInteractionListener,
         CurrentWeatherFragment.OnCurrentWeatherFragmentInteractionListener,
-        WeatherLocationFragment.OnListFragmentInteractionListener {
+        LandingPage.OnLandingPageReturnListener {
 
+    /** CREDENTIAL CONSTANTS */
     private Credentials mCreds;
     private String mJwToken;
-
     private PushMessageReceiver mPushMessageReciever;
 
-    //NavDrawer Icon constants
+    /** NAVIGATION CONSTANTS */
     private BadgeDrawerIconDrawable badgeDrawable;
     private TextView mChatCounterView;
     private TextView mContactCounterView;
-    //tells if the user unread notifications
-    private boolean mHasNotifications = false;
-
-    private ArrayList<String> unreadChatList; //holds the chatIDs received from notifications
-    private int mChatCounter;
-    private int mContactCounter;
-
-    private static final String CHANNEL_ID = "1";
-
-    //currently open fragment
-    private Fragment mChatfragment;
-
-    // The list of connections for the current user.
+    private boolean mHasConnectionNotifications = false;
+    private boolean mHasMessageNotifications = false;
     private ArrayList<Connection> mConnections;
+    private ChatsContainerFragment mCurrentChatsContainerInstance;
+    private ConnectionsContainerFragment mCurrentConnectionsContainerInstance;
+
+
 
     // The list of chats for the current user
     private ArrayList<Chat> mChats;
@@ -109,21 +104,20 @@ public class HomeActivity extends AppCompatActivity
         // Initialize drawer icon and it's ActionBarDrawerToggle object to
         // manage the on and off red dot for notifications.
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
-        ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(this, drawer,toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
+        ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(this, drawer,toolbar,
+                R.string.navigation_drawer_open, R.string.navigation_drawer_close);
         badgeDrawable = new BadgeDrawerIconDrawable(getSupportActionBar().getThemedContext());
         toggle.setDrawerArrowDrawable(badgeDrawable);
         drawer.addDrawerListener(toggle);
         toggle.syncState();
-        badgeDrawable.setEnabled(false);
+
 
         //initialize the navigation drawer counter badges
-        mChatCounterView = (TextView) MenuItemCompat.getActionView(navigationView.getMenu().
-                findItem(R.id.nav_chat));
-        mContactCounterView = (TextView) MenuItemCompat.getActionView(navigationView.getMenu().
-                findItem(R.id.nav_connections));
+        mChatCounterView = (TextView) MenuItemCompat.getActionView(navigationView.getMenu().findItem(R.id.nav_chat));
+        mContactCounterView = (TextView) MenuItemCompat.getActionView(navigationView.getMenu().findItem(R.id.nav_connections));
         initializeCountDrawer(mChatCounterView);
         initializeCountDrawer(mContactCounterView);
-        unreadChatList = new ArrayList<String>();
+
 
 
         // Set the logout listener for the navigation drawer
@@ -140,39 +134,29 @@ public class HomeActivity extends AppCompatActivity
         mCreds = (Credentials) getIntent().getSerializableExtra(getString(R.string.key_credentials));
         mJwToken = getIntent().getStringExtra(getString(R.string.keys_intent_jwt));
 
-
-        // Load SuccessFragment into content_home (aka fragment_container)
+        checkForNotifications();
         if (savedInstanceState == null) {
-
-
             if (findViewById(R.id.fragment_container) != null) {
-                //getIntent().getBooleanExtra(getString(R.string.keys_intent_notification_msg), false) OLD IF STATEMENT
 
-                //getIntent().getExtras().getString("type").equals("msg") ||
-                //                        getIntent().getExtras().getString("type").equals("topic_msg")
-
-                //getIntent().getExtras().containsKey("type")
                 if (getIntent().getBooleanExtra(getString(R.string.keys_intent_notification_msg), false)) {
+                    //Was the Bundle received from Main Activity spurred by a message notification?
                     Bundle args = new Bundle();
                     // Get value from intent and put it in fragment args
+                    Fragment chatfragment = new MessagingContainerFragment();
                     String chatid = getIntent().getStringExtra(getString(R.string.keys_intent_chatId));
-                    args.putSerializable(getString(R.string.key_credentials)
-                            , mCreds);
-                    args.putSerializable(getString(R.string.keys_intent_jwt)
-                            , mJwToken);
-                    args.putSerializable(getString(R.string.key_chatid),
-                            chatid);
-                    mChatfragment = new MessagingContainerFragment();
-
-                    mChatfragment.setArguments(args);
+                    args.putSerializable(getString(R.string.key_credentials), mCreds);
+                    args.putSerializable(getString(R.string.keys_intent_jwt), mJwToken);
+                    args.putSerializable(getString(R.string.key_chatid), chatid);
+                    chatfragment.setArguments(args);
 
                     getSupportFragmentManager()
                             .beginTransaction()
-                            .replace(R.id.fragment_container, mChatfragment)
+                            .replace(R.id.fragment_container, chatfragment)
                             .commit();
 
-                    //If the HomeActivity was loaded from the WeatherMapActivity
+
                 } else if (getIntent().getBooleanExtra(getString(R.string.keys_weather_from_map_activity), false)) {
+                    //If the HomeActivity was loaded from the WeatherMapActivity
                     WeatherFragment wf = new WeatherFragment();
                     //add location from MapActivity as fragment argument
                     Bundle args = new Bundle();
@@ -183,6 +167,27 @@ public class HomeActivity extends AppCompatActivity
                     wf.setArguments(args);
                     //load the weather fragment
                     loadFragment(wf);
+
+
+                } else if (getIntent().getBooleanExtra(getString(R.string.keys_intent_notification_connection), false)){
+                    //Was the Bundle received from Main Activity spurred by a connection notification?
+                    //load the connections fragment
+                    mCurrentConnectionsContainerInstance = new ConnectionsContainerFragment();
+                    Bundle args = new Bundle();
+                    args.putSerializable(getString(R.string.keys_intent_jwt), mJwToken);
+                    args.putSerializable(getString(R.string.key_credentials), mCreds);
+                    mCurrentConnectionsContainerInstance.setArguments(args);
+                    loadFragment(mCurrentConnectionsContainerInstance);
+
+                } else if (getIntent().getBooleanExtra(getString(R.string.keys_intent_notification_conversation), false)){
+                    //Was the Bundle received from Main Activity spurred by a conversation request notification?
+                    //load the chats container fragment
+                    mCurrentChatsContainerInstance = new ChatsContainerFragment();
+                    Bundle args = new Bundle();
+                    args.putSerializable(getString(R.string.keys_intent_jwt), mJwToken);
+                    args.putSerializable(getString(R.string.key_credentials), mCreds);
+                    mCurrentChatsContainerInstance.setArguments(args);
+                    loadFragment(mCurrentChatsContainerInstance);
 
                 } else {
                     loadHomeLandingPage();
@@ -238,14 +243,11 @@ public class HomeActivity extends AppCompatActivity
      */
     private void loadHomeLandingPage(){
         Fragment frag = new LandingPage();
-        CurrentWeatherFragment cwf = new CurrentWeatherFragment();
         Bundle args = new Bundle();
         args.putSerializable(getString(R.string.key_credentials)
                 , mCreds);
         args.putSerializable(getString(R.string.keys_intent_jwt)
                 , mJwToken);
-
-
         frag.setArguments(args);
 
         // update homeactivity information with the latest
@@ -255,16 +257,48 @@ public class HomeActivity extends AppCompatActivity
 //        loadFragment(successFragment);
         getSupportFragmentManager().popBackStack(null, FragmentManager.POP_BACK_STACK_INCLUSIVE);
 
-        //TODO: use transaction to populate the dynamic home landing page
-        FragmentTransaction transaction = getSupportFragmentManager()
-                .beginTransaction()
-                .replace(R.id.fragment_container, frag);
-        transaction.replace(R.id.framelayout_homelanding_weather, cwf);
+        // populate framelayouts
+        mCurrentChatsContainerInstance = new ChatsContainerFragment();
+        Bundle args2 = new Bundle();
+        args2.putSerializable(getString(R.string.key_credentials)
+                , mCreds);
+        args2.putSerializable(getString(R.string.keys_intent_jwt)
+                , mJwToken);
+        args2.putSerializable(getString(R.string.key_flag_compact_mode), true);
+        mCurrentChatsContainerInstance.setArguments(args2);
 
+        mCurrentConnectionsContainerInstance = new ConnectionsContainerFragment();
+        Bundle args3 = new Bundle();
+        args3.putSerializable(getString(R.string.key_credentials)
+                , mCreds);
+        args3.putSerializable(getString(R.string.keys_intent_jwt)
+                , mJwToken);
+        args3.putSerializable(getString(R.string.key_flag_compact_mode), true);
+        mCurrentConnectionsContainerInstance.setArguments(args3);
+
+        CurrentWeatherFragment cwf = new CurrentWeatherFragment();
+
+
+        getSupportFragmentManager()
+                .beginTransaction()
+                .replace(R.id.fragment_container, frag, "1")
+                .replace(R.id.framelayout_homelanding_weather, cwf, "2")
+                .replace(R.id.framelayout_homelanding_contactlist, mCurrentConnectionsContainerInstance, "3")
+                .replace(R.id.framelayout_homelanding_chatlist, mCurrentChatsContainerInstance, "4")
+                .commit();
+
+
+        // make sure wait fragment is removed
+        if (getSupportFragmentManager().findFragmentByTag("WAIT") != null) {
+            getSupportFragmentManager()
+                    .beginTransaction()
+                    .remove(getSupportFragmentManager().findFragmentByTag("WAIT"))
+                    .commit();
+        }
         //transaction.replace(R.id.framelayout_homelanding_email, successFragment);
         //transaction.add(R.id.framelayout_homelanding_chatlist, chats);
 
-        transaction.commit();
+
     }
 
 //    @Override
@@ -290,6 +324,45 @@ public class HomeActivity extends AppCompatActivity
 //        return super.onOptionsItemSelected(item);
 //    }
 
+    private void checkForNotifications(){
+        callWebServiceforChats(); //updates mChats
+        callWebServiceforConnections(); //update mConnections
+
+        if (mConnections!= null) {
+            for (Connection contact : mConnections) {
+                //usernameB is the recipient of the request
+                if (contact.getVerified() == 0 && contact.getUsernameB().equals(mCreds.getUsername())) {
+                    //if the user is the recipient of the request and it hasn't been accepted yet
+                    //show notification icons
+                    mHasConnectionNotifications = true;
+                    mContactCounterView.setText("NEW");
+                }
+            }
+        }
+        if (mChats!= null) {
+            for (Chat chat : mChats) {
+                //check if last message in chat was sent by another user
+                //and if that last message has been not been read
+                if (!chat.getLastMessageUsername().equals(mCreds.getUsername()) && !chat.isHasBeenRead()) {
+                    //unread message
+                    mHasMessageNotifications = true;
+                    mContactCounterView.setText("NEW");
+                    return;
+                }
+            }
+        }
+
+        //TODO maybe add in item for checking if chat has been verified. It is same icon on chats not adding for now
+
+        //update badge icon
+        if (mHasConnectionNotifications || mHasMessageNotifications){
+            badgeDrawable.setEnabled(true);
+        } else {
+            badgeDrawable.setEnabled(false);
+        }
+
+    }
+
     /**
      * Navigation drawer item listener.
      * When action item has been clicked, the counter for notifications gets set to not show.
@@ -312,28 +385,30 @@ public class HomeActivity extends AppCompatActivity
 
             case R.id.nav_connections:
 
+                if (!mHasMessageNotifications){ //make sure there are no other pending notifications
+                    badgeDrawable.setEnabled(false);
+                }
                 mContactCounterView.setText("");
-                badgeDrawable.setEnabled(false);
-//                if (!mHasNotifications) {
-//                    badgeDrawable.setEnabled(false);
-//                }
-                Fragment frag = new ConnectionsContainerFragment();
+                mCurrentConnectionsContainerInstance = new ConnectionsContainerFragment();
                 Bundle args = new Bundle();
                 args.putSerializable(getString(R.string.keys_intent_jwt), mJwToken);
                 args.putSerializable(getString(R.string.key_credentials), mCreds);
-                frag.setArguments(args);
-                loadFragment(frag);
+//                args.putStringArrayList(getString(R.string.keys_intent_chatId), unreadChatList);
+                mCurrentConnectionsContainerInstance.setArguments(args);
+                loadFragment(mCurrentConnectionsContainerInstance);
                 break;
 
             case R.id.nav_chat:
                 mChatCounterView.setText("");
-                badgeDrawable.setEnabled(false);
-                frag = new ChatsContainerFragment();
+                mCurrentChatsContainerInstance = new ChatsContainerFragment();
+                if (!mHasConnectionNotifications){ //make sure there are no other pending notifications
+                    badgeDrawable.setEnabled(false);
+                }
                 args = new Bundle();
                 args.putSerializable(getString(R.string.keys_intent_jwt), mJwToken);
                 args.putSerializable(getString(R.string.key_credentials), mCreds);
-                frag.setArguments(args);
-                loadFragment(frag);
+                mCurrentChatsContainerInstance.setArguments(args);
+                loadFragment(mCurrentChatsContainerInstance);
                 break;
 
             case R.id.nav_weather:
@@ -569,7 +644,7 @@ public class HomeActivity extends AppCompatActivity
                             .build());
                 }
                 // update the reference in HomeActivity
-                updateChats(mChats);
+                updateChats(chats);
 
 
 
@@ -601,14 +676,14 @@ public class HomeActivity extends AppCompatActivity
      */
     @Override
     public void onListFragmentInteraction(Chat item) {
-        mChatfragment = new MessagingContainerFragment();             //MessagingContainerFragment chatfrag
+        MessagingContainerFragment chatfragment = new MessagingContainerFragment();
         Bundle args = new Bundle();
         args.putSerializable(getString(R.string.keys_intent_jwt), mJwToken);
         args.putSerializable(getString(R.string.key_credentials), mCreds);
         args.putSerializable(getString(R.string.key_chat), item);
         args.putSerializable(getString(R.string.key_intent_connections), mConnections);
-        mChatfragment.setArguments(args);
-        loadFragment(mChatfragment);
+        chatfragment.setArguments(args);
+        loadFragment(chatfragment);
     }
 
 
@@ -627,6 +702,11 @@ public class HomeActivity extends AppCompatActivity
         mConnections = connections;
     }
 
+    /**
+     * Part of the interface from ChatsContainer Fragment that sends in the updated list
+     * of all chats for the user on create of the chatscontainer.
+     * @param chats     list of chats user is in
+     */
     @Override
     public void updateChats(ArrayList<Chat> chats) {
         mChats = chats;
@@ -654,22 +734,32 @@ public class HomeActivity extends AppCompatActivity
         // don't do anything for now, messages aren't able to be interacted with
     }
 
-    /**
-     * From the MessagingContainerFragment interface that updates the count of unread
-     * chat Ids from notifications.
-     * @param chatId    chatId to add to the list
-     */
-    @Override
-    public void incrementUnreadChatNotifications(String chatId) {
+//    /**
+//     * From the MessagingContainerFragment interface that updates the count of unread
+//     * chat Ids from notifications.
+//     * @param chatId    chatId to add to the list
+//     */
+//    @Override
+//    public void incrementUnreadChatNotifications(String chatId) {
+//
+//        //adds the chatId to list of unread chats
+//        //show badge on home button.
+//        //show number on nav menu chat button
+//        mHasNotifications = true;
+//        unreadChatList.add(chatId);
+//        badgeDrawable.setEnabled(true);
+//        mChatCounterView.setText("NEW");
+//        //show badge on recycler view item in all chats.
+//    }
 
-        //adds the chatId to list of unread chats
-        //show badge on home button.
-        //show number on nav menu chat button
-        mHasNotifications = true;
-        unreadChatList.add(chatId);
-        badgeDrawable.setEnabled(true);
-        mChatCounterView.setText(unreadChatList.size());
-        //show badge on recycler view item in all chats.
+    @Override
+    public void unreadMessageReceivedinOtherChatNotifications(String chatId) {
+
+    }
+
+    @Override
+    public void reloadLandingPage() {
+        loadHomeLandingPage();
     }
 
     /**
@@ -761,42 +851,54 @@ public class HomeActivity extends AppCompatActivity
 
             String typeOfMessage = intent.getStringExtra("type");
             String sender = intent.getStringExtra("sender");
-            String messageText = intent.getStringExtra("message");
-            String chatid = intent.getStringExtra("chatid");
-
-            /*
-             * CASES: For viewing notifications in app
-             *
-             * MSG NOTIFICATIONS
-             * 1. User is viewing OTHER Fragment and msg notification is received.
-             * 2. User is viewing chat room fragment and msg inside of chat is received.
-             * 3. User is viewing chat room fragment and msg from another chat is received.
-             *
-             *
-             *
-            */
-
 
 
             if(typeOfMessage.equals("msg")){ //if received broadcast from message notification.
-                if (findViewById(R.id.fragment_chat) == null){ //case where user is NOT in chat fragment
-                    //update global boolean for badge icon to show
-                    mHasNotifications = true;
-                    unreadChatList.add(chatid);
-                    //update home icon and the counter
-                    badgeDrawable.setEnabled(true);
-                    // commented out because it was crashing in any view other than homeactivity
-//                    mChatCounterView.setText(unreadChatList.size());
+                Log.e("Notification Receiver", "Received message type: msg");
+                callWebServiceforChats(); //update chat list
+                if (findViewById(R.id.chats_container) == null ){ //case where user is NOT in chat list fragment
+                    Log.e("Notification Receiver", "chat fragment not open");
+                    String id = intent.getStringExtra("chatid");
 
-                    //how to add in red dot alongside specific chat room?
-                    //call backend to get all chatIds with unread messages
-                    //then add to global list, increment counts and count views.
-                    Log.e("Notification Receiver", "Received message type: msg");
+                    for (Chat chats : mChats){
+                        if (id.equals(chats.getId()) && !chats.getLastMessageUsername().equals(mCreds.getUsername())){ //check if the message is in a chat room that the user is in
+                            List<String> users = chats.getUsersInChat();
+                            List<Boolean> flags = chats.getAcceptedFlags();
+
+                            //only show notification if user has accepted the chat room invite already
+                            //flag should be true if accepted chatroom request
+                            if (flags.get(users.indexOf(mCreds.getUsername()))) {
+                                Log.e("Notification Receiver", "Updating badge" );
+
+                                mHasMessageNotifications = true;
+                                badgeDrawable.setEnabled(true);
+                                mChatCounterView.setText("NEW");
+                            }
+                            return;
+                        }
+                    }
+
                 }
 
 
-            } else {
-                //add in logic for new connection request, new chat room request
+            } else if(typeOfMessage.equals("conn req")){ //if received broadcast from connection request.
+                if (findViewById(R.id.all_connections_container) == null){ //case where user is NOT in connection fragment
+                    badgeDrawable.setEnabled(true);
+                    mContactCounterView.setText("NEW");
+                    mHasConnectionNotifications = true;
+
+                }
+                mCurrentConnectionsContainerInstance.callWebServiceforConnections();
+                Log.e("Notification Receiver", "Received message type: conn req");
+            } else if(typeOfMessage.equals("convo req")){ //if received broadcast from conversation request.
+                if (findViewById(R.id.chats_container) == null){ //case where user is NOT in chats fragment //fragment_chat
+                    badgeDrawable.setEnabled(true);
+                    mChatCounterView.setText("NEW");
+
+                }
+                mCurrentChatsContainerInstance.callWebServiceforChats();
+                Log.e("RELOAD", "RELOADING CHATS FROM IN APP NOTIFICATION");
+                Log.e("Notification Receiver", "Received message type: convo req");
             }
 
 

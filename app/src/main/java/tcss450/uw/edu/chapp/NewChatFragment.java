@@ -113,6 +113,7 @@ public class NewChatFragment extends Fragment implements AdapterView.OnItemClick
 
                 //set the output text to show the sent message
                 tv.setText("New chat room created!");
+                mAutoCompleteSearchBox.setText("");
 
                 // refresh chats
                 myPcs.firePropertyChange(ChatsContainerFragment.PROPERTY_REFRESH_CHATS,

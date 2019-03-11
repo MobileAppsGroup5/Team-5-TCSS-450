@@ -27,6 +27,7 @@
     <string name="key_chatid">chatid key</string>
     <string name="key_username">username keys</string>
     <string name="key_intent_connections">these are connections</string>
+    <string name="key_flag_compact_mode">run in compact mode</string>
 
     <!-- Added this in Lab 5 -->
     <string name="key_email">email_key</string>
@@ -34,7 +35,9 @@
     <string name="keys_prefs_email">traffic_light_wont_let_me_through</string>
     <string name="keys_prefs_password">see_the_city_see_the_zoo</string>
     <string name="keys_intent_notification_msg">was app started from message notification?</string>
-    <string name="keys_intent_in_app_notification_msg">was in app msg notification clicked?</string>
+    <string name="keys_intent_notification_connection">was app started from connection request?</string>
+    <string name="keys_intent_notification_conversation">was app started from conversation notification?</string>
+
 
     <!-- register keys -->
     <string name="keys_json_register_error">error</string>
