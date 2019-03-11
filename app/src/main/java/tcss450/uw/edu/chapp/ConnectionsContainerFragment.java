@@ -4,6 +4,7 @@ package tcss450.uw.edu.chapp;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -26,6 +27,7 @@ import java.util.List;
 
 import tcss450.uw.edu.chapp.connections.Connection;
 import tcss450.uw.edu.chapp.model.Credentials;
+import tcss450.uw.edu.chapp.utils.PushReceiver;
 import tcss450.uw.edu.chapp.utils.SendPostAsyncTask;
 
 
@@ -39,7 +41,7 @@ public class ConnectionsContainerFragment extends Fragment implements PropertyCh
     private Credentials mCreds;
     private String mJwToken;
     private OnConnectionInformationFetchListener mListener;
-
+    private PushMessageReceiver mPushMessageReciever;
 
     public ConnectionsContainerFragment() {
         // Required empty public constructor
@@ -222,6 +224,11 @@ public class ConnectionsContainerFragment extends Fragment implements PropertyCh
     @Override
     public void onResume() {
         super.onResume();
+        if (mPushMessageReciever == null) {
+            mPushMessageReciever = new PushMessageReceiver();
+        }
+        IntentFilter iFilter = new IntentFilter(PushReceiver.RECEIVED_NEW_MESSAGE);
+        getActivity().registerReceiver(mPushMessageReciever, iFilter);
         callWebServiceforConnections();
     }
 
@@ -240,6 +247,16 @@ public class ConnectionsContainerFragment extends Fragment implements PropertyCh
     public void onDetach() {
         super.onDetach();
         mListener = null;
+        if (mPushMessageReciever != null){
+            getActivity().unregisterReceiver(mPushMessageReciever);
+        }
+    }
+    @Override
+    public void onPause() {
+        super.onPause();
+        if (mPushMessageReciever != null){
+            getActivity().unregisterReceiver(mPushMessageReciever);
+        }
     }
 
     @Override

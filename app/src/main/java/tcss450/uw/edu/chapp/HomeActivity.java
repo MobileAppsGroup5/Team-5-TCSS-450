@@ -782,13 +782,13 @@ public class HomeActivity extends AppCompatActivity
 
             if(typeOfMessage.equals("msg")){ //if received broadcast from message notification.
                 Log.e("Notification Receiver", "Received message type: msg");
-
-                if (findViewById(R.id.chats_container) == null){ //case where user is NOT in chat list fragment
+                callWebServiceforChats(); //update chat list
+                if (findViewById(R.id.chats_container) == null ){ //case where user is NOT in chat list fragment
                     Log.e("Notification Receiver", "chat fragment not open");
                     String id = intent.getStringExtra("chatid");
 
                     for (Chat chats : mChats){
-                        if (id.equals(chats.getId())){ //check if the message is in a chat room that the user is in
+                        if (id.equals(chats.getId()) && !chats.getLastMessageUsername().equals(mCreds.getUsername())){ //check if the message is in a chat room that the user is in
                             List<String> users = chats.getUsersInChat();
                             List<Boolean> flags = chats.getAcceptedFlags();
 
