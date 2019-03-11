@@ -22,6 +22,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import tcss450.uw.edu.chapp.connections.Connection;
 import tcss450.uw.edu.chapp.model.Credentials;
 import tcss450.uw.edu.chapp.utils.SendPostAsyncTask;
 
@@ -33,6 +34,7 @@ public class NewConnectionFragment extends Fragment implements AdapterView.OnIte
     private Credentials mCreds;
     private String mJwToken;
     private List<Credentials> mMemberList;
+    private List<Connection> mConnectionList;
     private String[] searchBySelections;
     private AutoCompleteTextView mAutoCompleteSearchBox;
     private Spinner mMemberSearchBySpinner;
@@ -57,6 +59,7 @@ public class NewConnectionFragment extends Fragment implements AdapterView.OnIte
         super.onCreate(savedInstanceState);
         if (getArguments() != null) {
             mMemberList = new ArrayList<>(Arrays.asList((Credentials[])getArguments().getSerializable(ARG_CRED_LIST)));
+            mConnectionList = (ArrayList<Connection>) getArguments().getSerializable(getString(R.string.key_intent_connections));
             mJwToken = (String) getArguments().getSerializable(getString(R.string.keys_intent_jwt));
             mCreds = (Credentials) getArguments().getSerializable(getString(R.string.key_credentials));
 
@@ -73,10 +76,23 @@ public class NewConnectionFragment extends Fragment implements AdapterView.OnIte
         lastNameList = new ArrayList<>();
 
         mMemberList.forEach(credentials -> {
-            userNameList.add(credentials.getUsername());
-            emailList.add(credentials.getEmail());
-            firstNameList.add(credentials.getFirstName());
-            lastNameList.add(credentials.getLastName());
+            boolean shouldAdd = true;
+            // don't show connections that have already been made
+            for (int i = 0; i < mConnectionList.size(); i++) {
+                if ((credentials.getUsername().equals(mConnectionList.get(i).getUsernameA())
+                        && mCreds.getUsername().equals(mConnectionList.get(i).getUsernameB()))
+                    || (credentials.getUsername().equals(mConnectionList.get(i).getUsernameB())
+                        && mCreds.getUsername().equals(mConnectionList.get(i).getUsernameA()))) {
+                    shouldAdd = false;
+                }
+            }
+            if (shouldAdd) {
+                Log.e("adding", credentials.getUsername());
+                userNameList.add(credentials.getUsername());
+                emailList.add(credentials.getEmail());
+                firstNameList.add(credentials.getFirstName());
+                lastNameList.add(credentials.getLastName());
+            }
         });
 
         // Handle collisions in non-unique fields.
@@ -187,7 +203,7 @@ public class NewConnectionFragment extends Fragment implements AdapterView.OnIte
 
             } else {
                 // error
-                tv.setText("Error, that user does not exist.");
+                tv.setText("Error, did you already send a request?");
                 Log.e("CRASH", result);
             }
         } catch (JSONException e) {

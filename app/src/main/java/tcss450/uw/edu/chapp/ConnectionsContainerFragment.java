@@ -118,6 +118,7 @@ public class ConnectionsContainerFragment extends Fragment implements PropertyCh
                 args.putSerializable(NewConnectionFragment.ARG_CRED_LIST, credsAsArray);
                 args.putSerializable(getString(R.string.key_credentials), mCreds);
                 args.putSerializable(getString(R.string.keys_intent_jwt), mJwToken);
+                args.putSerializable(getString(R.string.key_intent_connections), mConnections);
                 NewConnectionFragment newConnectionFrag = new NewConnectionFragment();
                 newConnectionFrag.setArguments(args);
 
