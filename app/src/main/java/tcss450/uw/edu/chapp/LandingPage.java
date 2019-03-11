@@ -49,13 +49,13 @@ public class LandingPage extends Fragment {
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         View v = inflater.inflate(R.layout.fragment_landing_page, container, false);
-        if (mAlreadyLoaded) {
-            mListener.reloadLandingPage();
-        }
-
-        if (savedInstanceState == null && !mAlreadyLoaded) {
-            mAlreadyLoaded = true;
-        }
+//        if (mAlreadyLoaded) {
+//            mListener.reloadLandingPage();
+//        }
+//
+//        if (savedInstanceState == null && !mAlreadyLoaded) {
+//            mAlreadyLoaded = true;
+//        }
 
 
         TextView centerText = v.findViewById(R.id.text_success_email2);

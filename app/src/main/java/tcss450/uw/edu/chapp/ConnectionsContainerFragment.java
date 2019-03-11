@@ -266,13 +266,6 @@ public class ConnectionsContainerFragment extends Fragment implements PropertyCh
             getActivity().unregisterReceiver(mPushMessageReciever);
         }
     }
-    @Override
-    public void onPause() {
-        super.onPause();
-        if (mPushMessageReciever != null){
-            getActivity().unregisterReceiver(mPushMessageReciever);
-        }
-    }
 
     @Override
     public void propertyChange(PropertyChangeEvent evt) {

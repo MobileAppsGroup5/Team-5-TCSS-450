@@ -358,14 +358,6 @@ public class ChatsContainerFragment extends Fragment implements PropertyChangeLi
         mListener = null;
     }
 
-    @Override
-    public void onPause() {
-        super.onPause();
-        if (mPushMessageReciever != null){
-            getActivity().unregisterReceiver(mPushMessageReciever);
-        }
-    }
-
 
     @Override
     public void propertyChange(PropertyChangeEvent evt) {

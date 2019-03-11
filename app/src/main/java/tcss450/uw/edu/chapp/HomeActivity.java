@@ -10,6 +10,7 @@ import android.location.Location;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.design.widget.NavigationView;
@@ -256,12 +257,6 @@ public class HomeActivity extends AppCompatActivity
 //        loadFragment(successFragment);
         getSupportFragmentManager().popBackStack(null, FragmentManager.POP_BACK_STACK_INCLUSIVE);
 
-        // swap in the landingpage
-        getSupportFragmentManager()
-                .beginTransaction()
-                .replace(R.id.fragment_container, frag)
-                .commit();
-
         // populate framelayouts
         mCurrentChatsContainerInstance = new ChatsContainerFragment();
         Bundle args2 = new Bundle();
@@ -283,12 +278,15 @@ public class HomeActivity extends AppCompatActivity
 
         CurrentWeatherFragment cwf = new CurrentWeatherFragment();
 
+
         getSupportFragmentManager()
                 .beginTransaction()
-                .replace(R.id.framelayout_homelanding_weather, cwf)
-                .replace(R.id.framelayout_homelanding_contactlist, mCurrentConnectionsContainerInstance)
-                .replace(R.id.framelayout_homelanding_chatlist, mCurrentChatsContainerInstance)
+                .replace(R.id.fragment_container, frag, "1")
+                .replace(R.id.framelayout_homelanding_weather, cwf, "2")
+                .replace(R.id.framelayout_homelanding_contactlist, mCurrentConnectionsContainerInstance, "3")
+                .replace(R.id.framelayout_homelanding_chatlist, mCurrentChatsContainerInstance, "4")
                 .commit();
+
 
         // make sure wait fragment is removed
         if (getSupportFragmentManager().findFragmentByTag("WAIT") != null) {
