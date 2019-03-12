@@ -852,12 +852,13 @@ public class HomeActivity extends AppCompatActivity
      /**
       * A BroadcastReceiver that listens for messages sent from PushReceiver while
       * the Home Activity is open (i.e. in App Notifications)
-     */
-    private class PushMessageReceiver extends BroadcastReceiver {
+      */
+     private class PushMessageReceiver extends BroadcastReceiver {
 
          @Override
          public void onReceive(Context context, Intent intent) {
              Log.e("Home Notification Receiver", "Received broadcast in home activity");
+             Log.e("Home Notification Receiver", intent.getStringExtra("message"));
 
              String typeOfMessage = intent.getStringExtra("type");
              String sender = intent.getStringExtra("sender");
@@ -879,11 +880,11 @@ public class HomeActivity extends AppCompatActivity
                                  //check if the message is in a chat room that the user is in
                                  List<String> users = chats.getUsersInChat();
                                  List<Boolean> flags = chats.getAcceptedFlags();
-                                 Log.e("Notification Receiver", "Last message sent from: " + chats.getLastMessageUsername());
+                                 Log.e("Home Notification Receiver", "Last message sent from: " + chats.getLastMessageUsername());
                                  //only show notification if user has accepted the chat room invite already
                                  //flag should be true if accepted chatroom request
                                  if (flags.get(users.indexOf(mCreds.getUsername()))) {
-                                     Log.e("Notification Receiver", "Updating badge");
+                                     Log.e("Home Notification Receiver", "Updating badge");
 
                                      mHasMessageNotifications = true;
                                      badgeDrawable.setEnabled(true);
@@ -930,46 +931,61 @@ public class HomeActivity extends AppCompatActivity
 //                }
 
 
-                 } else if (typeOfMessage.equals("conn req")) { //if received broadcast from connection request.
-                     if (mCurrentConnectionsContainerInstance.mCompactMode || (findViewById(R.id.framelayout_homelanding_contactlist) == null)
-                             && findViewById(R.id.connections_container) == null) {
-                         Log.e("Notification Receiver", "Received message type: conn req");
+             } else if (typeOfMessage.equals("conn req")) { //if received broadcast from connection request.
+                 Log.e("Home Notification Receiver", "Received message type: conn req");
+                 if (mCurrentConnectionsContainerInstance.mCompactMode && findViewById(R.id.connections_container) != null) {
+                     //if viewing the home activity
 
-                         //case where user is in HomeFragment
-                         //or if contact fragment == null
-                         badgeDrawable.setEnabled(true);
-                         mContactCounterView.setText("NEW");
-                         mHasConnectionNotifications = true;
-                         Log.e("Notification Receiver", "Updated Badge for conn req");
+                     badgeDrawable.setEnabled(true);
+                     mContactCounterView.setText("NEW");
+                     mHasConnectionNotifications = true;
+                     Log.e("Home Notification Receiver", "Updated Badge for conn req");
 
-                     }
+                 } else if(findViewById(R.id.connections_container) != null){
+                     Log.e("Home Notification Receiver", "connections_container not null");
+
+                 } else if(findViewById(R.id.connections_container) == null){
+                     badgeDrawable.setEnabled(true);
+                     mContactCounterView.setText("NEW");
+                     mHasConnectionNotifications = true;
+                     Log.e("Home Notification Receiver", "Updated Badge for conn req, connection container == null");
+                 }
 //                if (findViewById(R.id.connections_container) != null || findViewById(R.id.framelayout_homelanding_contactlist) != null){
 //                    //case where user is viewing contact fragment
 //                    mCurrentConnectionsContainerInstance.callWebServiceforConnections();
 //                }
-                 } else if (typeOfMessage.equals("convo req")) { //if received broadcast from conversation request.
-                    if (mCurrentChatsContainerInstance.mCompactMode || (findViewById(R.id.framelayout_homelanding_chatlist) == null)
-                             && findViewById(R.id.chats_container) == null) {
-                         //case where user is in HomeFragment
-                         badgeDrawable.setEnabled(true);
-                         mChatCounterView.setText("NEW");
-                         Log.e("RELOAD", "RELOADING CHATS FROM IN APP NOTIFICATION");
-                         mCurrentChatsContainerInstance.callWebServiceforChats();
+             } else if (typeOfMessage.equals("convo req")) { //if received broadcast from conversation request.
+                 Log.e("Home Notification Receiver", "Received message type: convo req");
+                 if (mCurrentChatsContainerInstance.mCompactMode && findViewById(R.id.chats_container) != null) {
 
-                    }
-                    if (findViewById(R.id.chats_container) != null ){ //|| findViewById(R.id.framelayout_homelanding_chatlist) != null
-                        //case where user is viewing chat fragment
-                        mCurrentChatsContainerInstance.callWebServiceforChats();
-                        Log.e("Notification Receiver", "Convo req: updating chats with webservice");
-                    }
-                    }
+                     //case where user is in HomeFragment
 
-                    Log.e("Notification Receiver", "Received message type: convo req");
+                     Log.e("Home Notification Receiver", "Convo req: Calling webservice for chats & updating badge");
+                     badgeDrawable.setEnabled(true);
+                     mChatCounterView.setText("NEW");
+                     mHasMessageNotifications = true;
+                     mCurrentChatsContainerInstance.callWebServiceforChats();
+
+                 } else if (findViewById(R.id.chats_container) != null) { //|| findViewById(R.id.framelayout_homelanding_chatlist) != null
+                     //case where user is viewing chat fragment
+                     mCurrentChatsContainerInstance.callWebServiceforChats();
+                     Log.e("Notification Receiver", "Convo req: updating chats with webservice");
+                 } else if (findViewById(R.id.chats_container) == null) {
+                     //not in home activity or chats fragment, so show badge
+
+                     Log.e("Home Notification Receiver", "Convo req: Calling webservice for chats & updating badge");
+                     badgeDrawable.setEnabled(true);
+                     mHasMessageNotifications = true;
+                     mChatCounterView.setText("NEW");
+
                  }
-
-
              }
 
+         }
+
+
      }
+
+}
 
 
