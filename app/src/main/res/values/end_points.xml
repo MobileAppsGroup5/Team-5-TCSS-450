@@ -27,6 +27,9 @@
     <string name="ep_weather_current">current</string>
     <string name="ep_weather_24h">24h</string>
     <string name="ep_weather_10d">10d</string>
+    <string name="ep_weather_save">save</string>
+    <string name="ep_weather_get_locations">getWeather</string>
+    <string name="ep_weather_delete_location">delete</string>
     <string name="ep_connections_base">connections</string>
     <string name="ep_connections_get_connections_and_requests">getAllConnectionsAndRequests</string>
     <string name="ep_connections_accept_request">acceptRequest</string>

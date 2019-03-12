@@ -51,7 +51,7 @@ public class ForgotPasswordFragment extends Fragment implements View.OnClickList
                              Bundle savedInstanceState) {
 
         View view = inflater.inflate(R.layout.fragment_forgot_password, container, false);
-        mResetPasswordButton = (Button) view.findViewById(R.id.btn_reset_password);
+        mResetPasswordButton = view.findViewById(R.id.btn_reset_password);
         mResetPasswordButton.setOnClickListener(this::sendForgotEmail);
 
 

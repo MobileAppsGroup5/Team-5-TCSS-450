@@ -50,6 +50,7 @@ import tcss450.uw.edu.chapp.R;
 import tcss450.uw.edu.chapp.WaitFragment;
 import tcss450.uw.edu.chapp.model.Credentials;
 import tcss450.uw.edu.chapp.utils.GetAsyncTask;
+import tcss450.uw.edu.chapp.utils.SendPostAsyncTask;
 import tcss450.uw.edu.chapp.weather.WeatherHourContent.WeatherHourItem;
 import tcss450.uw.edu.chapp.weather.WeatherDayContent.WeatherDayItem;
 
@@ -63,8 +64,7 @@ import tcss450.uw.edu.chapp.weather.WeatherDayContent.WeatherDayItem;
  *
  * @author Mike Osborne, Trung Thai, Michael Josten, Jessica Medrzycki
  */
-public class WeatherFragment extends Fragment implements
-        WeatherLocationFragment.OnListFragmentInteractionListener{
+public class WeatherFragment extends Fragment {
 
     /*
      * desired interval for location updates, inexact. updates may be more or less frequent
@@ -86,8 +86,10 @@ public class WeatherFragment extends Fragment implements
     private OnFragmentInteractionListener mListener;
 
     private Location mCurrentLocation = null;
+    private String mZipcode = "";
     private String mCurrentCity = "";
     private Location mMapLocation = null;
+    private Location mMapStartLocation = null;
     private Location mLoadLocation = null;
     private Credentials mCreds;
     private String mJwt;
@@ -120,6 +122,10 @@ public class WeatherFragment extends Fragment implements
         Bundle args = getArguments();
         mMapLocation = args.getParcelable(getString(R.string.keys_weather_location_from_map));
         mLoadLocation = args.getParcelable(getString(R.string.keys_weather_location_load));
+        mZipcode = args.getInt(getString(R.string.keys_weather_location_zip)) + "";
+        Log.wtf("WEATHER", mZipcode);
+        if (mZipcode.equals("0"))
+            mZipcode = "";
 
         if (ActivityCompat.checkSelfPermission(getActivity(), Manifest.permission.ACCESS_FINE_LOCATION)
                 != PackageManager.PERMISSION_GRANTED
@@ -150,8 +156,12 @@ public class WeatherFragment extends Fragment implements
     @Override
     public void onStart() {
         super.onStart();
-        if (mLoadLocation != null) {
-            setWeather(mLoadLocation);
+        Log.wtf("WEATHER ZIP", mZipcode);
+        if (mLoadLocation != null && (mLoadLocation.getLatitude() != 0 && mLoadLocation.getLongitude() != 0)) {
+                setWeather(mLoadLocation);
+        } else if (!mZipcode.isEmpty()) {
+            Log.wtf("WEATHER ZIP IS NOT EMPTY", mZipcode);
+           setWeather(mZipcode);
         } else if (mMapLocation != null) {
             //map location exists
             setWeather(mMapLocation);
@@ -214,10 +224,10 @@ public class WeatherFragment extends Fragment implements
      * @param visible boolean if current weather fragment is visible
      */
     private void setWeatherCurrentVisible(boolean visible) {
-        TextView cityText = (TextView) getActivity().findViewById(R.id.weather_city_text);
-        TextView condText = (TextView) getActivity().findViewById(R.id.weather_condition_text);
-        TextView tempText = (TextView) getActivity().findViewById(R.id.weather_temp_text);
-        ImageView iconView = (ImageView) getActivity().findViewById(R.id.weather_current_icon);
+        TextView cityText = getActivity().findViewById(R.id.weather_city_text);
+        TextView condText = getActivity().findViewById(R.id.weather_condition_text);
+        TextView tempText = getActivity().findViewById(R.id.weather_temp_text);
+        ImageView iconView = getActivity().findViewById(R.id.weather_current_icon);
 
         if (visible) {
             cityText.setVisibility(View.VISIBLE);
@@ -290,6 +300,7 @@ public class WeatherFragment extends Fragment implements
                         if (zipcode.isEmpty()) {
                             editText.setError(getString(R.string.weather_dialog_postal_code_error));
                         } else {
+                            mZipcode = zipcode;
                             setWeather(zipcode);
                             dialog.dismiss();
                         }
@@ -330,7 +341,7 @@ public class WeatherFragment extends Fragment implements
                     Intent intent = new Intent(getActivity(), MapsActivity.class);
                     //pass current location to the map activity
                     //Log.e("WEATHER_DEBUG", mCurrentLocation.toString());
-                    intent.putExtra(getString(R.string.keys_weather_map_intent_location), mCurrentLocation);
+                    intent.putExtra(getString(R.string.keys_weather_map_intent_location), mMapStartLocation);
                     Bundle args = getArguments();
                     if (args != null) {
                         intent.putExtras(args);
@@ -360,26 +371,46 @@ public class WeatherFragment extends Fragment implements
      */
     private boolean saveLocation(MenuItem menuItem) {
         Log.i("WEATHER_OPTION_SELECT", "save location");
-        String saveLocation = "city:" + mCurrentCity + ",lat:" + mCurrentLocation.getLatitude() +
-                ",lon:" + mCurrentLocation.getLongitude();
+        Uri uri = new Uri.Builder()
+                .scheme("https")
+                .appendPath(getString(R.string.ep_base_url))
+                .appendPath(getString(R.string.ep_weather_base))
+                .appendPath(getString(R.string.ep_weather_save))
+                .build();
 
-        SharedPreferences prefs = getActivity().getSharedPreferences(getString(R.string.keys_shared_prefs),
-                Context.MODE_PRIVATE);
-        //store the current location string in the prefs string set.
-        Set<String> locationSet = prefs.getStringSet(getString(R.string.keys_prefs_location_set),
-                new HashSet<String>());
+        try {
+            JSONObject saveJSON = new JSONObject();
+            saveJSON.put("username", mCreds.getUsername());
+            saveJSON.put("city", mCurrentCity);
+            if (!mZipcode.isEmpty()) {
+                saveJSON.put("zip", mZipcode);
+            } else if (mCurrentLocation != null) {
+                saveJSON.put("lat", mCurrentLocation.getLatitude());
+                saveJSON.put("lon", mCurrentLocation.getLongitude());
+            }
+            new SendPostAsyncTask.Builder(uri.toString(), saveJSON)
+                    .onPostExecute((result) -> {
+                        try {
+                            JSONObject resultJSON = new JSONObject(result);
+                            View parentView = getActivity().findViewById(R.id.weather_parent_layout);
+                            if (resultJSON.getBoolean("success")) {
+                                Snackbar.make(parentView, "Saved Location " + mCurrentCity + "!", Snackbar.LENGTH_SHORT)
+                                        .show();
+                            } else {
+                                Snackbar.make(parentView, "Location Already Saved", Snackbar.LENGTH_SHORT)
+                                        .show();
+                            }
+                        } catch(JSONException e) {
+                            e.printStackTrace();
+                        }
 
-        HashSet<String> copyLocationSet = new HashSet<String>(locationSet);
+                    })
+                    .build()
+                    .execute();
 
-        copyLocationSet.add(saveLocation);
-        prefs.edit()
-                .putStringSet(getString(R.string.keys_prefs_location_set), copyLocationSet)
-                .apply();
-
-        //show snackbar message that the location was saved
-        View parentView = getActivity().findViewById(R.id.weather_parent_layout);
-        Snackbar.make(parentView, "Saved Location " + mCurrentCity + "!", Snackbar.LENGTH_SHORT)
-                .show();
+        } catch(JSONException e) {
+            e.printStackTrace();
+        }
 
         return true;
     }
@@ -392,29 +423,6 @@ public class WeatherFragment extends Fragment implements
     private boolean loadLocation(MenuItem menuItem) {
         Log.i("WEATHER_OPTION_SELECT", "load location");
         mListener.onLoadWeatherClicked();
-
-//        setWeatherCurrentVisible(false);
-//        Fragment hourFrag = getChildFragmentManager().findFragmentByTag(getString(R.string.weather_hour_fragment_tag));
-//        Fragment dayFrag = getChildFragmentManager().findFragmentByTag(getString(R.string.weather_day_fragment_tag));
-//        if (hourFrag != null) {
-//            getChildFragmentManager()
-//                    .beginTransaction()
-//                    .remove(hourFrag)
-//                    .commit();
-//        }
-//        if (dayFrag != null) {
-//            getChildFragmentManager()
-//                    .beginTransaction()
-//                    .remove(dayFrag)
-//                    .commit();
-//        }
-//
-//        getChildFragmentManager()
-//                .beginTransaction()
-//                .replace(R.id.weather_parent_layout, new WeatherLocationFragment())
-//                .addToBackStack(null)
-//                .commit();
-
         return true;
     }
 
@@ -533,6 +541,7 @@ public class WeatherFragment extends Fragment implements
     private void setWeather(Location location) {
         if (location != null) {
             mCurrentLocation = location;
+            mZipcode = "";
             setWeatherCurrentVisible(true);
             setCurrentWeather(location);
             setHourWeather(location);
@@ -549,6 +558,8 @@ public class WeatherFragment extends Fragment implements
      */
     private void setWeather(String zipcode) {
         if (!zipcode.isEmpty()) {
+            mZipcode = zipcode;
+            mCurrentLocation = null;
             setWeatherCurrentVisible(true);
             setCurrentWeather(zipcode);
             setHourWeather(zipcode);
@@ -738,14 +749,11 @@ public class WeatherFragment extends Fragment implements
                 int resId = getResources().getIdentifier(weatherJSON.getString("icon")
                         , "drawable", getActivity().getPackageName());
                 iconView.setImageResource(resId);
-
-                //set the current location
-                double lat = weatherInfoJSON.getDouble("lat");
-                double lon = weatherInfoJSON.getDouble("lon");
-                mCurrentLocation.setLongitude(lon);
-                mCurrentLocation.setLatitude(lat);
                 mCurrentCity = city;
-                Log.wtf("WEATHER DEBUG", mCurrentLocation.toString());
+                mMapStartLocation = new Location("");
+                mMapStartLocation.setLatitude(weatherInfoJSON.getDouble("lat"));
+                mMapStartLocation.setLongitude(weatherInfoJSON.getDouble("lon"));
+
 
 
 
@@ -859,16 +867,6 @@ public class WeatherFragment extends Fragment implements
 
         mListener.onWaitFragmentInteractionHide();
     }
-
-    /**
-     * this method is a call back for when a weatherLocation is clicked on
-     * @param item
-     */
-    @Override
-    public void onListFragmentInteraction(WeatherLocationContent.WeatherLocationItem item) {
-        Log.wtf("WEATHER CLICKED ON LOCATION ITEM", item.toString());
-    }
-
 
     /**
      * Interface to communicate with parent activity

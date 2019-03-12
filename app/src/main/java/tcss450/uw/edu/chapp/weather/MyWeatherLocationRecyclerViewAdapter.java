@@ -75,7 +75,7 @@ public class MyWeatherLocationRecyclerViewAdapter extends RecyclerView.Adapter<M
         public ViewHolder(View view) {
             super(view);
             mView = view;
-            mCityView = (TextView) view.findViewById(R.id.weather_location_city_text);
+            mCityView = view.findViewById(R.id.weather_location_city_text);
         }
 
         @Override
