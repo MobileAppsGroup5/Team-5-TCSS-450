@@ -142,16 +142,16 @@ public class HomeActivity extends AppCompatActivity
                     //Was the Bundle received from Main Activity spurred by a message notification?
                     Bundle args = new Bundle();
                     // Get value from intent and put it in fragment args
-                    Fragment chatfragment = new MessagingContainerFragment();
+                    MessagingContainerFragment messageFragment = new MessagingContainerFragment();
                     String chatid = getIntent().getStringExtra(getString(R.string.keys_intent_chatId));
                     args.putSerializable(getString(R.string.key_credentials), mCreds);
                     args.putSerializable(getString(R.string.keys_intent_jwt), mJwToken);
                     args.putSerializable(getString(R.string.key_chatid), chatid);
-                    chatfragment.setArguments(args);
+                    messageFragment.setArguments(args);
 
                     getSupportFragmentManager()
                             .beginTransaction()
-                            .replace(R.id.fragment_container, chatfragment)
+                            .replace(R.id.fragment_container,messageFragment )
                             .commit();
 
 
