@@ -46,7 +46,7 @@ public class ChatsContainerFragment extends Fragment implements PropertyChangeLi
     private Credentials mCreds;
     private String mJwToken;
     private OnChatInformationFetchListener mListener;
-    private boolean mCompactMode = false;
+    public boolean mCompactMode = false;
     private PushMessageReceiver mPushMessageReciever;
 
     public ChatsContainerFragment() {

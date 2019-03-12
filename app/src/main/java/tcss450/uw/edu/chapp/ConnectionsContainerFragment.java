@@ -41,7 +41,7 @@ public class ConnectionsContainerFragment extends Fragment implements PropertyCh
     private Credentials mCreds;
     private String mJwToken;
     private OnConnectionInformationFetchListener mListener;
-    private boolean mCompactMode = false;
+    public boolean mCompactMode = false;
     private PushMessageReceiver mPushMessageReciever;
 
     public ConnectionsContainerFragment() {
