@@ -224,10 +224,10 @@ public class WeatherFragment extends Fragment {
      * @param visible boolean if current weather fragment is visible
      */
     private void setWeatherCurrentVisible(boolean visible) {
-        TextView cityText = (TextView) getActivity().findViewById(R.id.weather_city_text);
-        TextView condText = (TextView) getActivity().findViewById(R.id.weather_condition_text);
-        TextView tempText = (TextView) getActivity().findViewById(R.id.weather_temp_text);
-        ImageView iconView = (ImageView) getActivity().findViewById(R.id.weather_current_icon);
+        TextView cityText = getActivity().findViewById(R.id.weather_city_text);
+        TextView condText = getActivity().findViewById(R.id.weather_condition_text);
+        TextView tempText = getActivity().findViewById(R.id.weather_temp_text);
+        ImageView iconView = getActivity().findViewById(R.id.weather_current_icon);
 
         if (visible) {
             cityText.setVisibility(View.VISIBLE);

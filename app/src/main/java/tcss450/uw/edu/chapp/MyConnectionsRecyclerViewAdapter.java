@@ -246,11 +246,11 @@ public class MyConnectionsRecyclerViewAdapter extends RecyclerView.Adapter<MyCon
             super(view);
             mView = view;
           //  mIdView = (TextView) view.findViewById(R.id.item_number);
-            mUsernameView = (TextView) view.findViewById(R.id.list_item_connection_name);
-            mDeclineCancelButton = (ImageView) view.findViewById(R.id.image_cancel_contact);
+            mUsernameView = view.findViewById(R.id.list_item_connection_name);
+            mDeclineCancelButton = view.findViewById(R.id.image_cancel_contact);
 
             // NOTE accept button can be missing if our viewID SENT or RECIEVED_VERIFIED
-            mAcceptButton = (ImageView) view.findViewById(R.id.image_accept_contact);
+            mAcceptButton = view.findViewById(R.id.image_accept_contact);
         }
 
         @Override

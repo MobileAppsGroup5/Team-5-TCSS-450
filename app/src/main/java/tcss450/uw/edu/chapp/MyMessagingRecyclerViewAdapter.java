@@ -81,9 +81,9 @@ public class MyMessagingRecyclerViewAdapter extends RecyclerView.Adapter<MyMessa
         public ViewHolder(View view) {
             super(view);
             mView = view;
-            mMessageView = (TextView) view.findViewById(R.id.text_view_message);
-            mSenderView = (TextView) view.findViewById(R.id.text_view_sender);
-            mTimeStampView = (TextView) view.findViewById(R.id.text_view_timestamp);
+            mMessageView = view.findViewById(R.id.text_view_message);
+            mSenderView = view.findViewById(R.id.text_view_sender);
+            mTimeStampView = view.findViewById(R.id.text_view_timestamp);
         }
 
         @Override

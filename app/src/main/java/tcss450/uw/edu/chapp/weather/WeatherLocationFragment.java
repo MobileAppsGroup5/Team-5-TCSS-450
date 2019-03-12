@@ -149,22 +149,6 @@ public class WeatherLocationFragment extends Fragment {
         }
     }
 
-
-//    private void deleteItemFromSharedPrefs(String prefString) {
-//        SharedPreferences prefs = getActivity().getSharedPreferences(getString(R.string.keys_shared_prefs),
-//                Context.MODE_PRIVATE);
-//        Set<String> locationSet = prefs.getStringSet(getString(R.string.keys_prefs_location_set),
-//                new HashSet<String>());
-//
-//        HashSet<String> copyLocationSet = new HashSet<String>(locationSet);
-//        copyLocationSet.remove(prefString);
-//        prefs.edit().putStringSet(getString(R.string.keys_prefs_location_set), copyLocationSet)
-//                .apply();
-//    }
-
-
-
-
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
@@ -181,34 +165,6 @@ public class WeatherLocationFragment extends Fragment {
         super.onDetach();
         mListener = null;
     }
-
-    /**
-     * method that will generate a list of weather location items based on each
-     * entry of the locationSet. will be using regex for getting individual fields.
-     * @return list of weather location items.
-     */
-//    private ArrayList<WeatherLocationItem> generateLocationList(Set<String> locationSet) {
-//        String pattern = getString(R.string.weather_prefs_location_regex);
-//        Pattern regex = Pattern.compile(pattern, Pattern.CASE_INSENSITIVE);
-//
-//        ArrayList<WeatherLocationItem> locations = new ArrayList<WeatherLocationItem>();
-//
-//        Iterator<String> itr = locationSet.iterator();
-//        int i = 0;
-//        while (itr.hasNext()) {
-//            String locationString = itr.next();
-//            Matcher m = regex.matcher(locationString);
-//            if (m.matches()) {
-//                String city = m.group(1);
-//                double lat = Double.parseDouble(m.group(2));
-//                double lon = Double.parseDouble(m.group(3));
-//                //locations.add(new WeatherLocationItem(Integer.toString(i),city, lat, lon, locationString));
-//                locations.add(new WeatherLocationItem(Integer.toString(i), city, lat, lon, 0));
-//                i++;
-//            }
-//        }
-//        return locations;
-//    }
 
     private void setWeatherLocationsList() {
         if (mCreds != null) {
@@ -282,19 +238,7 @@ public class WeatherLocationFragment extends Fragment {
         }
         mListener.onWaitFragmentInteractionHide();
     }
-
-
-
-    /**
-     * This interface must be implemented by activities that contain this
-     * fragment to allow an interaction in this fragment to be communicated
-     * to the activity and potentially other fragments contained in that
-     * activity.
-     * <p/>
-     * See the Android Training lesson <a href=
-     * "http://developer.android.com/training/basics/fragments/communicating.html"
-     * >Communicating with Other Fragments</a> for more information.
-     */
+    
     public interface OnListFragmentInteractionListener extends WaitFragment
             .OnFragmentInteractionListener{
 

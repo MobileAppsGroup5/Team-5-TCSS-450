@@ -96,14 +96,14 @@ public class HomeActivity extends AppCompatActivity
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_home);
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-        NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
+        NavigationView navigationView = findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
 
         // Initialize drawer icon and it's ActionBarDrawerToggle object to
         // manage the on and off red dot for notifications.
-        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        DrawerLayout drawer = findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(this, drawer,toolbar,
                 R.string.navigation_drawer_open, R.string.navigation_drawer_close);
         badgeDrawable = new BadgeDrawerIconDrawable(getSupportActionBar().getThemedContext());
@@ -121,7 +121,7 @@ public class HomeActivity extends AppCompatActivity
 
 
         // Set the logout listener for the navigation drawer
-        TextView logoutText = (TextView) findViewById(R.id.nav_logout);
+        TextView logoutText = findViewById(R.id.nav_logout);
         logoutText.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -228,7 +228,7 @@ public class HomeActivity extends AppCompatActivity
 
     @Override
     public void onBackPressed() {
-        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        DrawerLayout drawer = findViewById(R.id.drawer_layout);
         if (drawer.isDrawerOpen(GravityCompat.START)) {
             drawer.closeDrawer(GravityCompat.START);
         } else {
@@ -427,7 +427,7 @@ public class HomeActivity extends AppCompatActivity
         }
         Log.i("NAVIGATION_INFORMATION", "Pressed: " + item.getTitle().toString());
 
-        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        DrawerLayout drawer = findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
         return true;
     }
