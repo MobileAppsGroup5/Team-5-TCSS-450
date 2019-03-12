@@ -70,9 +70,9 @@ public class MyWeatherHourRecyclerViewAdapter extends RecyclerView.Adapter<MyWea
         public ViewHolder(View view) {
             super(view);
             mView = view;
-            mWeatherTimeText = (TextView) view.findViewById(R.id.weather_hour_time);
-            mWeatherTempText = (TextView) view.findViewById(R.id.weather_hour_temp);
-            mWeatherIcon = (ImageView) view.findViewById(R.id.weather_hour_icon);
+            mWeatherTimeText = view.findViewById(R.id.weather_hour_time);
+            mWeatherTempText = view.findViewById(R.id.weather_hour_temp);
+            mWeatherIcon = view.findViewById(R.id.weather_hour_icon);
         }
 
         @Override

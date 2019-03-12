@@ -74,10 +74,10 @@ public class MyWeatherDayRecyclerViewAdapter extends RecyclerView.Adapter<MyWeat
         public ViewHolder(View view) {
             super(view);
             mView = view;
-            mDayView = (TextView) view.findViewById(R.id.weather_day_text);
-            mIconView = (ImageView) view.findViewById(R.id.weather_day_icon);
-            mHighTemp = (TextView) view.findViewById(R.id.weather_day_high_temp_text);
-            mLowTemp = (TextView) view.findViewById(R.id.weather_day_low_temp_text);
+            mDayView = view.findViewById(R.id.weather_day_text);
+            mIconView = view.findViewById(R.id.weather_day_icon);
+            mHighTemp = view.findViewById(R.id.weather_day_high_temp_text);
+            mLowTemp = view.findViewById(R.id.weather_day_low_temp_text);
 
         }
 
