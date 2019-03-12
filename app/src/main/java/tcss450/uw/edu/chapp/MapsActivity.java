@@ -36,8 +36,6 @@ public class MapsActivity extends FragmentActivity implements
         //current location could be null
         mCurrentLocation = (Location) getIntent().getParcelableExtra(getString(R.string.keys_weather_map_intent_location));
         mArguments = getIntent().getExtras();
-        Log.e("MAP DEBUG", mCurrentLocation.toString());
-
     }
 
 

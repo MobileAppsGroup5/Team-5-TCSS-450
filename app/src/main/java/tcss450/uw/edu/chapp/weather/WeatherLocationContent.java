@@ -30,7 +30,7 @@ public class WeatherLocationContent {
     }
 
     private static WeatherLocationItem createDummyItem(int position) {
-        return new WeatherLocationItem(String.valueOf(position), "petersburg, ru", -100, 120, "someData");
+        return new WeatherLocationItem(String.valueOf(position), "petersburg, ru", -100, 120, 98374);
     }
 
     /**
@@ -41,20 +41,20 @@ public class WeatherLocationContent {
         public final String city;
         public final double lat;
         public final double lon;
-        public final String prefString;
+        public final int zip;
 
 
-        public WeatherLocationItem(String id, String city, double lat, double lon, String prefString) {
+        public WeatherLocationItem(String id, String city, double lat, double lon, int zip) {
             this.id = id;
             this.city = city;
             this.lat = lat;
             this.lon = lon;
-            this.prefString = prefString;
+            this.zip = zip;
         }
 
         @Override
         public String toString() {
-            return prefString;
+            return city;
         }
     }
 }

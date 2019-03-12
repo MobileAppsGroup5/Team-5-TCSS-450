@@ -87,5 +87,6 @@
     <string name="keys_prefs_locations">SharedPreferencesWeatherLocation</string>
     <string name="keys_prefs_location_set">SharedPreferencesWeatherLocationSet</string>
     <string name="keys_weather_location_load">LocationFromLoadFragment</string>
+    <string name="keys_weather_location_zip">WeatherLocationZipcodeForBundle</string>
 
 </resources>

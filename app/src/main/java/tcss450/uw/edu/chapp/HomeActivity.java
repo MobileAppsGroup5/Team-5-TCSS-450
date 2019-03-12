@@ -776,6 +776,7 @@ public class HomeActivity extends AppCompatActivity
         //add location from MapActivity as fragment argument
         Bundle args = new Bundle();
         args.putParcelable(getString(R.string.keys_weather_location_load), location);
+        args.putInt(getString(R.string.keys_weather_location_zip), item.zip);
 
         args.putSerializable(getString(R.string.key_credentials), mCreds);
         args.putSerializable(getString(R.string.keys_intent_jwt), mJwToken);
@@ -790,7 +791,12 @@ public class HomeActivity extends AppCompatActivity
      */
     @Override
     public void onLoadWeatherClicked() {
-        loadFragment(new WeatherLocationFragment());
+
+        WeatherLocationFragment wlf = new WeatherLocationFragment();
+        Bundle args = new Bundle();
+        args.putSerializable(getString(R.string.key_credentials), mCreds);
+        wlf.setArguments(args);
+        loadFragment(wlf);
     }
 
 //    /**
