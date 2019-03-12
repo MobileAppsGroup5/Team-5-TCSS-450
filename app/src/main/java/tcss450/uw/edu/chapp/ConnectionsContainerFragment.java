@@ -289,7 +289,6 @@ public class ConnectionsContainerFragment extends Fragment implements PropertyCh
 
         @Override
         public void onReceive(Context context, Intent intent) {
-
             String typeOfMessage = intent.getStringExtra("type");
 
 
