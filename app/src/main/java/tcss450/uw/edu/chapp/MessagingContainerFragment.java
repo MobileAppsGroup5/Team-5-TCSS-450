@@ -340,29 +340,34 @@ public class MessagingContainerFragment extends Fragment {
         @Override
         public void onReceive(Context context, Intent intent) {
             Log.e("MESSAGE FRAGMENT RECEIVER", intent.getStringExtra("MESSAGE"));
-            if(intent.hasExtra("SENDER")
-                    && intent.hasExtra("MESSAGE")
-                    && intent.hasExtra("CHATID")) {
-                String sender = intent.getStringExtra("SENDER");
-                String messageText = intent.getStringExtra("MESSAGE");
-                String chatId = intent.getStringExtra("CHATID");
-                Message message = new Message.Builder(sender, messageText, currentTime()).build();
+
+            String typeOfMessage = intent.getStringExtra("type");
+
+            if(typeOfMessage.equals("msg")) {
+
+                String sender = intent.getStringExtra("sender");
+                String messageText = intent.getStringExtra("message");
+                String chatId = intent.getStringExtra("chatid");
+
+                Log.e("MESSAGE FRAGMENT RECEIVER", "Sender: " + sender);
+                Log.e("MESSAGE FRAGMENT RECEIVER", "Current chatId: " + mChat.getId() + " Message chatId: " + chatId );
+                Log.e("MESSAGE FRAGMENT RECEIVER", "Message Fragment State is Showing (true): " + (mMessageFragment != null));
+
 
                 //Checks if the current chat that's open matches the one
                 //incoming with the notification
-                //and that the sender wasn't self
-                if (intent.getStringExtra("CHATID").equals(mChat.getId())
-                    && (mMessageFragment != null || !sender.equals(mCreds.getUsername()))) {
+                if (mMessageFragment != null && chatId.equals(mChat.getId())) {
                     Log.e("MESSAGE FRAGMENT RECEIVER", "Calling webservice for messages");
                     callWebServiceforMessages(); //get new list of messages instead of show notificaiton inapp
 
 
-                } else {    //msg was received from a user in a separate chat than one being viewed
+                } else if ( mMessageFragment != null && !chatId.equals(mChat.getId()) ){
+                    //msg was received from a user in a separate chat than one being viewed
                     Log.e("MESSAGE FRAGMENT RECEIVER", "Calling Home Activity to update badge");
                     mListener.unreadMessageReceivedinOtherChatNotifications(chatId);
-
                 }
 //                Snackbar snack = Snackbar.make(getActivity().findViewById(R.id.chat_messages_container), "MESSAGE", Snackbar.LENGTH_LONG);
+                // Message message = new Message.Builder(sender, messageText, currentTime()).build();
 //                View view = snack.getView();
 //                CoordinatorLayout.LayoutParams params = (CoordinatorLayout.LayoutParams)view.getLayoutParams();
 //                params.gravity = Gravity.TOP;

@@ -42,7 +42,9 @@ public class PushReceiver extends BroadcastReceiver {
                 Intent i = new Intent(RECEIVED_NEW_MESSAGE);
                 i.putExtra("SENDER", intent.getStringExtra("sender"));
                 i.putExtra("MESSAGE", intent.getStringExtra("message"));
-                i.putExtra("CHATID", intent.getStringExtra("chatid"));
+                i.putExtra("CHATID", intent.getStringExtra("chatId"));
+                String id = intent.getStringExtra("chatId");
+                Log.e("Pushy Receiver", "Id sending to intent: " + id);
                 i.putExtras(intent.getExtras());
 
                 context.sendBroadcast(i);

@@ -42,7 +42,7 @@ public class ConnectionsContainerFragment extends Fragment implements PropertyCh
     private String mJwToken;
     private OnConnectionInformationFetchListener mListener;
     public boolean mCompactMode = false;
-    private PushMessageReceiver mPushMessageReciever;
+ //   private PushMessageReceiver mPushMessageReciever;
 
     public ConnectionsContainerFragment() {
         // Required empty public constructor
@@ -262,9 +262,9 @@ public class ConnectionsContainerFragment extends Fragment implements PropertyCh
     public void onDetach() {
         super.onDetach();
         mListener = null;
-        if (mPushMessageReciever != null){
-            getActivity().unregisterReceiver(mPushMessageReciever);
-        }
+//        if (mPushMessageReciever != null){
+//            getActivity().unregisterReceiver(mPushMessageReciever);
+//        }
     }
 
     @Override
@@ -281,28 +281,27 @@ public class ConnectionsContainerFragment extends Fragment implements PropertyCh
         void onWaitFragmentInteractionShow();
     }
 
-    /**
-     * A BroadcastReceiver that listens for messages sent from PushReceiver while
-     * the Home Activity is open (i.e. in App Notifications)
-     */
-    private class PushMessageReceiver extends BroadcastReceiver {
-
-        @Override
-        public void onReceive(Context context, Intent intent) {
-
-            String typeOfMessage = intent.getStringExtra("type");
-
-
-            if(typeOfMessage.equals("conn req")){ //if received broadcast from connection request.
-                //don't update badge on navigation drawer,
-                //just update the list of requests by calling web service
-                callWebServiceforConnections();
-                Log.e("INTENT", intent.toString());
-                Log.e("ConnectionsContainer", "Received message type: conn req");
-            }
-
-
-        }
-    }
+//    /**
+//     * A BroadcastReceiver that listens for messages sent from PushReceiver while
+//     * the Home Activity is open (i.e. in App Notifications)
+//     */
+//    private class PushMessageReceiver extends BroadcastReceiver {
+//
+//        @Override
+//        public void onReceive(Context context, Intent intent) {
+//            String typeOfMessage = intent.getStringExtra("type");
+//
+//
+//            if(typeOfMessage.equals("conn req")){ //if received broadcast from connection request.
+//                //don't update badge on navigation drawer,
+//                //just update the list of requests by calling web service
+//                callWebServiceforConnections();
+//                Log.e("INTENT", intent.toString());
+//                Log.e("ConnectionsContainer", "Received message type: conn req");
+//            }
+//
+//
+//        }
+//    }
 
 }

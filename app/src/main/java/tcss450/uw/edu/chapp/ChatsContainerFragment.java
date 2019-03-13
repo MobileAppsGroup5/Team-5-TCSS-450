@@ -47,7 +47,7 @@ public class ChatsContainerFragment extends Fragment implements PropertyChangeLi
     private String mJwToken;
     private OnChatInformationFetchListener mListener;
     public boolean mCompactMode = false;
-    private PushMessageReceiver mPushMessageReciever;
+  //  private PushMessageReceiver mPushMessageReciever;
 
     public ChatsContainerFragment() {
         // Required empty public constructor
@@ -374,24 +374,28 @@ public class ChatsContainerFragment extends Fragment implements PropertyChangeLi
         void onWaitFragmentInteractionShow();
     }
 
-    /**
-     * A BroadcastReceiver that listens for messages sent from PushReceiver while
-     * the Home Activity is open (i.e. in App Notifications)
-     */
-    private class PushMessageReceiver extends BroadcastReceiver {
-
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            Log.e("Notification Receiver", "Received broadcast in chat fragment activity");
-
-            String typeOfMessage = intent.getStringExtra("type");
-            String sender = intent.getStringExtra("sender");
-
-
-            if(typeOfMessage.equals("msg")) { //if received broadcast from message notification.
-                Log.e("Notification Receiver", "Received message type: msg");
-                callWebServiceforChats();
-            }
-        }
-    }
+//    /**
+//     * A BroadcastReceiver that listens for messages sent from PushReceiver while
+//     * the Home Activity is open (i.e. in App Notifications)
+//     */
+//    private class PushMessageReceiver extends BroadcastReceiver {
+//
+//        @Override
+//        public void onReceive(Context context, Intent intent) {
+//            Log.e("CHAT CONTAINER FRAGMENT RECEIVER", "Received broadcast in chat fragment activity");
+//
+//            String typeOfMessage = intent.getStringExtra("type");
+//            String sender = intent.getStringExtra("sender");
+//
+//            if(typeOfMessage.equals("msg")) {
+//                //if received broadcast from message notification.
+//                Log.e("CHAT CONTAINER FRAGMENT RECEIVER", "Received message type: msg, calling webservice for chats");
+//                callWebServiceforChats();
+//            } else if (typeOfMessage.equals("convo req")){
+//                Log.e("CHAT CONTAINER FRAGMENT RECEIVER", "Received message type: convo req, calling webservice for chats");
+//                callWebServiceforChats();
+//
+//            }
+//        }
+//    }
 }
