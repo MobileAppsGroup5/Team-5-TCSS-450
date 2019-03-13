@@ -345,9 +345,9 @@ public class MessagingContainerFragment extends Fragment {
 
             if(typeOfMessage.equals("msg")) {
 
-                String sender = intent.getStringExtra("SENDER");
-                String messageText = intent.getStringExtra("MESSAGE");
-                String chatId = intent.getStringExtra("CHATID");
+                String sender = intent.getStringExtra("sender");
+                String messageText = intent.getStringExtra("message");
+                String chatId = intent.getStringExtra("chatid");
 
                 Log.e("MESSAGE FRAGMENT RECEIVER", "Sender: " + sender);
                 Log.e("MESSAGE FRAGMENT RECEIVER", "Current chatId: " + mChat.getId() + " Message chatId: " + chatId );

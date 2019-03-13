@@ -874,26 +874,28 @@ public class HomeActivity extends AppCompatActivity
                      Log.e("Home Notification Receiver", "Messaging fragment not open");
                      String id = intent.getStringExtra("chatid");
 
-                     if (mCreds != null) {
+                     Log.e("Home Notification Receiver", "Chatid recevied: " +id);
                          for (Chat chats : mChats) {
-                             if (id.equals(chats.getId()) && !chats.getLastMessageUsername().equals(mCreds.getUsername())) {
-                                 //check if the message is in a chat room that the user is in
-                                 List<String> users = chats.getUsersInChat();
-                                 List<Boolean> flags = chats.getAcceptedFlags();
-                                 Log.e("Home Notification Receiver", "Last message sent from: " + chats.getLastMessageUsername());
-                                 //only show notification if user has accepted the chat room invite already
-                                 //flag should be true if accepted chatroom request
-                                 if (flags.get(users.indexOf(mCreds.getUsername()))) {
-                                     Log.e("Home Notification Receiver", "Updating badge");
+                             if (chats.getLastMessageUsername() != null) {
+                                 if (id.equals(chats.getId()) && !chats.getLastMessageUsername().equals(mCreds.getUsername())) {
+                                     //check if the message is in a chat room that the user is in
+                                     List<String> users = chats.getUsersInChat();
+                                     List<Boolean> flags = chats.getAcceptedFlags();
+                                     Log.e("Home Notification Receiver", "Last message sent from: " + chats.getLastMessageUsername());
+                                     //only show notification if user has accepted the chat room invite already
+                                     //flag should be true if accepted chatroom request
+                                     if (flags.get(users.indexOf(mCreds.getUsername()))) {
+                                         Log.e("Home Notification Receiver", "Updating badge");
 
-                                     mHasMessageNotifications = true;
-                                     badgeDrawable.setEnabled(true);
-                                     mChatCounterView.setText("NEW");
+                                         mHasMessageNotifications = true;
+                                         badgeDrawable.setEnabled(true);
+                                         mChatCounterView.setText("NEW");
+                                     }
+                                     return;
                                  }
-                                 return;
                              }
                          }
-                     }
+
                  }
 
 
