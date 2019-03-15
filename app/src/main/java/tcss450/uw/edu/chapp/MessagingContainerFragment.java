@@ -42,7 +42,7 @@ import tcss450.uw.edu.chapp.utils.SendPostAsyncTask;
  * Makes a call to the database to retrieve messages for a given chatId.
  *
  * @author Mike Osborne, Jessica Medrzycki
- * @version 02/25/19
+ * @version 03/15/19
  */
 public class MessagingContainerFragment extends Fragment {
 
@@ -54,7 +54,6 @@ public class MessagingContainerFragment extends Fragment {
     private List<Message> mMessages;
     private OnChatMessageFragmentInteractionListener mListener;
     private ArrayList<Connection> mConnections;
-
 
     private Credentials mCreds;
     private String mJwToken;
@@ -322,20 +321,17 @@ public class MessagingContainerFragment extends Fragment {
         }
     }
 
-    private String currentTime() {
-        Date date = Calendar.getInstance().getTime();
-        DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-        return dateFormat.format(date);
-    }
 
+    /**
+     * InteractionListener Interface that HomeActivity is a listener of.
+     */
     public interface OnChatMessageFragmentInteractionListener {
         void unreadMessageReceivedinOtherChatNotifications(String chatId);
-       // void updateViewedChatroom(String chatId);
     }
 
-//    /**
-//     * A BroadcastReceiver that listens for messages sent from PushReceiver
-//     */
+    /**
+     * A BroadcastReceiver that listens for messages sent from PushReceiver
+     */
     private class PushMessageReceiver extends BroadcastReceiver {
         @Override
         public void onReceive(Context context, Intent intent) {
@@ -366,14 +362,6 @@ public class MessagingContainerFragment extends Fragment {
                     Log.e("MESSAGE FRAGMENT RECEIVER", "Calling Home Activity to update badge");
                     mListener.unreadMessageReceivedinOtherChatNotifications(chatId);
                 }
-//                Snackbar snack = Snackbar.make(getActivity().findViewById(R.id.chat_messages_container), "MESSAGE", Snackbar.LENGTH_LONG);
-                // Message message = new Message.Builder(sender, messageText, currentTime()).build();
-//                View view = snack.getView();
-//                CoordinatorLayout.LayoutParams params = (CoordinatorLayout.LayoutParams)view.getLayoutParams();
-//                params.gravity = Gravity.TOP;
-//                params.setMargins(0, 150, 0, 0);
-//                view.setLayoutParams(params);
-//                snack.show();
             }
         }
     }

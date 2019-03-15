@@ -17,11 +17,16 @@ import tcss450.uw.edu.chapp.model.Credentials;
 import static android.app.ActivityManager.RunningAppProcessInfo.IMPORTANCE_FOREGROUND;
 import static android.app.ActivityManager.RunningAppProcessInfo.IMPORTANCE_VISIBLE;
 
+/**
+ * Notification Receiver from Pushy.me that send a broadcast to other classes in our app to
+ * deal with the notifications. Receives Connection Requests, Messages, and Conversation Requests.
+ *
+ * Based off of a Lab from class.
+ */
 public class PushReceiver extends BroadcastReceiver {
 
     public static final String RECEIVED_NEW_MESSAGE = "new message from pushy";
     private static final String CHANNEL_ID = "1";
-    private static Credentials mCreds; //TODO how do we get credentials of user to sift through notifications?
 
     @Override
     public void onReceive(Context context, Intent intent) {

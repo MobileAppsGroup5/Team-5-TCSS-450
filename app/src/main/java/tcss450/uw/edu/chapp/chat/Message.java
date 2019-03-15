@@ -3,10 +3,9 @@ package tcss450.uw.edu.chapp.chat;
 import java.io.Serializable;
 
 /**
- * Message Object that holds the information from the database, from
+ * Message Object that holds Message information from the database, from
  * the endpoint chapp-server-5.herokuapp.com/messaging/getAll
  *
- * @author Jessica Medrzycki
  * @version 02/20/19
  */
 public class Message implements Serializable {

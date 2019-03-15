@@ -12,10 +12,7 @@ import tcss450.uw.edu.chapp.model.Credentials;
 
 
 /**
- * A simple {@link Fragment} subclass.
- * Activities that contain this fragment must implement the
- * {@link SuccessFragment.OnFragmentInteractionListener} interface
- * to handle interaction events.
+ * A Fragment that shows an introduction message and Chapp logo to the user.
  */
 public class SuccessFragment extends Fragment {
 
@@ -56,22 +53,6 @@ public class SuccessFragment extends Fragment {
 
     }
 
-//    @Override
-//    public void onAttach(Context context) {
-//        super.onAttach(context);
-//        if (context instanceof OnFragmentInteractionListener) {
-//            mListener = (OnFragmentInteractionListener) context;
-//        } else {
-//            throw new RuntimeException(context.toString()
-//                    + " must implement OnFragmentInteractionListener");
-//        }
-//    }
-//
-//    @Override
-//    public void onDetach() {
-//        super.onDetach();
-//        mListener = null;
-//    }
 
     /**
      * This interface must be implemented by activities that contain this

@@ -13,9 +13,14 @@ import java.io.Serializable;
 import me.pushy.sdk.Pushy;
 import tcss450.uw.edu.chapp.model.Credentials;
 
+/**
+ * The launcher activity for Chapp. Connects the Login and Register Fragment. On a successful
+ * login, the activity transfers credentials information to the HomeActivity.
+ */
 public class MainActivity extends AppCompatActivity implements LoginFragment.OnLoginFragmentInteractionListener,
         RegisterFragment.OnRegisterFragmentInteractionListener {
 
+    /** INTENT VARIABLES */
     private boolean mLoadFromChatNotification = false;
     private boolean mLoadFromConnectionRequest = false;
     private boolean mLoadFromConversationRequest = false;

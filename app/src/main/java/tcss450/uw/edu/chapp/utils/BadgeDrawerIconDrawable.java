@@ -92,16 +92,6 @@ public class BadgeDrawerIconDrawable extends DrawerArrowDrawable {
         return text;
     }
 
-    public void setBackgroundColor(int color) {
-        if (backgroundPaint.getColor() != color) {
-            backgroundPaint.setColor(color);
-            invalidateSelf();
-        }
-    }
-
-    public int getBackgroundColor() {
-        return backgroundPaint.getColor();
-    }
 
     public void setTextColor(int color) {
         if (textPaint.getColor() != color) {

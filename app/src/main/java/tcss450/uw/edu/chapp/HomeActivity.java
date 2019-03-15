@@ -56,7 +56,7 @@ import tcss450.uw.edu.chapp.weather.WeatherLocationFragment;
  * Fragment.
  *
  * @author Mike Osborne, Trung Thai, Michael Josten, Jessica Medrzycki
- * @version 03/08/19
+ * @version 03/15/19
  *
  */
 public class HomeActivity extends AppCompatActivity
@@ -72,25 +72,25 @@ public class HomeActivity extends AppCompatActivity
         CurrentWeatherFragment.OnCurrentWeatherFragmentInteractionListener,
         LandingPage.OnLandingPageReturnListener {
 
-    /** CREDENTIAL CONSTANTS */
+    /** CREDENTIAL VARIABLES */
     private Credentials mCreds;
     private String mJwToken;
     private PushMessageReceiver mPushMessageReciever;
 
-    /** NAVIGATION CONSTANTS */
+    /** NOTIFICATION VARIABLES */
     private BadgeDrawerIconDrawable badgeDrawable;
     private TextView mChatCounterView;
     private TextView mContactCounterView;
     private boolean mHasConnectionNotifications = false;
     private boolean mHasMessageNotifications = false;
     private ArrayList<Connection> mConnections;
+    private ArrayList<Chat> mChats;
+
+    /** FRAGMENT CONTAINER INSTANCES */
     private ChatsContainerFragment mCurrentChatsContainerInstance;
     private ConnectionsContainerFragment mCurrentConnectionsContainerInstance;
 
 
-
-    // The list of chats for the current user
-    private ArrayList<Chat> mChats;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -134,7 +134,6 @@ public class HomeActivity extends AppCompatActivity
         mCreds = (Credentials) getIntent().getSerializableExtra(getString(R.string.key_credentials));
         mJwToken = getIntent().getStringExtra(getString(R.string.keys_intent_jwt));
 
-        checkForNotifications();
         if (savedInstanceState == null) {
             if (findViewById(R.id.fragment_container) != null) {
 
@@ -324,44 +323,6 @@ public class HomeActivity extends AppCompatActivity
 //        return super.onOptionsItemSelected(item);
 //    }
 
-    private void checkForNotifications(){
-        callWebServiceforChats(); //updates mChats
-        callWebServiceforConnections(); //update mConnections
-
-        if (mConnections!= null) {
-            for (Connection contact : mConnections) {
-                //usernameB is the recipient of the request
-                if (contact.getVerified() == 0 && contact.getUsernameB().equals(mCreds.getUsername())) {
-                    //if the user is the recipient of the request and it hasn't been accepted yet
-                    //show notification icons
-                    mHasConnectionNotifications = true;
-                    mContactCounterView.setText("NEW");
-                }
-            }
-        }
-        if (mChats!= null) {
-            for (Chat chat : mChats) {
-                //check if last message in chat was sent by another user
-                //and if that last message has been not been read
-                if (!chat.getLastMessageUsername().equals(mCreds.getUsername()) && !chat.isHasBeenRead()) {
-                    //unread message
-                    mHasMessageNotifications = true;
-                    mContactCounterView.setText("NEW");
-                    return;
-                }
-            }
-        }
-
-        //TODO maybe add in item for checking if chat has been verified. It is same icon on chats not adding for now
-
-        //update badge icon
-        if (mHasConnectionNotifications || mHasMessageNotifications){
-            badgeDrawable.setEnabled(true);
-        } else {
-            badgeDrawable.setEnabled(false);
-        }
-
-    }
 
     /**
      * Navigation drawer item listener.
@@ -734,24 +695,13 @@ public class HomeActivity extends AppCompatActivity
         // don't do anything for now, messages aren't able to be interacted with
     }
 
-//    /**
-//     * From the MessagingContainerFragment interface that updates the count of unread
-//     * chat Ids from notifications.
-//     * @param chatId    chatId to add to the list
-//     */
-//    @Override
-//    public void incrementUnreadChatNotifications(String chatId) {
-//
-//        //adds the chatId to list of unread chats
-//        //show badge on home button.
-//        //show number on nav menu chat button
-//        mHasNotifications = true;
-//        unreadChatList.add(chatId);
-//        badgeDrawable.setEnabled(true);
-//        mChatCounterView.setText("NEW");
-//        //show badge on recycler view item in all chats.
-//    }
 
+    /**
+     * Part of the MessagingContainerFragment's OnFragmentInteractionListener. Gets called
+     * when a notification broadcast is received in the fragment and the notification badges
+     * need to be updated in HomeActivity.
+     * @param chatId    the chat that has a new message.
+     */
     @Override
     public void unreadMessageReceivedinOtherChatNotifications(String chatId) {
         Log.e("HomeActivity unreadMessageReceived in other chat", "Updating badge now");
@@ -803,16 +753,6 @@ public class HomeActivity extends AppCompatActivity
         loadFragment(wlf);
     }
 
-//    /**
-//     * From the MessagingContainerFragment interface that removes a viewed chatid from the counter
-//     * of unread chat ids
-//     * @param chatId    the chatId already viewed.
-//     */
-//    @Override
-//    public void updateViewedChatroom(String chatId) {
-//        unreadChatList.remove(chatId);
-//    }
-
 
     // Deleting the Pushy device token must be done asynchronously. Good thing
     // we have something that allows us to do that.
@@ -851,7 +791,10 @@ public class HomeActivity extends AppCompatActivity
 
      /**
       * A BroadcastReceiver that listens for messages sent from PushReceiver while
-      * the Home Activity is open (i.e. in App Notifications)
+      * the Home Activity is open (i.e. in App Notifications).
+      *
+      * Handles broadcasts such as Message Notifications ('msg'), Connection Requests ('conn req'),
+      * and Conversation Requests ('convo req').
       */
      private class PushMessageReceiver extends BroadcastReceiver {
 
@@ -864,7 +807,7 @@ public class HomeActivity extends AppCompatActivity
              String sender = intent.getStringExtra("sender");
 
 
-             if (typeOfMessage.equals("msg")) { //if received broadcast from message notification.
+             if (typeOfMessage.equals("msg")) { //if message notification.
                  Log.e("Home Notification Receiver", "Received message type: msg");
 
                  if (findViewById(R.id.chat_messages_container) == null) {
@@ -877,8 +820,11 @@ public class HomeActivity extends AppCompatActivity
                      Log.e("Home Notification Receiver", "Chatid recevied: " +id);
                          for (Chat chats : mChats) {
                              if (chats.getLastMessageUsername() != null) {
+                                 //check that the last message exists before checking the sender
+
                                  if (id.equals(chats.getId()) && !chats.getLastMessageUsername().equals(mCreds.getUsername())) {
                                      //check if the message is in a chat room that the user is in
+                                     //and the sender was not the current user
                                      List<String> users = chats.getUsersInChat();
                                      List<Boolean> flags = chats.getAcceptedFlags();
                                      Log.e("Home Notification Receiver", "Last message sent from: " + chats.getLastMessageUsername());
@@ -899,39 +845,6 @@ public class HomeActivity extends AppCompatActivity
                  }
 
 
-//                if (mCurrentChatsContainerInstance.mCompactMode && findViewById(R.id.framelayout_homelanding_chatlist) == null
-//                        && findViewById(R.id.chats_container) == null && findViewById(R.id.chat_messages_container) == null){
-//                    //case where user is NOT in chat list fragment
-//                    Log.e("Home Notification Receiver", "chat fragment not open");
-//                    String id = intent.getStringExtra("chatid");
-//
-//
-//                    for (Chat chats : mChats){
-//                        if (id.equals(chats.getId()) && !chats.getLastMessageUsername().equals(mCreds.getUsername())){
-//                            //check if the message is in a chat room that the user is in
-//                            List<String> users = chats.getUsersInChat();
-//                            List<Boolean> flags = chats.getAcceptedFlags();
-//                            Log.e("Notification Receiver", "Last message sent from: " + chats.getLastMessageUsername() );
-//                            //only show notification if user has accepted the chat room invite already
-//                            //flag should be true if accepted chatroom request
-//                            if (flags.get(users.indexOf(mCreds.getUsername()))) {
-//                                Log.e("Notification Receiver", "Updating badge" );
-//
-//                                mHasMessageNotifications = true;
-//                                badgeDrawable.setEnabled(true);
-//                                mChatCounterView.setText("NEW");
-//                            }
-//                            return;
-//                        }
-//                    }
-//
-//                }
-//                if (findViewById(R.id.chats_container) != null || findViewById(R.id.framelayout_homelanding_chatlist) != null){
-//                    //case where user is viewing chat fragment
-//                    Log.e("Home Activity Notification Receiver", "not viewing chats container, calling webservice for chats");
-//                    mCurrentChatsContainerInstance.callWebServiceforChats();
-//                }
-
 
              } else if (typeOfMessage.equals("conn req")) { //if received broadcast from connection request.
                  Log.e("Home Notification Receiver", "Received message type: conn req");
@@ -944,37 +857,36 @@ public class HomeActivity extends AppCompatActivity
                      Log.e("Home Notification Receiver", "Updated Badge for conn req");
 
                  } else if(findViewById(R.id.connections_container) != null){
-                     Log.e("Home Notification Receiver", "connections_container not null");
+                     Log.e("Home Notification Receiver", "connections_container is open ");
 
                  } else if(findViewById(R.id.connections_container) == null){
+                     //not viewing the connections, show badges
                      badgeDrawable.setEnabled(true);
                      mContactCounterView.setText("NEW");
                      mHasConnectionNotifications = true;
                      Log.e("Home Notification Receiver", "Updated Badge for conn req, connection container == null");
                  }
-//                if (findViewById(R.id.connections_container) != null || findViewById(R.id.framelayout_homelanding_contactlist) != null){
-//                    //case where user is viewing contact fragment
-//                    mCurrentConnectionsContainerInstance.callWebServiceforConnections();
-//                }
              } else if (typeOfMessage.equals("convo req")) { //if received broadcast from conversation request.
                  Log.e("Home Notification Receiver", "Received message type: convo req");
                  if (mCurrentChatsContainerInstance.mCompactMode && findViewById(R.id.chats_container) != null) {
 
                      //case where user is in HomeFragment
-
+                     Log.e("Home Notification Receiver", "Convo req: Chats container is not null and compact mode");
                      Log.e("Home Notification Receiver", "Convo req: Calling webservice for chats & updating badge");
                      badgeDrawable.setEnabled(true);
                      mChatCounterView.setText("NEW");
                      mHasMessageNotifications = true;
                      mCurrentChatsContainerInstance.callWebServiceforChats();
 
-                 } else if (findViewById(R.id.chats_container) != null) { //|| findViewById(R.id.framelayout_homelanding_chatlist) != null
-                     //case where user is viewing chat fragment
+                 } else if (findViewById(R.id.chats_container) != null ) {
+                     //case where user is viewing chat fragment, update the list of chats to see the one created
                      mCurrentChatsContainerInstance.callWebServiceforChats();
                      Log.e("Notification Receiver", "Convo req: updating chats with webservice");
-                 } else if (findViewById(R.id.chats_container) == null) {
-                     //not in home activity or chats fragment, so show badge
+                 } else if (findViewById(R.id.chats_container) == null && findViewById(R.id.chat_messages_container) == null) {
+                     //not on home page, chats list, or messaging fragment,
+                     //so show badges
 
+                     Log.e("Home Notification Receiver", "Convo req: Chats container is null");
                      Log.e("Home Notification Receiver", "Convo req: Calling webservice for chats & updating badge");
                      badgeDrawable.setEnabled(true);
                      mHasMessageNotifications = true;

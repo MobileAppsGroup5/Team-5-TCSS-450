@@ -3,6 +3,9 @@ package tcss450.uw.edu.chapp.chat;
 import java.io.Serializable;
 import java.util.List;
 
+/**
+ *
+ */
 public class Chat implements Serializable {
 
     private final String mId;

@@ -21,10 +21,12 @@ import java.util.Arrays;
 import java.util.List;
 
 /**
- * A fragment representing a list of Items.
- * <p/>
+ * A fragment representing a list of Chat items.
+ *
  * Activities containing this fragment MUST implement the {@link OnListFragmentInteractionListener}
  * interface.
+ *
+ * @version 03/15/19
  */
 public class ChatsFragment extends Fragment implements PropertyChangeListener {
 
