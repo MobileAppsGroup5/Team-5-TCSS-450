@@ -1,6 +1,5 @@
 package tcss450.uw.edu.chapp;
 
-import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
@@ -13,11 +12,10 @@ import tcss450.uw.edu.chapp.model.Credentials;
 
 /**
  * A Fragment that shows an introduction message and Chapp logo to the user.
+ *
+ * @author Mike Osborne, Trung Thai, Michael Josten, Jessica Medrzycki
  */
 public class SuccessFragment extends Fragment {
-
-    private OnFragmentInteractionListener mListener;
-
     public SuccessFragment() {
         // Required empty public constructor
     }
@@ -42,6 +40,10 @@ public class SuccessFragment extends Fragment {
         }
     }
 
+    /**
+     * method that will set the username that is displayed on the success screen.
+     * @param creds
+     */
     private void updateUserInfo(Credentials creds) {
         TextView centerText = getActivity().findViewById(R.id.text_success_email);
         String message = "Welcome to Chapp ";
@@ -51,21 +53,5 @@ public class SuccessFragment extends Fragment {
             centerText.setText(message + creds.getEmail() + "!");
         }
 
-    }
-
-
-    /**
-     * This interface must be implemented by activities that contain this
-     * fragment to allow an interaction in this fragment to be communicated
-     * to the activity and potentially other fragments contained in that
-     * activity.
-     * <p>
-     * See the Android Training lesson <a href=
-     * "http://developer.android.com/training/basics/fragments/communicating.html"
-     * >Communicating with Other Fragments</a> for more information.
-     */
-    public interface OnFragmentInteractionListener {
-        // TODO: Update argument type and name
-        void onFragmentInteraction(Uri uri);
     }
 }

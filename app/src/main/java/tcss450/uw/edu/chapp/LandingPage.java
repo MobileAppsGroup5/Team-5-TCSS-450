@@ -20,8 +20,7 @@ import tcss450.uw.edu.chapp.weather.CurrentWeatherFragment;
  * The fragment that should display the dynamic content for the
  * app's home page.
  *
- *
- * A simple {@link Fragment} subclass.
+ * @author Mike Osborne, Trung Thai, Michael Josten, Jessica Medrzycki
  */
 public class LandingPage extends Fragment {
 
@@ -49,14 +48,6 @@ public class LandingPage extends Fragment {
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         View v = inflater.inflate(R.layout.fragment_landing_page, container, false);
-//        if (mAlreadyLoaded) {
-//            mListener.reloadLandingPage();
-//        }
-//
-//        if (savedInstanceState == null && !mAlreadyLoaded) {
-//            mAlreadyLoaded = true;
-//        }
-
 
         TextView centerText = v.findViewById(R.id.text_success_email2);
         String message = "Welcome to Chapp ";

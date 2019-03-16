@@ -23,9 +23,7 @@ import java.util.List;
 /**
  * A fragment representing a list of Chat items.
  *
- * Activities containing this fragment MUST implement the {@link OnListFragmentInteractionListener}
- * interface.
- *
+ * @author Mike Osborne, Trung Thai, Michael Josten, Jessica Medrzycki
  * @version 03/15/19
  */
 public class ChatsFragment extends Fragment implements PropertyChangeListener {
@@ -49,6 +47,9 @@ public class ChatsFragment extends Fragment implements PropertyChangeListener {
     public ChatsFragment() {
     }
 
+    /**
+     * method that is called to create a new instance of the chat fragment.
+     */
     public static ChatsFragment newInstance(int columnCount) {
         ChatsFragment fragment = new ChatsFragment();
         Bundle args = new Bundle();
@@ -57,6 +58,9 @@ public class ChatsFragment extends Fragment implements PropertyChangeListener {
         return fragment;
     }
 
+    /**
+     * method that will get a display a list of chats.
+     */
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -125,16 +129,7 @@ public class ChatsFragment extends Fragment implements PropertyChangeListener {
         }
     }
 
-    /**
-     * This interface must be implemented by activities that contain this
-     * fragment to allow an interaction in this fragment to be communicated
-     * to the activity and potentially other fragments contained in that
-     * activity.
-     * <p/>
-     * See the Android Training lesson <a href=
-     * "http://developer.android.com/training/basics/fragments/communicating.html"
-     * >Communicating with Other Fragments</a> for more information.
-     */
+
     public interface OnListFragmentInteractionListener {
         void onListFragmentInteraction(Chat item);
     }

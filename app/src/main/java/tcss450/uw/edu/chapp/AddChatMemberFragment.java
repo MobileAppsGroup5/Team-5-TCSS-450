@@ -27,7 +27,9 @@ import tcss450.uw.edu.chapp.utils.SendPostAsyncTask;
 
 
 /**
- * A simple {@link Fragment} subclass.
+ * Fragment that displays a functionality for adding a chat member to a chat.
+ *
+ * @author Mike Osborne, Trung Thai, Michael Josten, Jessica Medrzycki
  */
 public class AddChatMemberFragment extends Fragment implements AdapterView.OnItemClickListener {
     private Credentials mCreds;
@@ -100,6 +102,10 @@ public class AddChatMemberFragment extends Fragment implements AdapterView.OnIte
         return v;
     }
 
+    /**
+     * helper method that launches an async task to add users to a chat.
+     * @param username of the user to be added
+     */
     private void addUserToChat(String username) {
         Uri uri = new Uri.Builder()
                 .scheme("https")
@@ -110,7 +116,6 @@ public class AddChatMemberFragment extends Fragment implements AdapterView.OnIte
 
         JSONObject msg = new JSONObject();
         try {
-//            Log.e("STUFF", )
             msg.put("usernameTo", username);
             msg.put("usernameFrom", mCreds.getUsername());
             msg.put("chatid", mChat.getId());
@@ -124,6 +129,11 @@ public class AddChatMemberFragment extends Fragment implements AdapterView.OnIte
                 .build().execute();
     }
 
+    /**
+     * method that is called after returning from the endpoint for adding chat members.
+     * set a message based on the result of the endpoint.
+     * @param result
+     */
     private void handleAddMemberPostExecute(String result) {
         TextView tv = getActivity().findViewById(R.id.text_view_add_chat_result);
         tv.setVisibility(View.VISIBLE);
@@ -145,6 +155,9 @@ public class AddChatMemberFragment extends Fragment implements AdapterView.OnIte
         }
     }
 
+    /**
+     * Method that is called when an Item is clicked.
+     */
     @Override
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
         String clickedUsername = ((TextView)view).getText().toString();

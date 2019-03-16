@@ -33,6 +33,8 @@ import tcss450.uw.edu.chapp.utils.SendPostAsyncTask;
 /**
  * A container for all things chats/messaging. Handles switching out messaging/chats and auto updates
  * chats/messages each time it does so.
+ *
+ * @author Mike Osborne, Trung Thai, Michael Josten, Jessica Medrzycki
  */
 public class ChatsContainerFragment extends Fragment implements PropertyChangeListener {
 
@@ -67,6 +69,10 @@ public class ChatsContainerFragment extends Fragment implements PropertyChangeLi
         }
     }
 
+    /**
+     * method that will launch an async task to receive all the chat information from the
+     * database.
+     */
     public void callWebServiceforChats() {
         Uri uri = new Uri.Builder()
                 .scheme("https")
@@ -160,14 +166,6 @@ public class ChatsContainerFragment extends Fragment implements PropertyChangeLi
                             }
                         }
                     }
-
-//                    Log.e("users?", usersInChat.toString());
-//                    Log.e("NAME", jsonChat.getString(getString(R.string.keys_json_chats_name)));
-//                    Log.e("LAST SENDER", lastSender == null ? "NULL" : lastSender);
-//                    Log.e("READ?", hasBeenRead == null ? "NULL" : Boolean.toString(hasBeenRead));
-//                    Log.e("flags?", acceptedFlags.toString());
-
-
                     chats.add(new Chat.Builder(
                             chatid,
                             jsonChat.getString(getString(R.string.keys_json_chats_name)),
@@ -245,24 +243,11 @@ public class ChatsContainerFragment extends Fragment implements PropertyChangeLi
                 .build().execute();
 
         return true;
-
-//        // for now just call the fragment
-//        NewChatFragment frag = new NewChatFragment();
-//
-//        Bundle args = new Bundle();
-//        args.putSerializable(getString(R.string.key_credentials), mCreds);
-//        args.putSerializable(getString(R.string.keys_intent_jwt), mJwToken);
-//        frag.setArguments(args);
-//        getActivity().getSupportFragmentManager()
-//                .beginTransaction()
-//                .replace(R.id.new_chat_container, frag)
-//                .commit();
-//
-//        // listen for when it needs to be refreshed
-//        frag.addPropertyChangeListener(this);
-//        return true;
     }
 
+    /**
+     * method that will handle the connection information received from an async task.
+     */
     private void handleConnectionInformationOnPostExecute(String result) {
         // parse JSON
         try {
@@ -332,11 +317,6 @@ public class ChatsContainerFragment extends Fragment implements PropertyChangeLi
     @Override
     public void onResume() {
         super.onResume();
-//        if (mPushMessageReciever == null) {
-//            mPushMessageReciever = new PushMessageReceiver();
-//        }
-//        IntentFilter iFilter = new IntentFilter(PushReceiver.RECEIVED_NEW_MESSAGE);
-//        getActivity().registerReceiver(mPushMessageReciever, iFilter);
         callWebServiceforChats();
 
     }
@@ -344,9 +324,6 @@ public class ChatsContainerFragment extends Fragment implements PropertyChangeLi
     @Override
     public void onPause() {
         super.onPause();
-//        if (mPushMessageReciever != null){
-//            getActivity().unregisterReceiver(mPushMessageReciever);
-//        }
     }
 
     @Override
@@ -370,29 +347,4 @@ public class ChatsContainerFragment extends Fragment implements PropertyChangeLi
 
         void onWaitFragmentInteractionShow();
     }
-
-//    /**
-//     * A BroadcastReceiver that listens for messages sent from PushReceiver while
-//     * the Home Activity is open (i.e. in App Notifications)
-//     */
-//    private class PushMessageReceiver extends BroadcastReceiver {
-//
-//        @Override
-//        public void onReceive(Context context, Intent intent) {
-//            Log.e("CHAT CONTAINER FRAGMENT RECEIVER", "Received broadcast in chat fragment activity");
-//
-//            String typeOfMessage = intent.getStringExtra("type");
-//            String sender = intent.getStringExtra("sender");
-//
-//            if(typeOfMessage.equals("msg")) {
-//                //if received broadcast from message notification.
-//                Log.e("CHAT CONTAINER FRAGMENT RECEIVER", "Received message type: msg, calling webservice for chats");
-//                callWebServiceforChats();
-//            } else if (typeOfMessage.equals("convo req")){
-//                Log.e("CHAT CONTAINER FRAGMENT RECEIVER", "Received message type: convo req, calling webservice for chats");
-//                callWebServiceforChats();
-//
-//            }
-//        }
-//    }
 }

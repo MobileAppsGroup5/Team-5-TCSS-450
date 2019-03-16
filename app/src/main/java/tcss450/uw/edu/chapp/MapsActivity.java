@@ -16,6 +16,8 @@ import com.google.android.gms.maps.model.MarkerOptions;
 
 /**
  * Map Activity to select a location for the weather
+ *
+ * @author Mike Osborne, Trung Thai, Michael Josten, Jessica Medrzycki
  */
 public class MapsActivity extends FragmentActivity implements
         OnMapReadyCallback, GoogleMap.OnMapClickListener {

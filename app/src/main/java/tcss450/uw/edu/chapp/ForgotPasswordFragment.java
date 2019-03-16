@@ -21,7 +21,9 @@ import tcss450.uw.edu.chapp.utils.SendPostAsyncTask;
 
 
 /**
- * A simple {@link Fragment} subclass.
+ * fragment that will display the forgot password functionality.
+ *
+ * @author Mike Osborne, Trung Thai, Michael Josten, Jessica Medrzycki
  */
 public class ForgotPasswordFragment extends Fragment implements View.OnClickListener {
 

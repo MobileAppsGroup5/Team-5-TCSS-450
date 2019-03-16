@@ -7,6 +7,11 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+/**
+ * fragment that indicates that the app is processing something in the background
+ *
+ * @author Mike Osborne, Trung Thai, Michael Josten, Jessica Medrzycki
+ */
 public class WaitFragment extends Fragment {
 
     private OnFragmentInteractionListener mListener;
@@ -40,14 +45,7 @@ public class WaitFragment extends Fragment {
     }
 
     /**
-     * This interface must be implemented by activities that contain this
-     * fragment to allow an interaction in this fragment to be communicated
-     * to the activity and potentially other fragments contained in that
-     * activity.
-     * <p>
-     * See the Android Training lesson <a href=
-     * "http://developer.android.com/training/basics/fragments/communicating.html"
-     * >Communicating with Other Fragments</a> for more information.
+     * Fragment interface for displaying or hiding the wait fragment.
      */
     public interface OnFragmentInteractionListener {
         void onWaitFragmentInteractionShow();

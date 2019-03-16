@@ -91,7 +91,11 @@ public class HomeActivity extends AppCompatActivity
     private ConnectionsContainerFragment mCurrentConnectionsContainerInstance;
 
 
-
+    /**
+     * Lifecycle method for the home activity. Will load different fragments based
+     * On the types of arguments passed.
+     * @param savedInstanceState, state of the app.
+     */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -277,7 +281,6 @@ public class HomeActivity extends AppCompatActivity
 
         CurrentWeatherFragment cwf = new CurrentWeatherFragment();
 
-
         getSupportFragmentManager()
                 .beginTransaction()
                 .replace(R.id.fragment_container, frag, "1")
@@ -294,42 +297,12 @@ public class HomeActivity extends AppCompatActivity
                     .remove(getSupportFragmentManager().findFragmentByTag("WAIT"))
                     .commit();
         }
-        //transaction.replace(R.id.framelayout_homelanding_email, successFragment);
-        //transaction.add(R.id.framelayout_homelanding_chatlist, chats);
-
-
     }
-
-//    @Override
-//    public boolean onCreateOptionsMenu(Menu menu) {
-//        // Inflate the menu; this adds items to the action bar if it is present.
-//        getMenuInflater().inflate(R.menu.home, menu);
-//        return true;
-//    }
-//
-//    @Override
-//    public boolean onOptionsItemSelected(MenuItem item) {
-//        // Handle action bar item clicks here. The action bar will
-//        // automatically handle clicks on the Home/Up button, so long
-//        // as you specify a parent activity in AndroidManifest.xml.
-////        int id = item.getItemId();
-////
-////        //noinspection SimplifiableIfStatement
-////        if (id == R.id.action_logout) {
-////            logout();
-////            return true;
-////        }
-//
-//        return super.onOptionsItemSelected(item);
-//    }
-
 
     /**
      * Navigation drawer item listener.
      * When action item has been clicked, the counter for notifications gets set to not show.
      * Then loads the correct fragment.
-     * @param item
-     * @return
      */
     @SuppressWarnings("StatementWithEmptyBody")
     @Override
@@ -373,8 +346,6 @@ public class HomeActivity extends AppCompatActivity
                 break;
 
             case R.id.nav_weather:
-//                CurrentWeatherFragment cwf = new CurrentWeatherFragment();
-//                loadFragment(cwf);
                 WeatherFragment wf = new WeatherFragment();
                 Bundle wArgs = new Bundle();
                 wArgs.putSerializable(getString(R.string.keys_intent_jwt), mJwToken);
@@ -467,6 +438,11 @@ public class HomeActivity extends AppCompatActivity
     }
 
 
+    /**
+     * On Post async task for get connection information from the database and create
+     * a connection object based on the information from the database.
+     * @param result is the string result from the database in json form
+     */
     private void handleConnectionsOnPostExecute(String result) {
         // parse JSON
         try {
@@ -496,6 +472,10 @@ public class HomeActivity extends AppCompatActivity
         }
     }
 
+    /**
+     * Method that will get the chats from the database
+     * by calling an async task
+     */
     private void callWebServiceforChats() {
         Uri uri = new Uri.Builder()
                 .scheme("https")
@@ -587,14 +567,6 @@ public class HomeActivity extends AppCompatActivity
                             }
                         }
                     }
-
-//                    Log.e("users?", usersInChat.toString());
-//                    Log.e("NAME", jsonChat.getString(getString(R.string.keys_json_chats_name)));
-//                    Log.e("LAST SENDER", lastSender == null ? "NULL" : lastSender);
-//                    Log.e("READ?", hasBeenRead == null ? "NULL" : Boolean.toString(hasBeenRead));
-//                    Log.e("flags?", acceptedFlags.toString());
-
-
                     chats.add(new Chat.Builder(
                             chatid,
                             jsonChat.getString(getString(R.string.keys_json_chats_name)),
@@ -619,8 +591,6 @@ public class HomeActivity extends AppCompatActivity
 
         }
     }
-
-
     /**
      * Handle errors that may occur during the AsyncTask.
      * @param result the error message provide from the AsyncTask
@@ -648,7 +618,9 @@ public class HomeActivity extends AppCompatActivity
     }
 
 
-
+    /**
+     * method that will show the wait fragment
+     */
     @Override
     public void onWaitFragmentInteractionShow() {
         getSupportFragmentManager()
@@ -673,6 +645,9 @@ public class HomeActivity extends AppCompatActivity
         mChats = chats;
     }
 
+    /**
+     * method that will hide the wait fragment
+     */
     @Override
     public void onWaitFragmentInteractionHide() {
         getSupportFragmentManager()
@@ -711,6 +686,9 @@ public class HomeActivity extends AppCompatActivity
         mChatCounterView.setText("NEW");
     }
 
+    /**
+     * helper method that will reload the home landing page when there exists new information
+     */
     @Override
     public void reloadLandingPage() {
         loadHomeLandingPage();

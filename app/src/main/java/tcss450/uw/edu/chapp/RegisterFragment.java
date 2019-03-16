@@ -24,10 +24,9 @@ import tcss450.uw.edu.chapp.utils.SendPostAsyncTask;
 
 
 /**
- * A simple {@link Fragment} subclass.
- * Activities that contain this fragment must implement the
- * {@link RegisterFragment.OnRegisterFragmentInteractionListener} interface
- * to handle interaction events.
+ * Register fragment for registering a user to allow use for the app.
+ *
+ * @author Mike Osborne, Trung Thai, Michael Josten, Jessica Medrzycki
  */
 public class RegisterFragment extends Fragment {
 
@@ -38,6 +37,10 @@ public class RegisterFragment extends Fragment {
         // Required empty public constructor
     }
 
+    /**
+     * method that will make sure the credentials entered by the user are valid.
+     * @param v
+     */
     public void validateRegisterCredentials(View v) {
         // Fetch Values
         Resources res = getContext().getResources();
@@ -193,8 +196,9 @@ public class RegisterFragment extends Fragment {
     }
 
 
-
-
+    /**
+     * On creating the fragment, set the on click listeners.
+     */
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
@@ -336,10 +340,6 @@ public class RegisterFragment extends Fragment {
      * fragment to allow an interaction in this fragment to be communicated
      * to the activity and potentially other fragments contained in that
      * activity.
-     * <p>
-     * See the Android Training lesson <a href=
-     * "http://developer.android.com/training/basics/fragments/communicating.html"
-     * >Communicating with Other Fragments</a> for more information.
      */
     public interface OnRegisterFragmentInteractionListener extends WaitFragment.OnFragmentInteractionListener {
         void onRegisterSuccess(Credentials theCredentials);

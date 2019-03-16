@@ -19,6 +19,7 @@ import java.util.Objects;
  * Code based off of stack-overflow
  * https://stackoverflow.com/questions/43881131/add-badge-counter-to-hamburger-navigation-menu-icon-in-android
  *
+ * @author Mike Osborne, Trung Thai, Michael Josten, Jessica Medrzycki
  * @version 02/26/19
  */
 public class BadgeDrawerIconDrawable extends DrawerArrowDrawable {

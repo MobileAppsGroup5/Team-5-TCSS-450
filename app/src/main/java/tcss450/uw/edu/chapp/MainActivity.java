@@ -16,6 +16,8 @@ import tcss450.uw.edu.chapp.model.Credentials;
 /**
  * The launcher activity for Chapp. Connects the Login and Register Fragment. On a successful
  * login, the activity transfers credentials information to the HomeActivity.
+ *
+ * @author Mike Osborne, Trung Thai, Michael Josten, Jessica Medrzycki
  */
 public class MainActivity extends AppCompatActivity implements LoginFragment.OnLoginFragmentInteractionListener,
         RegisterFragment.OnRegisterFragmentInteractionListener {
@@ -28,7 +30,10 @@ public class MainActivity extends AppCompatActivity implements LoginFragment.OnL
     private String mNotifChatId;
 
 
-
+    /**
+     * on creating the main activity, check to see if the app was loaded from notifications.
+     * @param savedInstanceState
+     */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -58,11 +63,13 @@ public class MainActivity extends AppCompatActivity implements LoginFragment.OnL
     }
 
 
+    /**
+     * method that will start the home activity.
+     * @param theCredentials of the user
+     * @param jwt json web token, generated for security.
+     */
     @Override
     public void onLoginSuccess(Credentials theCredentials, String jwt) {
-        // FOR DEBUG PURPOSES, REMOVE BEFORE PRODUCTION
-        Log.d("JSON_WEB_TOKEN", jwt);
-
         Intent intent = new Intent(this, HomeActivity.class);
         intent.putExtra(getString(R.string.key_credentials), theCredentials);
         intent.putExtra(getString(R.string.keys_intent_notification_msg), mLoadFromChatNotification);
@@ -75,6 +82,9 @@ public class MainActivity extends AppCompatActivity implements LoginFragment.OnL
         finish();
     }
 
+    /**
+     * method that will load the register fragment
+     */
     @Override
     public void onRegisterClicked() {
         FragmentTransaction transaction = getSupportFragmentManager()
@@ -84,6 +94,9 @@ public class MainActivity extends AppCompatActivity implements LoginFragment.OnL
         transaction.commit();
     }
 
+    /**
+     * method that will load the forgot password fragment
+     */
     @Override
     public void onForgotPasswordClicked() {
         FragmentTransaction transaction = getSupportFragmentManager()
@@ -94,6 +107,10 @@ public class MainActivity extends AppCompatActivity implements LoginFragment.OnL
 
     }
 
+    /**
+     * method that will dispaly a success message and load the login fragment.
+     * @param theCredentials of the user
+     */
     @Override
     public void onRegisterSuccess(Credentials theCredentials) {
         LoginFragment loginFragment;
@@ -125,6 +142,9 @@ public class MainActivity extends AppCompatActivity implements LoginFragment.OnL
         }
     }
 
+    /**
+     * method that will show the wait fragment
+     */
     @Override
     public void onWaitFragmentInteractionShow() {
         getSupportFragmentManager()
@@ -134,6 +154,9 @@ public class MainActivity extends AppCompatActivity implements LoginFragment.OnL
                 .commit();
     }
 
+    /**
+     * method that will hide the wait fragment.
+     */
     @Override
     public void onWaitFragmentInteractionHide() {
         getSupportFragmentManager()
