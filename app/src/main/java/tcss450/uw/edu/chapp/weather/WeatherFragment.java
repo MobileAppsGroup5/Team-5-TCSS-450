@@ -13,6 +13,7 @@ import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.AlertDialog;
+import android.text.InputType;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -279,6 +280,7 @@ public class WeatherFragment extends Fragment {
 
         //make a dialog with a edittext
         final EditText editText = new EditText(getActivity());
+        editText.setInputType(InputType.TYPE_CLASS_NUMBER);
 
         //make alert for the user to enter a zipcode
         AlertDialog dialog = new AlertDialog.Builder(getActivity())
