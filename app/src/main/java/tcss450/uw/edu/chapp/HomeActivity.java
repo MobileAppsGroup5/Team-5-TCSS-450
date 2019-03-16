@@ -854,10 +854,12 @@ public class HomeActivity extends AppCompatActivity
                      badgeDrawable.setEnabled(true);
                      mContactCounterView.setText("NEW");
                      mHasConnectionNotifications = true;
+                     mCurrentConnectionsContainerInstance.callWebServiceforConnections();
                      Log.e("Home Notification Receiver", "Updated Badge for conn req");
 
                  } else if(findViewById(R.id.connections_container) != null){
                      Log.e("Home Notification Receiver", "connections_container is open ");
+                     mCurrentConnectionsContainerInstance.callWebServiceforConnections();
 
                  } else if(findViewById(R.id.connections_container) == null){
                      //not viewing the connections, show badges

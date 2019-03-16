@@ -190,7 +190,7 @@ public class ChatsContainerFragment extends Fragment implements PropertyChangeLi
                 ChatsFragment frag = new ChatsFragment();
                 frag.setArguments(args);
 
-                getActivity().getSupportFragmentManager()
+                getChildFragmentManager()
                         .beginTransaction()
                         .replace(R.id.chats_container, frag)
                         .commit();
@@ -293,7 +293,7 @@ public class ChatsContainerFragment extends Fragment implements PropertyChangeLi
                 newChatFrag.setArguments(args);
                 Log.e("CHaTSS", mChats.toString());
 
-                getActivity().getSupportFragmentManager()
+                getChildFragmentManager()
                         .beginTransaction()
                         .replace(R.id.new_chat_container, newChatFrag)
                         .commit();
