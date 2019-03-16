@@ -125,7 +125,7 @@ public class ConnectionsContainerFragment extends Fragment implements PropertyCh
                 NewConnectionFragment newConnectionFrag = new NewConnectionFragment();
                 newConnectionFrag.setArguments(args);
 
-                getActivity().getSupportFragmentManager()
+                getChildFragmentManager()
                         .beginTransaction()
                         .replace(R.id.new_connection_container, newConnectionFrag)
                         .commit();
@@ -212,7 +212,7 @@ public class ConnectionsContainerFragment extends Fragment implements PropertyCh
         ConnectionsFragment frag = new ConnectionsFragment();
         frag.setArguments(args);
 
-        getActivity().getSupportFragmentManager()
+        getChildFragmentManager()
                 .beginTransaction()
                 .replace(R.id.connections_container, frag)
                 .commit();
@@ -230,6 +230,7 @@ public class ConnectionsContainerFragment extends Fragment implements PropertyCh
     @Override
     public void onResume() {
         super.onResume();
+
         callWebServiceforConnections();
     }
 
