@@ -32,11 +32,11 @@ import tcss450.uw.edu.chapp.utils.SendPostAsyncTask;
 
 
 /**
- * A simple {@link Fragment} subclass.
+ * A simple {@link Fragment} subclass, Handles swapping out of connection information to keep information
+ * fresh.
  */
 public class ConnectionsContainerFragment extends Fragment implements PropertyChangeListener {
     public static final String REFRESH_CONNECTIONS = "refresh the connections please";
-
     private ArrayList<Connection> mConnections;
     private Credentials mCreds;
     private String mJwToken;
@@ -47,6 +47,10 @@ public class ConnectionsContainerFragment extends Fragment implements PropertyCh
         // Required empty public constructor
     }
 
+    /**
+     * Gets information from the arguments.
+     * @param savedInstanceState The previous state of this fragment
+     */
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -64,6 +68,11 @@ public class ConnectionsContainerFragment extends Fragment implements PropertyCh
         }
     }
 
+    /**
+     * Add options menu item and assigns listener
+     * @param menu The menu that will be shown
+     * @param inflater The inflater to inflate the menu
+     */
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
 
@@ -74,6 +83,11 @@ public class ConnectionsContainerFragment extends Fragment implements PropertyCh
         super.onCreateOptionsMenu(menu, inflater);
     }
 
+    /**
+     * Listener for clicks on the new connection menu item
+     * @param menuItem The menu item that was clicked on
+     * @return true if the action was performed successfully, false otherwise
+     */
     private boolean newConnectionMenuItemListener(MenuItem menuItem) {
         // fetch usernames from database here
         Uri uri = new Uri.Builder()
@@ -94,6 +108,10 @@ public class ConnectionsContainerFragment extends Fragment implements PropertyCh
         return true;
     }
 
+    /**
+     * Handles member information and shows it to the user
+     * @param result The JSON result of the async task.
+     */
     private void handleMemberInformationOnPostExecute(String result) {
         // parse JSON
         try {
@@ -164,6 +182,10 @@ public class ConnectionsContainerFragment extends Fragment implements PropertyCh
                 .build().execute();
     }
 
+    /**
+     * Parses the connections information and displays it
+     * @param result The JSON result of the async task
+     */
     private void handleConnectionsOnPostExecute(String result) {
         // parse JSON
         try {
@@ -199,6 +221,10 @@ public class ConnectionsContainerFragment extends Fragment implements PropertyCh
         }
     }
 
+    /**
+     * Constructs the connections fragment that will be shown on the screen, based on the result
+     * of the async task.
+     */
     private void constructConnections() {
         Bundle args = new Bundle();
 
@@ -227,6 +253,9 @@ public class ConnectionsContainerFragment extends Fragment implements PropertyCh
         return inflater.inflate(R.layout.fragment_connections_container, container, false);
     }
 
+    /**
+     * Refresh our connections any time we resume.
+     */
     @Override
     public void onResume() {
         super.onResume();
@@ -255,11 +284,12 @@ public class ConnectionsContainerFragment extends Fragment implements PropertyCh
     public void onDetach() {
         super.onDetach();
         mListener = null;
-//        if (mPushMessageReciever != null){
-//            getActivity().unregisterReceiver(mPushMessageReciever);
-//        }
     }
 
+    /**
+     * Called when we get a propertychangeevent, refreshes the connection list
+     * @param evt the propertychangevent
+     */
     @Override
     public void propertyChange(PropertyChangeEvent evt) {
         if (evt.getPropertyName().equals(REFRESH_CONNECTIONS)) {
@@ -268,9 +298,24 @@ public class ConnectionsContainerFragment extends Fragment implements PropertyCh
         }
     }
 
+    /**
+     * The fragment interaction listener for connections information, also provides waitfragment functionality.
+     */
     interface OnConnectionInformationFetchListener {
+        /**
+         * updates homeactivities connections reference
+         * @param connections The new connections
+         */
         void updateConnections(ArrayList<Connection> connections);
+
+        /**
+         * hide the waitfragment
+         */
         void onWaitFragmentInteractionHide();
+
+        /**
+         * show the waitfragment
+         */
         void onWaitFragmentInteractionShow();
     }
 

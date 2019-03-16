@@ -26,7 +26,9 @@ import tcss450.uw.edu.chapp.connections.Connection;
 import tcss450.uw.edu.chapp.model.Credentials;
 import tcss450.uw.edu.chapp.utils.SendPostAsyncTask;
 
-
+/**
+ * A fragment for creating a new connection
+ */
 public class NewConnectionFragment extends Fragment implements AdapterView.OnItemSelectedListener, AdapterView.OnItemClickListener {
 
     public static String ARG_CRED_LIST = "credentials list}{{}";

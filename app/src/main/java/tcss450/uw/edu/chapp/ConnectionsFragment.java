@@ -21,7 +21,7 @@ import tcss450.uw.edu.chapp.connections.Connection;
 import tcss450.uw.edu.chapp.model.Credentials;
 
 /**
- * A fragment representing a list of Items.
+ * A fragment representing a list of Connections to display for the user to view and modify.
  */
 public class ConnectionsFragment extends Fragment implements PropertyChangeListener {
 
@@ -33,7 +33,6 @@ public class ConnectionsFragment extends Fragment implements PropertyChangeListe
     private String mJwToken;
     private MyConnectionsRecyclerViewAdapter mAdapter;
     private boolean mCompactMode;
-
     private int mColumnCount = 1;
 
     private PropertyChangeSupport myPcs = new PropertyChangeSupport(this);
@@ -45,7 +44,11 @@ public class ConnectionsFragment extends Fragment implements PropertyChangeListe
     public ConnectionsFragment() {
     }
 
-
+    /**
+     * Default list view new instance method
+     * @param columnCount the number of columns in the recycler
+     * @return The constructed fragment
+     */
     public static ConnectionsFragment newInstance(int columnCount) {
         ConnectionsFragment fragment = new ConnectionsFragment();
         Bundle args = new Bundle();
@@ -54,6 +57,10 @@ public class ConnectionsFragment extends Fragment implements PropertyChangeListe
         return fragment;
     }
 
+    /**
+     * Get information from the arguments
+     * @param savedInstanceState The saved instance state of the fragment.
+     */
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -90,14 +97,26 @@ public class ConnectionsFragment extends Fragment implements PropertyChangeListe
         return view;
     }
 
+    /**
+     * adds a propertychangelistener
+     * @param listener The propertychangelistener to add
+     */
     public void addPropertyChangeListener(PropertyChangeListener listener) {
         myPcs.addPropertyChangeListener(listener);
     }
 
+    /**
+     * removes a propertychangelistener
+     * @param listener The propertychangelistener to remove
+     */
     public void removePropertyChangeListener(PropertyChangeListener listener) {
         myPcs.removePropertyChangeListener(listener);
     }
 
+    /**
+     * called when connecton information needs to be refreshed
+     * @param evt the {@link PropertyChangeEvent}
+     */
     @Override
     public void propertyChange(PropertyChangeEvent evt) {
         // Wrap the adapter's connections changed adapter and put that up.

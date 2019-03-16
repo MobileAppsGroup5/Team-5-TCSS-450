@@ -40,7 +40,6 @@ public class AddChatMemberFragment extends Fragment implements AdapterView.OnIte
 
     private AutoCompleteTextView mAutoCompleteSearchBox;
 
-//    private OnFragmentInteractionListener mListener;
 
     public AddChatMemberFragment() {
         // Required empty public constructor

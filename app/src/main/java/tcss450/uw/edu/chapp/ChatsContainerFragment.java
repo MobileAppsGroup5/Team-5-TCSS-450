@@ -303,6 +303,10 @@ public class ChatsContainerFragment extends Fragment implements PropertyChangeLi
         return inflater.inflate(R.layout.fragment_chats_container, container, false);
     }
 
+    /**
+     * Make sure the calling activity implements our interaction listener
+     * @param context The activities context
+     */
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
@@ -314,25 +318,28 @@ public class ChatsContainerFragment extends Fragment implements PropertyChangeLi
         }
     }
 
+    /**
+     * Every time we navigate back to the app, refresh the chats.
+     */
     @Override
     public void onResume() {
         super.onResume();
         callWebServiceforChats();
-
     }
 
-    @Override
-    public void onPause() {
-        super.onPause();
-    }
-
+    /**
+     * Set mListener to null because the fragment is not in view.
+     */
     @Override
     public void onDetach() {
         super.onDetach();
         mListener = null;
     }
 
-
+    /**
+     * Property change for subfragments to use to refresh the chats.
+     * @param evt
+     */
     @Override
     public void propertyChange(PropertyChangeEvent evt) {
         if (PROPERTY_REFRESH_CHATS.equals(evt.getPropertyName())) {
@@ -340,11 +347,24 @@ public class ChatsContainerFragment extends Fragment implements PropertyChangeLi
         }
     }
 
+    /**
+     * An interface to update the HomeActivity chat information and also for onWaitFragment functionality
+     */
     interface OnChatInformationFetchListener {
+        /**
+         * Updates the listeners reference to chats.
+         * @param chats The chats
+         */
         void updateChats(ArrayList<Chat> chats);
 
+        /**
+         * hides waitfragment
+         */
         void onWaitFragmentInteractionHide();
 
+        /**
+         * shows waitfragment
+         */
         void onWaitFragmentInteractionShow();
     }
 }

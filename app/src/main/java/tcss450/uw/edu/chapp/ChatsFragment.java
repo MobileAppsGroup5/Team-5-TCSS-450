@@ -59,7 +59,7 @@ public class ChatsFragment extends Fragment implements PropertyChangeListener {
     }
 
     /**
-     * method that will get a display a list of chats.
+     * method that will get and display a list of chats.
      */
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -113,14 +113,27 @@ public class ChatsFragment extends Fragment implements PropertyChangeListener {
         mListener = null;
     }
 
+    /**
+     * Adds a propertychangelistener to this objects propertychangesupport
+     * @param listener The listener to add
+     */
     public void addPropertyChangeListener(PropertyChangeListener listener) {
         myPcs.addPropertyChangeListener(listener);
     }
 
+    /**
+     * Removes a propertychangelistener to this objects propertychangesupport
+     * @param listener The listener to remove
+     */
     public void removePropertyChangeListener(PropertyChangeListener listener) {
         myPcs.removePropertyChangeListener(listener);
     }
 
+    /**
+     * Listens for events from the recycleradapter and fires them to listeners of this class,
+     * just passes it along
+     * @param evt
+     */
     @Override
     public void propertyChange(PropertyChangeEvent evt) {
         if (ChatsContainerFragment.PROPERTY_REFRESH_CHATS.equals(evt.getPropertyName())) {
@@ -129,8 +142,14 @@ public class ChatsFragment extends Fragment implements PropertyChangeListener {
         }
     }
 
-
+    /**
+     * defines an interface when the list item is interacted with
+     */
     public interface OnListFragmentInteractionListener {
+        /**
+         * Perform an action when a chat list item is interacted with
+         * @param item The item that was interacted with
+         */
         void onListFragmentInteraction(Chat item);
     }
 }

@@ -212,6 +212,9 @@ public class HomeActivity extends AppCompatActivity
         //set the viewcounter text to a number or "" to change the counter!
     }
 
+    /**
+     * Register a new push receiver if we don't have one.
+     */
     @Override
     public void onResume() {
         super.onResume();
@@ -221,6 +224,10 @@ public class HomeActivity extends AppCompatActivity
         IntentFilter iFilter = new IntentFilter(PushReceiver.RECEIVED_NEW_MESSAGE);
         registerReceiver(mPushMessageReciever, iFilter);
     }
+
+    /**
+     * Unregister the push receiver
+     */
     @Override
     public void onPause() {
         super.onPause();
@@ -229,6 +236,9 @@ public class HomeActivity extends AppCompatActivity
         }
     }
 
+    /**
+     * Implement closing drawer on back press.
+     */
     @Override
     public void onBackPressed() {
         DrawerLayout drawer = findViewById(R.id.drawer_layout);
@@ -409,7 +419,10 @@ public class HomeActivity extends AppCompatActivity
         }
     }
 
-
+    /**
+     * Loads a fragment into this activities fragment container (the root framelayout)
+     * @param frag The fragment to show
+     */
     private void loadFragment(Fragment frag) {
         getSupportFragmentManager()
                 .beginTransaction()
@@ -876,7 +889,6 @@ public class HomeActivity extends AppCompatActivity
              }
 
          }
-
 
      }
 

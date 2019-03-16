@@ -26,7 +26,7 @@ import java.util.List;
 import java.util.StringJoiner;
 
 /**
- * {@link RecyclerView.Adapter} that can display a {@link Connection} and makes a call to the
+ * {@link RecyclerView.Adapter} that can display a {@link Chat} and makes a call to the
  * specified {@link OnListFragmentInteractionListener}.
  *
  * NOTE: This class is heavily based off of {@link MyConnectionsRecyclerViewAdapter}, the code is better
